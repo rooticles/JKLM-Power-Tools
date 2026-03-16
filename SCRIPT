@@ -30,6 +30,8 @@
     const setThemeColor = (val) => GM_setValue('themeColor', val);
     const getStats = () => GM_getValue('gameStats', { totalWords: 0, longestWord: '', responseTimes: [] });
     const setStats = (val) => GM_setValue('gameStats', val);
+    const getAdminAuth = () => GM_getValue('adminAuthenticated', false);
+    const setAdminAuth = (val) => GM_setValue('adminAuthenticated', val);
 
     // --- Translations ---
     const translations = {
@@ -71,6 +73,7 @@
             adminUserPlaceholder: 'Benutzername...',
             adminPassPlaceholder: 'Passwort...',
             adminLoginBtn: 'Anmelden',
+            adminLogoutBtn: 'Abmelden',
             adminLoginError: 'Ungültige Zugangsdaten!',
             german: 'Deutsch',
             english: 'Englisch',
@@ -114,6 +117,7 @@
             adminUserPlaceholder: 'Username...',
             adminPassPlaceholder: 'Password...',
             adminLoginBtn: 'Login',
+            adminLogoutBtn: 'Logout',
             adminLoginError: 'Invalid credentials!',
             german: 'German',
             english: 'English',
@@ -402,15 +406,15 @@
     updateThemeStyles();
 
     let lastDetectedSyllable = '';
-    let isAdminAuthenticated = false;
+    let isAdminAuthenticated = getAdminAuth();
     let usedWords = [];
     let isUserTurn = false;
     let turnStartTime = 0;
 
     const adminUsers = {
-        'sam': '6767',
-        'Root': 'MAMAAUFDIE1',
-        'eliplay24': 'fentanyl'
+        'root': '622acef',
+        'sam': '622c153',
+        'eliplay24': '-7e31d3d5'
     };
 
     const init = () => {
@@ -540,6 +544,7 @@
                 </div>
                 <div style="padding: 10px; background: #222; border-radius: 6px; margin-top: 8px; color: #ccc; font-size: 12px; line-height: 1.4;">${t.dictInfo}</div>
                  <div style="margin-top: 15px; padding-top: 8px; border-top: 1px solid #333; color: #666; font-size: 10px; font-style: italic;">${t.closeInfo}</div>
+                <button class="custom-msg-send" id="admin-logout-btn" style="width: 100%; margin-top: 10px; background: #444;">${t.adminLogoutBtn}</button>
             `;
         };
 
@@ -549,7 +554,7 @@
             const stats = getStats();
             statsTab.title = t.statsHeader;
 
-            const avgTime = stats.responseTimes.length > 0
+            const avgTime = stats.responseTimes.length > 0 
                 ? (stats.responseTimes.reduce((a, b) => a + b, 0) / stats.responseTimes.length / 1000).toFixed(2) + 's'
                 : '---';
 
@@ -606,7 +611,7 @@
                     <span>${t.adminHeader}</span>
                     <span class="custom-close-x" id="cat-admin-close">✕</span>
                 </div>
-
+                
                 <div class="custom-msg-module">
                     <div style="font-weight: bold; color: #ccc; margin-bottom: 10px;">${t.adminMacrosHeader}</div>
                     <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
@@ -686,7 +691,7 @@
 
         const toggleTab = (tab, page) => {
             const isActive = tab.classList.contains('active');
-
+            
             // Close if clicking the same active tab
             if (isActive) {
                 window.closeCustomTabs();
@@ -695,7 +700,7 @@
 
             document.querySelectorAll('.page, .tab').forEach(el => el.classList.remove('active'));
             allCustomPages.forEach(p => p.classList.remove('active'));
-
+            
             tab.classList.add('active');
             page.classList.add('active');
             resizer.style.display = 'block';
@@ -778,7 +783,7 @@
 
             loadDictionary().then(() => {
                 let words = syllable ? findWords(syllable) : [...dictionary];
-
+                
                 // Filter out used words
                 words = words.filter(w => !usedWords.includes(w.toUpperCase()));
 
@@ -824,7 +829,7 @@
         dictPage.addEventListener('click', (e) => {
             if (e.target.id === 'dict-close') window.closeCustomTabs();
             if (e.target.id === 'dict-msg-send') handleDictSearch();
-
+            
             if (e.target.classList.contains('clickable-word')) {
                 const word = e.target.innerText;
                 navigator.clipboard.writeText(word).then(() => {
@@ -853,6 +858,7 @@
 
                 if (adminUsers[user] && adminUsers[user] === pass) {
                     isAdminAuthenticated = true;
+                    setAdminAuth(true);
                     updateAdminContent();
                 } else {
                     error.style.display = 'block';
@@ -878,6 +884,12 @@
                     // Auto-send if possible (Enter key simulation)
                     chatInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true }));
                 }
+            }
+
+            if (e.target.id === 'admin-logout-btn') {
+                isAdminAuthenticated = false;
+                setAdminAuth(false);
+                updateAdminContent();
             }
         });
         adminPage.addEventListener('keydown', (e) => {
@@ -921,7 +933,7 @@
                 if (word.length > 0 && !usedWords.includes(word)) {
                     if (!wordEl.dataset.tracked) {
                         wordEl.dataset.tracked = "true";
-
+                        
                         // --- Stats Tracking: Word Submission ---
                         const isSelfWord = wordEl.closest('.selfTurn');
                         if (isSelfWord && turnStartTime > 0) {
@@ -992,14 +1004,14 @@
             if (!active || !(active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
 
             // Kontext-Erkennung
-            const isChatContext = active.closest('.chat') ||
-                                 active.placeholder?.toLowerCase().includes('chat') ||
+            const isChatContext = active.closest('.chat') || 
+                                 active.placeholder?.toLowerCase().includes('chat') || 
                                  active.classList.contains('chatInput') ||
                                  active.id === 'dict-msg-input';
-
+            
             // JKLM-spezifisch: Bist du am Zug?
             const isSelfTurn = !!document.querySelector('.selfTurn');
-
+            
             let shouldConvert = false;
             if (isChatContext) {
                 // Im Chat nur konvertieren, wenn Chat-Einstellung aktiv ist
@@ -1010,7 +1022,7 @@
             }
 
             if (shouldConvert) {
-                e.preventDefault();
+                e.preventDefault(); 
                 e.stopImmediatePropagation();
                 try { if (!document.execCommand('insertText', false, '-')) throw new Error(); } catch (err) {
                     const start = active.selectionStart, end = active.selectionEnd;
