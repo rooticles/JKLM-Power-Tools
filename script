@@ -1,0 +1,1027 @@
+// ==UserScript==
+// @name         JKLM-Power-Tools
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Dieses Tampermonkey-Script erkennt, wenn in Bombparty eine Runde beginnt und du am Zug bist. Es liest die aktuelle Silbe aus und schlägt automatisch 9 passende Wörter vor, die diese Silbe enthalten.
+// @author       Root
+// @match        *://*.jklm.fun/*
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_addValueChangeListener
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    // --- Storage Helpers ---
+    const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
+    const setEnabled = (val) => GM_setValue('spaceToHyphenEnabled', val);
+    const getChatEnabled = () => GM_getValue('spaceToHyphenChatEnabled', false);
+    const setChatEnabled = (val) => GM_setValue('spaceToHyphenChatEnabled', val);
+    const getLanguage = () => GM_getValue('selectedLanguage', 'Deutsch');
+    const setLanguage = (val) => GM_setValue('selectedLanguage', val);
+    const getDictLanguage = () => GM_getValue('dictLanguage', 'Deutsch');
+    const setDictLanguage = (val) => GM_setValue('dictLanguage', val);
+    const getSidebarWidth = () => GM_getValue('sidebarWidth', 250);
+    const setSidebarWidth = (val) => GM_setValue('sidebarWidth', val);
+    const getSyllableHighlighter = () => GM_getValue('syllableHighlighter', false);
+    const setSyllableHighlighter = (val) => GM_setValue('syllableHighlighter', val);
+    const getThemeColor = () => GM_getValue('themeColor', '#4caf50');
+    const setThemeColor = (val) => GM_setValue('themeColor', val);
+    const getStats = () => GM_getValue('gameStats', { totalWords: 0, longestWord: '', responseTimes: [] });
+    const setStats = (val) => GM_setValue('gameStats', val);
+
+    // --- Translations ---
+    const translations = {
+        'Deutsch': {
+            kbHeader: '🐱 Tastatur-Einstellungen',
+            langHeader: '🚩 Sprach-Einstellungen',
+            toggleLabel: 'Leertaste zu Bindestrich im Spiel Ein/Aus',
+            chatToggleLabel: 'Leertaste zu Bindestrich im Chat Ein/Aus',
+            onDesc: 'An = Wenn man in einer Runde Leertaste drückt, wird es stattdessen ein Bindestrich sein',
+            offDesc: 'Aus = Wenn man in einer Runde Leertaste drückt, wird es die Leertaste sein',
+            chatDesc: 'An = Leertaste im Chat wird zum Bindestrich',
+            chatOffDesc: 'Aus = Leertaste im Chat bleibt die Leertaste',
+            closeInfo: 'Du kannst dieses Menü mit der ESC-Taste oder dem X oben rechts schließen.',
+            dictHeader: '📚 Wörterbuch Wörter',
+            msgLabel: 'Nachricht schreiben',
+            msgPlaceholder: 'Deine Nachricht...',
+            msgSend: 'Senden',
+            dictResultPrefix: 'Es gibt {count} Wörter, die die Silbe {syllable} enthalten:',
+            dictNoResults: 'Keine Wörter für die Silbe {syllable} gefunden.',
+            dictInfo: '<b>Befehle:</b><br>• <b>/s [Silbe]</b> (Kurz 2-5)<br>• <b>/l [Silbe]</b> (Lang 20-30)<br>• <b>/h [Silbe]</b> (Hyphens/Bindestrich)<br>• <b>/r [Silbe]</b> (Selten/Schwer)<br>• <b>/p [Silbe]</b> (Phobien)<br>• <b>/a [Silbe]</b> (Apostrophe)<br>• <b>/c [Länge] [Silbe] [-l|-s|-a|-p|-h|-r]</b>',
+            dictSelectLabel: 'Wörterbuch auswählen:',
+            usedWordsHeader: '📜 Verwendete Wörter:',
+            usedWordsEmpty: 'Noch keine Wörter benutzt.',
+            historyHeader: '📜 Verlauf',
+            historyEmpty: 'Noch keine Wörter in dieser Runde.',
+            statsHeader: '📊 Deine Statistiken',
+            statsTotalWords: 'Gesamte Wörter:',
+            statsLongestWord: 'Längstes Wort:',
+            statsAvgResponse: 'Durchschn. Antwortzeit:',
+            statsResetBtn: 'Statistiken zurücksetzen',
+            adminHeader: '🛡️ Admin Panel',
+            adminAutoHeader: '🚀 Automatisierung & Komfort',
+            adminSafeModeBtn: 'Safe Mode (Wort kopieren)',
+            adminMacrosHeader: '💬 Chat-Makros',
+            adminVisualHeader: '🎨 UI & Visuelle Hilfen',
+            adminHighlighterLabel: 'Silben-Highlighter Ein/Aus',
+            adminThemeLabel: 'Theme-Farbe:',
+            adminLoginHeader: '🛡️ Admin Login',
+            adminUserPlaceholder: 'Benutzername...',
+            adminPassPlaceholder: 'Passwort...',
+            adminLoginBtn: 'Anmelden',
+            adminLoginError: 'Ungültige Zugangsdaten!',
+            german: 'Deutsch',
+            english: 'Englisch',
+            french: 'Französisch'
+        },
+        'Englisch': {
+            kbHeader: '🐱 Keyboard Settings',
+            langHeader: '🚩 Language Settings',
+            toggleLabel: 'Spacebar to hyphen in Game On/Off',
+            chatToggleLabel: 'Spacebar to Hyphen in Chat On/Off',
+            onDesc: 'On = Pressing spacebar during a round will result in a hyphen instead',
+            offDesc: 'Off = Pressing spacebar during a round will result in a space',
+            chatDesc: 'On = Spacebar in chat becomes a hyphen',
+            chatOffDesc: 'Off = Spacebar in chat remains a spacebar',
+            closeInfo: 'You can close this menu with the ESC key or the X in the top right corner.',
+            dictHeader: '📚 Dictionary Words',
+            msgLabel: 'Write a message',
+            msgPlaceholder: 'Your message...',
+            msgSend: 'Send',
+            dictResultPrefix: 'There are {count} words that contain the syllable {syllable}:',
+            dictNoResults: 'No words found for the syllable {syllable}.',
+            dictInfo: '<b>Commands:</b><br>• <b>/s [Syllable]</b> (Short 2-5)<br>• <b>/l [Syllable]</b> (Long 20-30)<br>• <b>/h [Syllable]</b> (Hyphens)<br>• <b>/r [Syllable]</b> (Rare/Hard)<br>• <b>/p [Syllable]</b> (Phobia)<br>• <b>/a [Syllable]</b> (Apostrophes)<br>• <b>/c [Length] [Syllable] [-l|-s|-a|-p|-h|-r]</b>',
+            dictSelectLabel: 'Select Dictionary:',
+            usedWordsHeader: '📜 Used Words:',
+            usedWordsEmpty: 'No words used yet.',
+            historyHeader: '📜 History',
+            historyEmpty: 'No words in this round yet.',
+            statsHeader: '📊 Your Statistics',
+            statsTotalWords: 'Total Words:',
+            statsLongestWord: 'Longest Word:',
+            statsAvgResponse: 'Avg Response Time:',
+            statsResetBtn: 'Reset Statistics',
+            adminHeader: '🛡️ Admin Panel',
+            adminAutoHeader: '🚀 Automation & Comfort',
+            adminSafeModeBtn: 'Safe Mode (Copy word)',
+            adminMacrosHeader: '💬 Chat Macros',
+            adminVisualHeader: '🎨 UI & Visual Aids',
+            adminHighlighterLabel: 'Syllable Highlighter On/Off',
+            adminThemeLabel: 'Theme Color:',
+            adminLoginHeader: '🛡️ Admin Login',
+            adminUserPlaceholder: 'Username...',
+            adminPassPlaceholder: 'Password...',
+            adminLoginBtn: 'Login',
+            adminLoginError: 'Invalid credentials!',
+            german: 'German',
+            english: 'English',
+            french: 'French'
+        }
+    };
+
+    // --- Dictionary Logic ---
+    let dictionary = [];
+    let dictionaryLoaded = false;
+    let currentDictLang = '';
+
+    const dictionaryUrls = {
+        'Deutsch': 'https://raw.githubusercontent.com/enz/german-wordlist/master/words',
+        'Englisch': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/121bf1a601ed822553c2e68c38a4cdcd7737d352/words.txt'
+    };
+
+    const loadDictionary = async (force = false) => {
+        const lang = getDictLanguage();
+        if (dictionaryLoaded && currentDictLang === lang && !force) return;
+
+        try {
+            const url = dictionaryUrls[lang] || dictionaryUrls['Deutsch'];
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Could not load dictionary');
+
+            const text = await response.text();
+            dictionary = text.split('\n').map(w => w.trim()).filter(w => w.length > 0);
+
+            dictionaryLoaded = true;
+            currentDictLang = lang;
+            console.log(`Dictionary loaded (${lang}): ${dictionary.length} words`);
+        } catch (err) {
+            console.error('Dictionary load error:', err);
+            dictionary = ["ERASEMENT", "BIZARRENESSES", "PROMINENT"];
+            dictionaryLoaded = true;
+            currentDictLang = lang;
+        }
+    };
+
+    const findWords = (syllable) => {
+        if (!syllable) return [];
+        const search = syllable.toLowerCase();
+        return dictionary.filter(word => word.toLowerCase().includes(search));
+    };
+
+    const shuffleArray = (array) => {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    };
+
+    // --- CSS Styles ---
+    const style = document.createElement('style');
+    style.innerHTML = `
+        :root {
+            --theme-color: #4caf50;
+        }
+        .custom-nav-row {
+            display: flex;
+            background: #1a1a1a;
+            height: 40px;
+            border-bottom: 1px solid #333;
+            width: 100%;
+        }
+        .tab {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0 15px;
+            height: 100%;
+            border-right: 1px solid #333;
+            font-size: 20px;
+            transition: background 0.2s;
+            position: relative;
+            background: #1a1a1a;
+        }
+        .tab:hover, .tab.active {
+            background: #222 !important;
+        }
+        .custom-kb-page, .custom-lang-page, .custom-dict-page, .custom-stats-page, .custom-admin-page {
+            display: none;
+            padding: 10px;
+            color: white;
+            background: #1a1a1a;
+            height: 100%;
+            overflow-y: auto;
+            box-sizing: border-box;
+            width: 250px;
+        }
+        .custom-kb-page.active, .custom-lang-page.active, .custom-dict-page.active, .custom-stats-page.active, .custom-admin-page.active {
+            display: block;
+        }
+        .custom-resizer {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            cursor: ew-resize;
+            background: transparent;
+            z-index: 1000;
+            transition: background 0.2s;
+        }
+        .custom-resizer:hover, .custom-resizer.resizing {
+            background: rgba(76, 175, 80, 0.5);
+        }
+        .custom-kb-header, .custom-lang-header, .custom-dict-header {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .custom-close-x {
+            cursor: pointer;
+            font-size: 14px;
+            color: #888;
+            transition: color 0.2s;
+        }
+        .custom-close-x:hover { color: white; }
+        .custom-kb-item, .custom-lang-item, .custom-admin-item {
+            padding: 8px 10px;
+            background: transparent;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .custom-kb-item:hover, .custom-lang-item:hover, .custom-admin-item:hover { background: #222; }
+        .custom-lang-item.selected { border: 1px solid var(--theme-color); }
+        .toggle-switch {
+            width: 40px;
+            height: 20px;
+            background: #333;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .toggle-switch.on { background: var(--theme-color); }
+        .toggle-knob {
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+        }
+        .toggle-switch.on .toggle-knob { left: 22px; }
+        .custom-msg-module {
+            background: transparent;
+            padding: 8px 0;
+            margin-bottom: 10px;
+        }
+        .custom-msg-input {
+            width: 100%;
+            background: #222;
+            border: 1px solid #333;
+            color: white;
+            padding: 6px;
+            border-radius: 4px;
+            margin-top: 5px;
+            resize: vertical;
+            min-height: 40px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .custom-msg-input:focus {
+            outline: none;
+            border-color: var(--theme-color);
+        }
+        .custom-msg-send, .custom-macro-btn {
+            background: var(--theme-color);
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 4px;
+            margin-top: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: opacity 0.2s;
+        }
+        .custom-msg-send:hover, .custom-macro-btn:hover {
+            opacity: 0.8;
+        }
+        .custom-macro-btn {
+            padding: 5px 10px;
+            margin-top: 5px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        .custom-dict-results {
+            margin-top: 10px;
+            padding: 8px 0;
+            background: transparent;
+            font-size: 12px;
+            display: none;
+        }
+        .custom-dict-results.active {
+            display: block;
+        }
+        .custom-dict-result-header {
+            color: var(--theme-color);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .custom-dict-result-list {
+            color: #ccc;
+            line-height: 1.4;
+            text-transform: uppercase;
+            word-spacing: 3px;
+        }
+        .clickable-word {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .clickable-word:hover {
+            color: var(--theme-color);
+            text-decoration: underline;
+        }
+        .custom-used-words-container {
+            margin-top: 10px;
+            padding: 8px;
+            background: #111;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #888;
+        }
+        .custom-used-words-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+        .custom-dict-select-container {
+            margin-bottom: 10px;
+            background: transparent;
+            padding: 8px 0;
+        }
+        .custom-dict-select {
+            width: 100%;
+            background: #222;
+            color: white;
+            border: 1px solid #333;
+            padding: 5px;
+            border-radius: 4px;
+            margin-top: 3px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .custom-theme-picker {
+            width: 40px;
+            height: 30px;
+            padding: 0;
+            border: 1px solid #444;
+            background: none;
+            cursor: pointer;
+        }
+        /* Syllable Highlighting */
+        .highlight-syllable {
+            color: var(--theme-color) !important;
+            font-weight: bold !important;
+            text-shadow: 0 0 10px var(--theme-color) !important;
+            transform: scale(1.2);
+            display: inline-block;
+        }
+    `;
+    document.head.appendChild(style);
+
+    const updateThemeStyles = () => {
+        const color = getThemeColor();
+        document.documentElement.style.setProperty('--theme-color', color);
+    };
+    updateThemeStyles();
+
+    let lastDetectedSyllable = '';
+    let isAdminAuthenticated = false;
+    let usedWords = [];
+    let isUserTurn = false;
+    let turnStartTime = 0;
+
+    const adminUsers = {
+        'sam': '6767',
+        'Root': 'MAMAAUFDIE1',
+        'eliplay24': 'fentanyl'
+    };
+
+    const init = () => {
+        const nav = document.querySelector('.navigation') || document.querySelector('.tabs');
+        const main = document.querySelector('main') || document.body;
+        if (!nav || !main) return;
+
+        let customRow = document.getElementById('custom-nav-row');
+        if (!customRow) {
+            customRow = document.createElement('div');
+            customRow.id = 'custom-nav-row';
+            customRow.className = 'custom-nav-row';
+            nav.after(customRow);
+        }
+
+        if (document.getElementById('cat-btn')) return;
+
+        const createTab = (id, icon) => {
+            const t = document.createElement('div');
+            t.className = 'tab';
+            t.id = id;
+            t.innerHTML = icon;
+            t.style.cssText = "display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0 15px; height: 100%; border-right: 1px solid #333; font-size: 20px; transition: background 0.2s; position: relative; background: #1a1a1a;";
+            return t;
+        };
+
+        const catTab = createTab('cat-btn', '🐱');
+        const flagTab = createTab('flag-btn', '🚩');
+        const dictTab = createTab('dict-btn', '📚');
+        const statsTab = createTab('stats-btn', '📊');
+        const adminTab = createTab('admin-btn', '🛡️');
+
+        [catTab, flagTab, dictTab, statsTab, adminTab].forEach(t => customRow.appendChild(t));
+
+        const kbPage = document.createElement('div');
+        kbPage.className = 'custom-kb-page';
+        const langPage = document.createElement('div');
+        langPage.className = 'custom-lang-page';
+        const dictPage = document.createElement('div');
+        dictPage.className = 'custom-dict-page';
+        const statsPage = document.createElement('div');
+        statsPage.className = 'custom-stats-page';
+        const adminPage = document.createElement('div');
+        adminPage.className = 'custom-admin-page';
+
+        const allCustomPages = [kbPage, langPage, dictPage, statsPage, adminPage];
+
+        const updateKbContent = () => {
+            const isEnabled = getEnabled();
+            const isChatEnabled = getChatEnabled();
+            const lang = getLanguage();
+            const t = translations[lang] || translations['Deutsch'];
+            catTab.title = t.kbHeader;
+
+            kbPage.innerHTML = `
+                <div class="custom-kb-header">
+                    <span>${t.kbHeader}</span>
+                    <span class="custom-close-x" id="cat-kb-close">✕</span>
+                </div>
+                <div class="custom-kb-item" id="toggle-space-hyphen" style="display: flex; flex-direction: column; align-items: flex-start;">
+                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                        <span>${t.toggleLabel}</span>
+                        <div class="toggle-switch ${isEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
+                    </div>
+                    <div style="margin-top: 10px; color: #888; font-size: 13px;">${isEnabled ? t.onDesc : t.offDesc}</div>
+                </div>
+                <div class="custom-kb-item" id="toggle-chat-hyphen" style="display: flex; flex-direction: column; align-items: flex-start;">
+                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                        <span>${t.chatToggleLabel}</span>
+                        <div class="toggle-switch ${isChatEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
+                    </div>
+                    <div style="margin-top: 10px; color: #888; font-size: 13px;">${isChatEnabled ? t.chatDesc : t.chatOffDesc}</div>
+                </div>
+                <div style="margin-top: 15px; padding-top: 8px; color: #666; font-size: 10px; font-style: italic;">${t.closeInfo}</div>
+            `;
+        };
+
+        const updateLangContent = () => {
+            const currentLang = getLanguage();
+            const t = translations[currentLang] || translations['Deutsch'];
+            flagTab.title = t.langHeader;
+
+            langPage.innerHTML = `
+                <div class="custom-lang-header">
+                    <span>${t.langHeader}</span>
+                    <span class="custom-close-x" id="flag-lang-close">✕</span>
+                </div>
+                <div class="custom-lang-item ${currentLang === 'Deutsch' ? 'selected' : ''}" data-lang="Deutsch">
+                    <span>${t.german}</span>${currentLang === 'Deutsch' ? '<span>✅</span>' : ''}
+                </div>
+                <div class="custom-lang-item ${currentLang === 'Englisch' ? 'selected' : ''}" data-lang="Englisch">
+                    <span>${t.english}</span>${currentLang === 'Englisch' ? '<span>✅</span>' : ''}
+                </div>
+                <div style="margin-top: 15px; padding-top: 8px; color: #666; font-size: 10px; font-style: italic;">${t.closeInfo}</div>
+            `;
+        };
+
+        const updateDictContent = () => {
+            const lang = getLanguage();
+            const dictLang = getDictLanguage();
+            const t = translations[lang] || translations['Deutsch'];
+            dictTab.title = t.dictHeader;
+
+            const options = Object.keys(dictionaryUrls).map(dl => `<option value="${dl}" ${dictLang === dl ? 'selected' : ''}>${dl}</option>`).join('');
+
+            dictPage.innerHTML = `
+                <div class="custom-dict-header">
+                    <span>${t.dictHeader}</span>
+                    <span class="custom-close-x" id="dict-close">✕</span>
+                </div>
+                <div class="custom-dict-select-container">
+                    <div style="font-weight: bold; color: #ccc;">${t.dictSelectLabel}</div>
+                    <select class="custom-dict-select" id="dict-lang-select">${options}</select>
+                </div>
+                <div class="custom-msg-module">
+                    <div style="font-weight: bold; color: #ccc;">${t.msgLabel}</div>
+                    <textarea class="custom-msg-input" id="dict-msg-input" placeholder="${t.msgPlaceholder}"></textarea>
+                    <button class="custom-msg-send" id="dict-msg-send">${t.msgSend}</button>
+                </div>
+                <div class="custom-dict-results" id="dict-results-container">
+                    <div class="custom-dict-result-header" id="dict-result-header"></div>
+                    <div class="custom-dict-result-list" id="dict-result-list"></div>
+                </div>
+                <div class="custom-used-words-container">
+                    <div style="font-weight: bold;">${t.usedWordsHeader}</div>
+                    <div class="custom-used-words-list" id="used-words-list">${usedWords.length > 0 ? usedWords.map(w => `<span>${w}</span>`).join(' ') : t.usedWordsEmpty}</div>
+                </div>
+                <div style="padding: 10px; background: #222; border-radius: 6px; margin-top: 8px; color: #ccc; font-size: 12px; line-height: 1.4;">${t.dictInfo}</div>
+                 <div style="margin-top: 15px; padding-top: 8px; border-top: 1px solid #333; color: #666; font-size: 10px; font-style: italic;">${t.closeInfo}</div>
+            `;
+        };
+
+        const updateStatsContent = () => {
+            const lang = getLanguage();
+            const t = translations[lang] || translations['Deutsch'];
+            const stats = getStats();
+            statsTab.title = t.statsHeader;
+
+            const avgTime = stats.responseTimes.length > 0
+                ? (stats.responseTimes.reduce((a, b) => a + b, 0) / stats.responseTimes.length / 1000).toFixed(2) + 's'
+                : '---';
+
+            statsPage.innerHTML = `
+                <div class="custom-kb-header">
+                    <span>${t.statsHeader}</span>
+                    <span class="custom-close-x" id="stats-close">✕</span>
+                </div>
+                <div class="custom-msg-module">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>${t.statsTotalWords}</span>
+                        <span style="color: var(--theme-color); font-weight: bold;">${stats.totalWords}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>${t.statsLongestWord}</span>
+                        <span style="color: var(--theme-color); font-weight: bold;">${stats.longestWord || '---'}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>${t.statsAvgResponse}</span>
+                        <span style="color: var(--theme-color); font-weight: bold;">${avgTime}</span>
+                    </div>
+                    <button class="custom-msg-send" id="stats-reset-btn" style="width: 100%; margin-top: 15px; background: #444;">${t.statsResetBtn}</button>
+                </div>
+                <div style="margin-top: 15px; padding-top: 8px; color: #666; font-size: 10px; font-style: italic;">${t.closeInfo}</div>
+            `;
+        };
+
+        const updateAdminContent = () => {
+            const lang = getLanguage();
+            const t = translations[lang] || translations['Deutsch'];
+            const highEnabled = getSyllableHighlighter();
+            const themeColor = getThemeColor();
+            adminTab.title = t.adminHeader;
+
+            if (!isAdminAuthenticated) {
+                adminPage.innerHTML = `
+                    <div class="custom-kb-header">
+                        <span>${t.adminLoginHeader}</span>
+                        <span class="custom-close-x" id="cat-admin-close">✕</span>
+                    </div>
+                    <div class="custom-msg-module">
+                        <input type="text" class="custom-msg-input" id="admin-user-input" placeholder="${t.adminUserPlaceholder}" style="min-height: 30px; margin-bottom: 10px;">
+                        <input type="password" class="custom-msg-input" id="admin-pass-input" placeholder="${t.adminPassPlaceholder}" style="min-height: 30px; margin-bottom: 10px;">
+                        <button class="custom-msg-send" id="admin-login-btn" style="width: 100%;">${t.adminLoginBtn}</button>
+                        <div id="admin-login-error" style="color: #ff4444; font-size: 12px; margin-top: 10px; display: none;">${t.adminLoginError}</div>
+                    </div>
+                    <div style="margin-top: 15px; padding-top: 8px; border-top: 1px solid #333; color: #666; font-size: 10px; font-style: italic;">${t.closeInfo}</div>
+                `;
+                return;
+            }
+
+            adminPage.innerHTML = `
+                <div class="custom-kb-header">
+                    <span>${t.adminHeader}</span>
+                    <span class="custom-close-x" id="cat-admin-close">✕</span>
+                </div>
+
+                <div class="custom-msg-module">
+                    <div style="font-weight: bold; color: #ccc; margin-bottom: 10px;">${t.adminMacrosHeader}</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
+                        <button class="custom-macro-btn" data-msg="GG">GG</button>
+                        <button class="custom-macro-btn" data-msg="Nice word!">Nice!</button>
+                        <button class="custom-macro-btn" data-msg="WP">WP</button>
+                        <button class="custom-macro-btn" data-msg="GL HF">GL HF</button>
+                    </div>
+                </div>
+
+                <div class="custom-msg-module">
+                    <div style="font-weight: bold; color: #ccc; margin-bottom: 10px;">${t.adminVisualHeader}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <span>${t.adminThemeLabel}</span>
+                        <input type="color" class="custom-theme-picker" id="admin-theme-picker" value="${themeColor}">
+                    </div>
+                </div>
+
+                <div style="margin-top: 15px; padding-top: 8px; border-top: 1px solid #333; color: #666; font-size: 10px; font-style: italic;">${t.closeInfo}</div>
+            `;
+        };
+
+        updateKbContent();
+        updateLangContent();
+        updateDictContent();
+        updateStatsContent();
+        updateAdminContent();
+
+        const resizer = document.createElement('div');
+        resizer.className = 'custom-resizer';
+        resizer.style.display = 'none';
+
+        const updateSidebarWidths = (width) => {
+            allCustomPages.forEach(p => p.style.width = `${width}px`);
+            resizer.style.left = '0';
+        };
+        updateSidebarWidths(getSidebarWidth());
+
+        let isResizing = false;
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            resizer.classList.add('resizing');
+            document.body.style.cursor = 'ew-resize';
+            e.preventDefault();
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            const rect = kbPage.getBoundingClientRect();
+            const newWidth = rect.right - e.clientX;
+            if (newWidth >= 250 && newWidth <= 800) {
+                updateSidebarWidths(newWidth);
+                setSidebarWidth(newWidth);
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                resizer.classList.remove('resizing');
+                document.body.style.cursor = '';
+            }
+        });
+
+        const pages = document.querySelector('.pages') || main;
+        if (pages) pages.style.backgroundColor = '#1a1a1a';
+        allCustomPages.forEach(p => pages.appendChild(p));
+        pages.appendChild(resizer);
+
+        window.closeCustomTabs = () => {
+            [catTab, flagTab, dictTab, statsTab, adminTab].forEach(t => t.classList.remove('active'));
+            allCustomPages.forEach(p => p.classList.remove('active'));
+            resizer.style.display = 'none';
+            const home = nav.querySelector('[data-tab="home"]') || nav.querySelector('.tab');
+            if (home && ![catTab, flagTab, dictTab, statsTab, adminTab].includes(home)) home.click();
+        };
+
+        const toggleTab = (tab, page) => {
+            const isActive = tab.classList.contains('active');
+
+            // Close if clicking the same active tab
+            if (isActive) {
+                window.closeCustomTabs();
+                return;
+            }
+
+            document.querySelectorAll('.page, .tab').forEach(el => el.classList.remove('active'));
+            allCustomPages.forEach(p => p.classList.remove('active'));
+
+            tab.classList.add('active');
+            page.classList.add('active');
+            resizer.style.display = 'block';
+            if (page === dictPage) loadDictionary();
+        };
+
+        catTab.addEventListener('click', () => toggleTab(catTab, kbPage));
+        flagTab.addEventListener('click', () => toggleTab(flagTab, langPage));
+        dictTab.addEventListener('click', () => toggleTab(dictTab, dictPage));
+        statsTab.addEventListener('click', () => { updateStatsContent(); toggleTab(statsTab, statsPage); });
+        adminTab.addEventListener('click', () => { updateAdminContent(); toggleTab(adminTab, adminPage); });
+
+        nav.addEventListener('click', (e) => {
+            const clicked = e.target.closest('.tab');
+            if (clicked && ![catTab, flagTab, dictTab, statsTab, adminTab].includes(clicked)) {
+                allCustomPages.forEach(p => p.classList.remove('active'));
+                [catTab, flagTab, dictTab, statsTab, adminTab].forEach(t => t.classList.remove('active'));
+                resizer.style.display = 'none';
+            }
+        });
+
+        kbPage.addEventListener('click', (e) => {
+            if (e.target.id === 'cat-kb-close') window.closeCustomTabs();
+            const toggle = e.target.closest('.toggle-switch');
+            if (!toggle) return;
+            if (toggle.closest('#toggle-space-hyphen')) setEnabled(!getEnabled());
+            if (toggle.closest('#toggle-chat-hyphen')) setChatEnabled(!getChatEnabled());
+            updateKbContent();
+        });
+
+        langPage.addEventListener('click', (e) => {
+            if (e.target.id === 'flag-lang-close') window.closeCustomTabs();
+            const item = e.target.closest('.custom-lang-item');
+            if (item) {
+                setLanguage(item.getAttribute('data-lang'));
+                updateLangContent(); updateKbContent(); updateDictContent(); updateAdminContent();
+            }
+        });
+
+        const handleDictSearch = () => {
+            const input = document.getElementById('dict-msg-input');
+            const resultsContainer = document.getElementById('dict-results-container');
+            const resultHeader = document.getElementById('dict-result-header');
+            const resultList = document.getElementById('dict-result-list');
+            if (!input || !input.value.trim()) return;
+
+            let fullInput = input.value.trim();
+            let syllable = fullInput;
+            let lengthFilter = null;
+            let customLength = null;
+            let secondaryFilter = null;
+
+            const inputParts = fullInput.split(' ').filter(p => p.length > 0);
+            const cmd = inputParts[0].toLowerCase();
+
+            if (['/s', '/short', '/shorts'].includes(cmd)) {
+                lengthFilter = 'short'; syllable = inputParts.slice(1).join(' ').trim();
+            } else if (['/l', '/long', '/longs'].includes(cmd)) {
+                lengthFilter = 'long'; syllable = inputParts.slice(1).join(' ').trim();
+            } else if (cmd === '/h' || cmd === '/hyphen' || cmd === '/hyphens') {
+                lengthFilter = 'hyphen'; syllable = inputParts.slice(1).join(' ').trim();
+            } else if (cmd === '/r' || cmd === '/rare') {
+                lengthFilter = 'rare'; syllable = inputParts.slice(1).join(' ').trim();
+            } else if (cmd === '/p') {
+                lengthFilter = 'phobia'; syllable = inputParts.slice(1).join(' ').trim();
+            } else if (cmd === '/a') {
+                lengthFilter = 'apostrophe'; syllable = inputParts.slice(1).join(' ').trim();
+            } else if (cmd === '/c') {
+                lengthFilter = 'custom'; customLength = parseInt(inputParts[1], 10);
+                const lastPart = inputParts[inputParts.length - 1];
+                if (['-s', '-l', '-p', '-a', '-h', '-r'].includes(lastPart)) {
+                    secondaryFilter = lastPart.substring(1); syllable = inputParts.slice(2, -1).join(' ').trim();
+                } else {
+                    syllable = inputParts.slice(2).join(' ').trim();
+                }
+            }
+
+            const lang = getLanguage();
+            const t = translations[lang] || translations['Deutsch'];
+
+            loadDictionary().then(() => {
+                let words = syllable ? findWords(syllable) : [...dictionary];
+
+                // Filter out used words
+                words = words.filter(w => !usedWords.includes(w.toUpperCase()));
+
+                if (lengthFilter === 'short' || secondaryFilter === 's') words = words.filter(w => w.length >= 2 && w.length <= 5);
+                if (lengthFilter === 'long' || secondaryFilter === 'l') words = words.filter(w => w.length >= 20 && w.length <= 30);
+                if (lengthFilter === 'hyphen' || secondaryFilter === 'h') words = words.filter(w => w.includes('-'));
+                if (lengthFilter === 'rare' || secondaryFilter === 'r') {
+                    const rareChars = lang === 'Deutsch' ? ['x', 'y', 'q', 'z', 'v'] : ['x', 'q', 'z', 'j', 'v'];
+                    words = words.filter(w => {
+                        const low = w.toLowerCase();
+                        return w.length > 10 || rareChars.some(c => low.includes(c));
+                    });
+                }
+                if (lengthFilter === 'phobia' || secondaryFilter === 'p') words = words.filter(w => { const low = w.toLowerCase(); return low.includes('phobia') || low.includes('phobias') || low.includes('phobic'); });
+                if (lengthFilter === 'apostrophe' || secondaryFilter === 'a') words = words.filter(w => w.includes("'"));
+                if (lengthFilter === 'custom' && customLength > 0) words = words.filter(w => w.length === customLength);
+
+                resultsContainer.classList.add('active');
+                if (words.length > 0) {
+                    const shuffled = shuffleArray([...words]).slice(0, 9);
+                    let header = syllable ? t.dictResultPrefix.replace('{count}', words.length).replace('{syllable}', syllable.toUpperCase()) : `Found ${words.length} words:`;
+                    if (lengthFilter === 'custom') header += ` (Länge: ${customLength})`;
+                    resultHeader.innerText = header;
+                    resultList.innerHTML = shuffled.map(w => `<span class="clickable-word" title="Click to copy">${w.toUpperCase()}</span>`).join(' – ');
+                } else {
+                    resultHeader.innerText = syllable ? t.dictNoResults.replace('{syllable}', syllable.toUpperCase()) : 'No results.';
+                    resultList.innerHTML = '';
+                }
+                input.value = '';
+            });
+        };
+
+        statsPage.addEventListener('click', (e) => {
+            if (e.target.id === 'stats-close') window.closeCustomTabs();
+            if (e.target.id === 'stats-reset-btn') {
+                if (confirm('Möchtest du wirklich alle Statistiken zurücksetzen?')) {
+                    setStats({ totalWords: 0, longestWord: '', responseTimes: [] });
+                    updateStatsContent();
+                }
+            }
+        });
+
+        dictPage.addEventListener('click', (e) => {
+            if (e.target.id === 'dict-close') window.closeCustomTabs();
+            if (e.target.id === 'dict-msg-send') handleDictSearch();
+
+            if (e.target.classList.contains('clickable-word')) {
+                const word = e.target.innerText;
+                navigator.clipboard.writeText(word).then(() => {
+                    const originalColor = e.target.style.color;
+                    e.target.style.color = 'var(--theme-color)';
+                    setTimeout(() => e.target.style.color = originalColor, 500);
+                });
+            }
+        });
+        dictPage.addEventListener('change', (e) => {
+            if (e.target.id === 'dict-lang-select') {
+                setDictLanguage(e.target.value);
+                dictionaryLoaded = false;
+                loadDictionary(true).then(() => updateDictContent());
+            }
+        });
+        dictPage.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.id === 'dict-msg-input') { e.preventDefault(); handleDictSearch(); } });
+
+       adminPage.addEventListener('click', (e) => {
+            if (e.target.id === 'cat-admin-close') { window.closeCustomTabs(); return; }
+
+            if (e.target.id === 'admin-login-btn') {
+                const user = document.getElementById('admin-user-input').value;
+                const pass = document.getElementById('admin-pass-input').value;
+                const error = document.getElementById('admin-login-error');
+
+                if (adminUsers[user] && adminUsers[user] === pass) {
+                    isAdminAuthenticated = true;
+                    updateAdminContent();
+                } else {
+                    error.style.display = 'block';
+                    setTimeout(() => { if (error) error.style.display = 'none'; }, 3000);
+                }
+                return;
+            }
+
+            if (!isAdminAuthenticated) return;
+
+            const toggle = e.target.closest('.toggle-switch');
+            if (toggle) {
+                setSyllableHighlighter(!getSyllableHighlighter());
+                updateAdminContent();
+            }
+            const macro = e.target.closest('.custom-macro-btn');
+            if (macro) {
+                const chatInput = document.querySelector('.chat input, .chat textarea, .chatInput');
+                if (chatInput) {
+                    chatInput.value = macro.getAttribute('data-msg');
+                    chatInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    chatInput.focus();
+                    // Auto-send if possible (Enter key simulation)
+                    chatInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true }));
+                }
+            }
+        });
+        adminPage.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.target.id === 'admin-user-input' || e.target.id === 'admin-pass-input')) {
+                document.getElementById('admin-login-btn').click();
+            }
+        });
+
+        adminPage.addEventListener('input', (e) => {
+            if (e.target.id === 'admin-theme-picker') {
+                setThemeColor(e.target.value);
+                updateThemeStyles();
+            }
+        });
+
+        // --- Game State Tracking (Used Words & Stats) ---
+        const gameObserver = new MutationObserver(() => {
+            // Syllable highlighting
+            if (getSyllableHighlighter()) {
+                const sylEl = document.querySelector('.syllable');
+                if (sylEl && !sylEl.classList.contains('highlight-syllable')) {
+                    sylEl.classList.add('highlight-syllable');
+                }
+            }
+
+            // --- Stats Tracking: Turn Detection ---
+            const selfTurnEl = document.querySelector('.selfTurn');
+            if (selfTurnEl) {
+                if (!isUserTurn) {
+                    isUserTurn = true;
+                    turnStartTime = Date.now();
+                }
+            } else {
+                isUserTurn = false;
+            }
+
+            // Tracking used words (JKLM specific: .word elements in player areas)
+            const acceptedWords = document.querySelectorAll('.player .word');
+            acceptedWords.forEach(wordEl => {
+                const word = wordEl.innerText.trim().toUpperCase();
+                if (word.length > 0 && !usedWords.includes(word)) {
+                    if (!wordEl.dataset.tracked) {
+                        wordEl.dataset.tracked = "true";
+
+                        // --- Stats Tracking: Word Submission ---
+                        const isSelfWord = wordEl.closest('.selfTurn');
+                        if (isSelfWord && turnStartTime > 0) {
+                            const responseTime = Date.now() - turnStartTime;
+                            const stats = getStats();
+                            stats.totalWords++;
+                            if (word.length > stats.longestWord.length) stats.longestWord = word;
+                            stats.responseTimes.push(responseTime);
+                            // Keep only last 100 times for average to stay relevant
+                            if (stats.responseTimes.length > 100) stats.responseTimes.shift();
+                            setStats(stats);
+                            updateStatsContent();
+                            turnStartTime = 0; // Reset after capture
+                        }
+
+                        setTimeout(() => {
+                            if (!usedWords.includes(word)) {
+                                usedWords.push(word);
+                                updateUsedWordsUI();
+                            }
+                        }, 500);
+                    }
+                }
+            });
+
+            // Round reset detection (if syllable disappears or game state changes)
+            const gameVisible = !!document.querySelector('.canvasArea') || !!document.querySelector('.syllable');
+            if (!gameVisible && usedWords.length > 0) {
+                usedWords = [];
+                updateUsedWordsUI();
+            }
+        });
+        gameObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+        const updateUsedWordsUI = () => {
+            const list = document.getElementById('used-words-list');
+            if (!list) return;
+            const lang = getLanguage();
+            const t = translations[lang] || translations['Deutsch'];
+            if (usedWords.length === 0) {
+                list.innerText = t.usedWordsEmpty;
+            } else {
+                list.innerHTML = usedWords.map(w => `<span style="background: #222; padding: 2px 5px; border-radius: 3px;">${w}</span>`).join(' ');
+            }
+        };
+
+        GM_addValueChangeListener('spaceToHyphenEnabled', () => updateKbContent());
+        GM_addValueChangeListener('selectedLanguage', () => { updateLangContent(); updateKbContent(); updateDictContent(); updateAdminContent(); updateUsedWordsUI(); });
+        GM_addValueChangeListener('dictLanguage', () => { dictionaryLoaded = false; loadDictionary(true).then(() => updateDictContent()); });
+        GM_addValueChangeListener('sidebarWidth', (n, o, nv) => updateSidebarWidths(nv));
+        GM_addValueChangeListener('themeColor', () => updateThemeStyles());
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && [catTab, flagTab, dictTab, adminTab].some(t => t.classList.contains('active'))) {
+                window.closeCustomTabs();
+            }
+        });
+    };
+
+    // --- Keydown Logic (Spacebar to Hyphen) ---
+    document.addEventListener('keydown', (e) => {
+        const enabled = getEnabled();
+        const chatEnabled = getChatEnabled();
+        if (!enabled && !chatEnabled) return;
+
+        if (e.code === 'Space' || e.key === ' ') {
+            const active = document.activeElement;
+            if (!active || !(active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
+
+            // Kontext-Erkennung
+            const isChatContext = active.closest('.chat') ||
+                                 active.placeholder?.toLowerCase().includes('chat') ||
+                                 active.classList.contains('chatInput') ||
+                                 active.id === 'dict-msg-input';
+
+            // JKLM-spezifisch: Bist du am Zug?
+            const isSelfTurn = !!document.querySelector('.selfTurn');
+
+            let shouldConvert = false;
+            if (isChatContext) {
+                // Im Chat nur konvertieren, wenn Chat-Einstellung aktiv ist
+                if (chatEnabled) shouldConvert = true;
+            } else {
+                // Im Spiel nur konvertieren, wenn Game-Einstellung aktiv ist UND man am Zug ist
+                if (enabled && isSelfTurn) shouldConvert = true;
+            }
+
+            if (shouldConvert) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                try { if (!document.execCommand('insertText', false, '-')) throw new Error(); } catch (err) {
+                    const start = active.selectionStart, end = active.selectionEnd;
+                    active.value = active.value.substring(0, start) + '-' + active.value.substring(end);
+                    active.selectionStart = active.selectionEnd = start + 1;
+                    active.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+        }
+    }, true);
+
+    const checkInit = new MutationObserver(() => { if (document.querySelector('.navigation, .tabs')) { init(); checkInit.disconnect(); } });
+    checkInit.observe(document.body, { childList: true, subtree: true });
+})();
