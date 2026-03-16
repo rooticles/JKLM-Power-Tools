@@ -28,8 +28,6 @@
     const setSyllableHighlighter = (val) => GM_setValue('syllableHighlighter', val);
     const getThemeColor = () => GM_getValue('themeColor', '#4caf50');
     const setThemeColor = (val) => GM_setValue('themeColor', val);
-    const getStats = () => GM_getValue('gameStats', { totalWords: 0, longestWord: '', responseTimes: [] });
-    const setStats = (val) => GM_setValue('gameStats', val);
     const getAdminAuth = () => GM_getValue('adminAuthenticated', false);
     const setAdminAuth = (val) => GM_setValue('adminAuthenticated', val);
 
@@ -57,11 +55,6 @@
             usedWordsEmpty: 'Noch keine Wörter benutzt.',
             historyHeader: '📜 Verlauf',
             historyEmpty: 'Noch keine Wörter in dieser Runde.',
-            statsHeader: '📊 Deine Statistiken',
-            statsTotalWords: 'Gesamte Wörter:',
-            statsLongestWord: 'Längstes Wort:',
-            statsAvgResponse: 'Durchschn. Antwortzeit:',
-            statsResetBtn: 'Statistiken zurücksetzen',
             adminHeader: '🛡️ Admin Panel',
             adminAutoHeader: '🚀 Automatisierung & Komfort',
             adminSafeModeBtn: 'Safe Mode (Wort kopieren)',
@@ -101,11 +94,6 @@
             usedWordsEmpty: 'No words used yet.',
             historyHeader: '📜 History',
             historyEmpty: 'No words in this round yet.',
-            statsHeader: '📊 Your Statistics',
-            statsTotalWords: 'Total Words:',
-            statsLongestWord: 'Longest Word:',
-            statsAvgResponse: 'Avg Response Time:',
-            statsResetBtn: 'Reset Statistics',
             adminHeader: '🛡️ Admin Panel',
             adminAutoHeader: '🚀 Automation & Comfort',
             adminSafeModeBtn: 'Safe Mode (Copy word)',
@@ -201,7 +189,7 @@
         .tab:hover, .tab.active {
             background: #222 !important;
         }
-        .custom-kb-page, .custom-lang-page, .custom-dict-page, .custom-stats-page, .custom-admin-page {
+        .custom-kb-page, .custom-lang-page, .custom-dict-page, .custom-admin-page {
             display: none;
             padding: 10px;
             color: white;
@@ -211,7 +199,7 @@
             box-sizing: border-box;
             width: 250px;
         }
-        .custom-kb-page.active, .custom-lang-page.active, .custom-dict-page.active, .custom-stats-page.active, .custom-admin-page.active {
+        .custom-kb-page.active, .custom-lang-page.active, .custom-dict-page.active, .custom-admin-page.active {
             display: block;
         }
         .custom-resizer {
@@ -408,8 +396,6 @@
     let lastDetectedSyllable = '';
     let isAdminAuthenticated = getAdminAuth();
     let usedWords = [];
-    let isUserTurn = false;
-    let turnStartTime = 0;
 
     const adminUsers = {
         'root': '622acef',
@@ -444,10 +430,9 @@
         const catTab = createTab('cat-btn', '🐱');
         const flagTab = createTab('flag-btn', '🚩');
         const dictTab = createTab('dict-btn', '📚');
-        const statsTab = createTab('stats-btn', '📊');
         const adminTab = createTab('admin-btn', '🛡️');
 
-        [catTab, flagTab, dictTab, statsTab, adminTab].forEach(t => customRow.appendChild(t));
+        [catTab, flagTab, dictTab, adminTab].forEach(t => customRow.appendChild(t));
 
         const kbPage = document.createElement('div');
         kbPage.className = 'custom-kb-page';
@@ -455,12 +440,10 @@
         langPage.className = 'custom-lang-page';
         const dictPage = document.createElement('div');
         dictPage.className = 'custom-dict-page';
-        const statsPage = document.createElement('div');
-        statsPage.className = 'custom-stats-page';
         const adminPage = document.createElement('div');
         adminPage.className = 'custom-admin-page';
 
-        const allCustomPages = [kbPage, langPage, dictPage, statsPage, adminPage];
+        const allCustomPages = [kbPage, langPage, dictPage, adminPage];
 
         const updateKbContent = () => {
             const isEnabled = getEnabled();
@@ -548,40 +531,6 @@
             `;
         };
 
-        const updateStatsContent = () => {
-            const lang = getLanguage();
-            const t = translations[lang] || translations['Deutsch'];
-            const stats = getStats();
-            statsTab.title = t.statsHeader;
-
-            const avgTime = stats.responseTimes.length > 0 
-                ? (stats.responseTimes.reduce((a, b) => a + b, 0) / stats.responseTimes.length / 1000).toFixed(2) + 's'
-                : '---';
-
-            statsPage.innerHTML = `
-                <div class="custom-kb-header">
-                    <span>${t.statsHeader}</span>
-                    <span class="custom-close-x" id="stats-close">✕</span>
-                </div>
-                <div class="custom-msg-module">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span>${t.statsTotalWords}</span>
-                        <span style="color: var(--theme-color); font-weight: bold;">${stats.totalWords}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span>${t.statsLongestWord}</span>
-                        <span style="color: var(--theme-color); font-weight: bold;">${stats.longestWord || '---'}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span>${t.statsAvgResponse}</span>
-                        <span style="color: var(--theme-color); font-weight: bold;">${avgTime}</span>
-                    </div>
-                    <button class="custom-msg-send" id="stats-reset-btn" style="width: 100%; margin-top: 15px; background: #444;">${t.statsResetBtn}</button>
-                </div>
-                <div style="margin-top: 15px; padding-top: 8px; color: #666; font-size: 10px; font-style: italic;">${t.closeInfo}</div>
-            `;
-        };
-
         const updateAdminContent = () => {
             const lang = getLanguage();
             const t = translations[lang] || translations['Deutsch'];
@@ -637,7 +586,6 @@
         updateKbContent();
         updateLangContent();
         updateDictContent();
-        updateStatsContent();
         updateAdminContent();
 
         const resizer = document.createElement('div');
@@ -682,11 +630,11 @@
         pages.appendChild(resizer);
 
         window.closeCustomTabs = () => {
-            [catTab, flagTab, dictTab, statsTab, adminTab].forEach(t => t.classList.remove('active'));
+            [catTab, flagTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
             allCustomPages.forEach(p => p.classList.remove('active'));
             resizer.style.display = 'none';
             const home = nav.querySelector('[data-tab="home"]') || nav.querySelector('.tab');
-            if (home && ![catTab, flagTab, dictTab, statsTab, adminTab].includes(home)) home.click();
+            if (home && ![catTab, flagTab, dictTab, adminTab].includes(home)) home.click();
         };
 
         const toggleTab = (tab, page) => {
@@ -710,14 +658,13 @@
         catTab.addEventListener('click', () => toggleTab(catTab, kbPage));
         flagTab.addEventListener('click', () => toggleTab(flagTab, langPage));
         dictTab.addEventListener('click', () => toggleTab(dictTab, dictPage));
-        statsTab.addEventListener('click', () => { updateStatsContent(); toggleTab(statsTab, statsPage); });
         adminTab.addEventListener('click', () => { updateAdminContent(); toggleTab(adminTab, adminPage); });
 
         nav.addEventListener('click', (e) => {
             const clicked = e.target.closest('.tab');
-            if (clicked && ![catTab, flagTab, dictTab, statsTab, adminTab].includes(clicked)) {
+            if (clicked && ![catTab, flagTab, dictTab, adminTab].includes(clicked)) {
                 allCustomPages.forEach(p => p.classList.remove('active'));
-                [catTab, flagTab, dictTab, statsTab, adminTab].forEach(t => t.classList.remove('active'));
+                [catTab, flagTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
                 resizer.style.display = 'none';
             }
         });
@@ -816,16 +763,6 @@
             });
         };
 
-        statsPage.addEventListener('click', (e) => {
-            if (e.target.id === 'stats-close') window.closeCustomTabs();
-            if (e.target.id === 'stats-reset-btn') {
-                if (confirm('Möchtest du wirklich alle Statistiken zurücksetzen?')) {
-                    setStats({ totalWords: 0, longestWord: '', responseTimes: [] });
-                    updateStatsContent();
-                }
-            }
-        });
-
         dictPage.addEventListener('click', (e) => {
             if (e.target.id === 'dict-close') window.closeCustomTabs();
             if (e.target.id === 'dict-msg-send') handleDictSearch();
@@ -915,17 +852,6 @@
                 }
             }
 
-            // --- Stats Tracking: Turn Detection ---
-            const selfTurnEl = document.querySelector('.selfTurn');
-            if (selfTurnEl) {
-                if (!isUserTurn) {
-                    isUserTurn = true;
-                    turnStartTime = Date.now();
-                }
-            } else {
-                isUserTurn = false;
-            }
-
             // Tracking used words (JKLM specific: .word elements in player areas)
             const acceptedWords = document.querySelectorAll('.player .word');
             acceptedWords.forEach(wordEl => {
@@ -934,21 +860,6 @@
                     if (!wordEl.dataset.tracked) {
                         wordEl.dataset.tracked = "true";
                         
-                        // --- Stats Tracking: Word Submission ---
-                        const isSelfWord = wordEl.closest('.selfTurn');
-                        if (isSelfWord && turnStartTime > 0) {
-                            const responseTime = Date.now() - turnStartTime;
-                            const stats = getStats();
-                            stats.totalWords++;
-                            if (word.length > stats.longestWord.length) stats.longestWord = word;
-                            stats.responseTimes.push(responseTime);
-                            // Keep only last 100 times for average to stay relevant
-                            if (stats.responseTimes.length > 100) stats.responseTimes.shift();
-                            setStats(stats);
-                            updateStatsContent();
-                            turnStartTime = 0; // Reset after capture
-                        }
-
                         setTimeout(() => {
                             if (!usedWords.includes(word)) {
                                 usedWords.push(word);
