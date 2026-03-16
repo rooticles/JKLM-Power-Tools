@@ -1,5 +1,5 @@
 # JKLM-Power-Tools
-A powerful Tampermonkey userscript for JKLM.fun Bombparty, featuring an intelligent dictionary, performance stats, and quality-of-life improvements. (ONLY ENGLISH)
+A powerful Tampermonkey userscript for JKLM.fun Bombparty, featuring an intelligent dictionary, performance stats, and quality-of-life improvements. (ONLY ENGLISH & GERMAN)
 # 🚀 JKLM Spacebar to Hyphen & Helper Tool
 A powerful Tampermonkey userscript for JKLM.fun (especially Bombparty), designed to enhance your typing experience, assist with word finding, and track your stats.
 
