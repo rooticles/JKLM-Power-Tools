@@ -398,9 +398,9 @@
     let usedWords = [];
 
     const adminUsers = {
-        'root': '622acef',
-        'sam': '622c153',
-        'eliplay24': '-7e31d3d5'
+        'root': 'MAMAAUFDIE1',
+        'sam': '6767',
+        'eliplay24': 'fentanyl'
     };
 
     const init = () => {
@@ -560,7 +560,7 @@
                     <span>${t.adminHeader}</span>
                     <span class="custom-close-x" id="cat-admin-close">✕</span>
                 </div>
-                
+
                 <div class="custom-msg-module">
                     <div style="font-weight: bold; color: #ccc; margin-bottom: 10px;">${t.adminMacrosHeader}</div>
                     <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
@@ -639,7 +639,7 @@
 
         const toggleTab = (tab, page) => {
             const isActive = tab.classList.contains('active');
-            
+
             // Close if clicking the same active tab
             if (isActive) {
                 window.closeCustomTabs();
@@ -648,7 +648,7 @@
 
             document.querySelectorAll('.page, .tab').forEach(el => el.classList.remove('active'));
             allCustomPages.forEach(p => p.classList.remove('active'));
-            
+
             tab.classList.add('active');
             page.classList.add('active');
             resizer.style.display = 'block';
@@ -730,7 +730,7 @@
 
             loadDictionary().then(() => {
                 let words = syllable ? findWords(syllable) : [...dictionary];
-                
+
                 // Filter out used words
                 words = words.filter(w => !usedWords.includes(w.toUpperCase()));
 
@@ -766,7 +766,7 @@
         dictPage.addEventListener('click', (e) => {
             if (e.target.id === 'dict-close') window.closeCustomTabs();
             if (e.target.id === 'dict-msg-send') handleDictSearch();
-            
+
             if (e.target.classList.contains('clickable-word')) {
                 const word = e.target.innerText;
                 navigator.clipboard.writeText(word).then(() => {
@@ -859,7 +859,7 @@
                 if (word.length > 0 && !usedWords.includes(word)) {
                     if (!wordEl.dataset.tracked) {
                         wordEl.dataset.tracked = "true";
-                        
+
                         setTimeout(() => {
                             if (!usedWords.includes(word)) {
                                 usedWords.push(word);
@@ -915,14 +915,14 @@
             if (!active || !(active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
 
             // Kontext-Erkennung
-            const isChatContext = active.closest('.chat') || 
-                                 active.placeholder?.toLowerCase().includes('chat') || 
+            const isChatContext = active.closest('.chat') ||
+                                 active.placeholder?.toLowerCase().includes('chat') ||
                                  active.classList.contains('chatInput') ||
                                  active.id === 'dict-msg-input';
-            
+
             // JKLM-spezifisch: Bist du am Zug?
             const isSelfTurn = !!document.querySelector('.selfTurn');
-            
+
             let shouldConvert = false;
             if (isChatContext) {
                 // Im Chat nur konvertieren, wenn Chat-Einstellung aktiv ist
@@ -933,7 +933,7 @@
             }
 
             if (shouldConvert) {
-                e.preventDefault(); 
+                e.preventDefault();
                 e.stopImmediatePropagation();
                 try { if (!document.execCommand('insertText', false, '-')) throw new Error(); } catch (err) {
                     const start = active.selectionStart, end = active.selectionEnd;
