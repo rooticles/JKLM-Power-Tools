@@ -4,6 +4,8 @@
 // @version      1.0
 // @description  Cool JKLM Script
 // @author       Root
+// @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
+// @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @match        *://*.jklm.fun/*
 // @match        *://jklm.fun/*
 // @grant        GM_setValue
