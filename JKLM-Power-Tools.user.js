@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Cool JKLM Script
-// @author       Root
-// @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
-// @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
+// @version      2.2
+// @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
+// @author       Natalie
+// @updateURL    https://raw.githubusercontent.com/Natalie/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
+// @downloadURL  https://raw.githubusercontent.com/Natalie/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @match        *://*.jklm.fun/*
 // @match        *://jklm.fun/*
 // @grant        GM_setValue
@@ -39,7 +39,11 @@
     const getBgColor = () => GM_getValue('bgColor', '#1a1a1a');
     const setBgColor = (val) => GM_setValue('bgColor', val);
 
-    const getLanguage = () => 'English';
+    const getSmartSpacebarEnabled = () => GM_getValue('smartSpacebarEnabled', false);
+    const setSmartSpacebarEnabled = (val) => GM_setValue('smartSpacebarEnabled', val);
+
+    const getLanguage = () => GM_getValue('language', 'English');
+    const setLanguage = (val) => GM_setValue('language', val);
 
     const getGlassOpacity = () => GM_getValue('glassOpacity', 0.85);
     const setGlassOpacity = (val) => GM_setValue('glassOpacity', val);
@@ -96,9 +100,12 @@
         'English': {
             kbHeader: '🐱 Keyboard Settings',
             toggleLabel: 'Spacebar to hyphen in Game On/Off',
+            smartSpacebarLabel: 'Smart Spacebar (Press Space to type first word)',
             chatToggleLabel: 'Spacebar to Hyphen in Chat On/Off',
             onDesc: 'On = Pressing spacebar during a round will result in a hyphen instead',
             offDesc: 'Off = Pressing spacebar during a round will result in a space',
+            smartSpacebarDescOn: 'On = Spacebar types the first dictionary result in-game',
+            smartSpacebarDescOff: 'Off = Normal spacebar behavior',
             chatDesc: 'On = Spacebar in chat becomes a hyphen',
             chatOffDesc: 'Off = Spacebar in chat remains a spacebar',
             closeInfo: 'This script enhances your JKLM experience. <br><br>You can close this menu with the <strong>ESC</strong> key.',
@@ -154,7 +161,72 @@
             notePlaceholder: 'Write your note here...',
             saveNote: 'Save Note',
             noNotes: 'No notes yet. Start writing!',
-           'toggleKeyLabel': 'Panel Toggle Hotkey'
+            toggleKeyLabel: 'Panel Toggle Hotkey'
+        },
+        'German': {
+            kbHeader: '🐱 Tastatur-Einstellungen',
+            toggleLabel: 'Leertaste zu Bindestrich im Spiel',
+            smartSpacebarLabel: 'Smart Leertaste (Erstes Wort schreiben)',
+            chatToggleLabel: 'Leertaste zu Bindestrich im Chat',
+            onDesc: 'An = Leertaste während einer Runde wird zum Bindestrich',
+            offDesc: 'Aus = Leertaste während einer Runde bleibt ein Leerzeichen',
+            smartSpacebarDescOn: 'An = Leertaste schreibt das erste Wort aus dem Wörterbuch',
+            smartSpacebarDescOff: 'Aus = Normales Leertasten-Verhalten',
+            chatDesc: 'An = Leertaste im Chat wird zum Bindestrich',
+            chatOffDesc: 'Aus = Leertaste im Chat bleibt ein Leerzeichen',
+            closeInfo: 'Dieses Skript verbessert dein JKLM-Erlebnis. <br><br>Menü schließen mit <strong>ESC</strong>.',
+            dictHeader: '📚 Wörterbuch',
+            msgLabel: 'Nachricht schreiben',
+            msgPlaceholder: 'Deine Nachricht...',
+            msgSend: 'Senden',
+            dictResultPrefix: 'Es gibt {count} passende Wörter:',
+            dictNoResults: 'Keine Wörter gefunden.',
+            dictSearchModeLabel: 'Suchmodus:',
+            dictWordTypeLabel: 'Worttyp:',
+            dictSelectLabel: 'Wörterbuch wählen:',
+            historyHeader: '📜 Verlauf',
+            historyEmpty: 'Noch keine Wörter in dieser Runde.',
+            adminHeader: '✨ UI & Einstellungen',
+            adminVisualHeader: '🎨 UI & Design',
+            adminMiniModeLabel: 'Mini-Modus UI',
+            adminFontLabel: 'Schriftart:',
+            adminThemeLabel: 'Themenfarbe:',
+            adminBgLabel: 'Hintergrundfarbe:',
+            adminPresetsLabel: '🎨 Themen-Vorlagen:',
+            adminCppHeader: '🖼️ Eigenes Profilbild',
+            adminCppDesc: 'Datei-Uploader nutzen:',
+            adminCppBtn: 'Als Profilbild nutzen',
+            adminCppError: 'Datei zu groß (>10Kb).',
+            adminCppSuccess: 'Erfolgreich.',
+            adminSidebarWidthLabel: 'Sidebar Breite (Pixel):',
+            adminMinLabel: 'Minimale Breite: 180.',
+            adminLoginHeader: '🛡️ Admin Login',
+            adminUserPlaceholder: 'Benutzername...',
+            adminPassPlaceholder: 'Password...',
+            adminLoginBtn: 'Login',
+            adminLogoutBtn: 'Logout',
+            adminLoginError: 'Ungültige Daten!',
+            adminGlassLabel: 'Glas-Transparenz:',
+            adminRadiusLabel: 'Ecken-Radius:',
+            adminClockLabel: 'Digitale Uhr',
+            adminThemeAnimLabel: 'Themen-Farben animieren',
+            adminBgImageLabel: 'Hintergrundbild (URL):',
+            adminAnimLabel: 'Öffnen-Animation:',
+            dictCustomUpload: 'Eigenes Wörterbuch',
+            dictUploadDesc: 'Datei hochladen oder Wörter einfügen (eins pro Zeile):',
+            dictUploadBtn: 'Wortliste speichern',
+            dictPlaceholder: 'Wörter hier einfügen...',
+            dictFoundWords: '{count} Wörter gefunden:',
+            dictNoResultsShort: 'Keine Ergebnisse.',
+            german: 'Deutsch',
+            english: 'Englisch',
+            notesHeader: '📝 Notizen',
+            notesDesc: 'Halte deine Gedanken und Strategien fest',
+            addNote: 'Notiz hinzufügen',
+            notePlaceholder: 'Notiz schreiben...',
+            saveNote: 'Speichern',
+            noNotes: 'Noch keine Notizen.',
+            toggleKeyLabel: 'Panel Hotkey'
         }
     };
 
@@ -942,6 +1014,7 @@
             const updateKbContent = () => {
                 const isEnabled = getEnabled();
                 const isChatEnabled = getChatEnabled();
+                const isSmartEnabled = getSmartSpacebarEnabled();
                 const t = translations[getLanguage()] || translations['English'];
                 catTab.title = t.kbHeader;
 
@@ -955,6 +1028,14 @@
                                 <span style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">${isEnabled ? t.onDesc : t.offDesc}</span>
                             </div>
                             <div class="toggle-switch ${isEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
+                        </div>
+
+                        <div class="settings-row" id="toggle-smart-spacebar">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-weight: 700; font-size: 15px;">${t.smartSpacebarLabel}</span>
+                                <span style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">${isSmartEnabled ? t.smartSpacebarDescOn : t.smartSpacebarDescOff}</span>
+                            </div>
+                            <div class="toggle-switch ${isSmartEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
                         </div>
 
                         <div class="settings-row" id="toggle-chat-hyphen">
@@ -1168,6 +1249,16 @@
 
                     <div class="feature-section">
                         <div class="feature-header"><span>📱</span> Interface</div>
+                        <div class="settings-row" id="toggle-language">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-weight: 700;">Language / Sprache</span>
+                                <span style="color: var(--text-muted); font-size: 12px;">Currently: ${getLanguage()}</span>
+                            </div>
+                            <select id="admin-language-select" class="custom-dict-select" style="width: 120px; height: 36px; padding: 4px 10px; margin-top: 0; font-size: 12px; font-weight: 800;">
+                                <option value="English" ${getLanguage() === 'English' ? 'selected' : ''}>English</option>
+                                <option value="German" ${getLanguage() === 'German' ? 'selected' : ''}>Deutsch</option>
+                            </select>
+                        </div>
                         <div class="settings-row" id="toggle-clock">
                             <span style="font-weight: 700;">Show System Clock</span>
                             <div class="toggle-switch ${clockEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
@@ -1282,6 +1373,7 @@
                 if (!row) return;
 
                 if (row.id === 'toggle-space-hyphen') setEnabled(!getEnabled());
+                if (row.id === 'toggle-smart-spacebar') setSmartSpacebarEnabled(!getSmartSpacebarEnabled());
                 if (row.id === 'toggle-chat-hyphen') setChatEnabled(!getChatEnabled());
                 updateKbContent();
             });
@@ -1542,6 +1634,12 @@
             });
 
             adminPage.addEventListener('change', (e) => {
+                if (e.target.id === 'admin-language-select') {
+                    setLanguage(e.target.value);
+                    updateKbContent();
+                    updateDictContent();
+                    updateAdminContent();
+                }
                 if (e.target.id === 'admin-animation-type') {
                     setAnimationType(e.target.value);
                     updateThemeStyles();
@@ -1645,7 +1743,8 @@
 
         const enabled = getEnabled();
         const chatEnabled = getChatEnabled();
-        if (!enabled && !chatEnabled) return;
+        const smartEnabled = getSmartSpacebarEnabled();
+        if (!enabled && !chatEnabled && !smartEnabled) return;
 
         if (e.code === 'Space' || e.key === ' ') {
             const active = document.activeElement;
@@ -1655,6 +1754,21 @@
                 active.classList.contains('chatInput') ||
                 active.id === 'dict-msg-input';
             const isSelfTurn = !!document.querySelector('.selfTurn');
+
+            if (!isChatContext && smartEnabled && isSelfTurn) {
+                const firstWord = document.querySelector('.clickable-word')?.getAttribute('data-word');
+                if (firstWord) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    active.value = '';
+                    try { if (!document.execCommand('insertText', false, firstWord)) throw new Error(); } catch (err) {
+                        active.value = firstWord;
+                        active.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    return;
+                }
+            }
+
             let shouldConvert = false;
             if (isChatContext) {
                 if (chatEnabled) shouldConvert = true;
