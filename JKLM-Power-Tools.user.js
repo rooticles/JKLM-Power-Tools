@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      2.2
+// @version      2.4
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
-// @author       root
+// @author       Root
 // @updateURL    https://raw.githubusercontent.com/Natalie/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/Natalie/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @match        *://*.jklm.fun/*
@@ -38,9 +38,6 @@
     const setThemeColor = (val) => GM_setValue('themeColor', val);
     const getBgColor = () => GM_getValue('bgColor', '#1a1a1a');
     const setBgColor = (val) => GM_setValue('bgColor', val);
-
-    const getSmartSpacebarEnabled = () => GM_getValue('smartSpacebarEnabled', false);
-    const setSmartSpacebarEnabled = (val) => GM_setValue('smartSpacebarEnabled', val);
 
     const getLanguage = () => GM_getValue('language', 'English');
     const setLanguage = (val) => GM_setValue('language', val);
@@ -100,12 +97,9 @@
         'English': {
             kbHeader: '🐱 Keyboard Settings',
             toggleLabel: 'Spacebar to hyphen in Game On/Off',
-            smartSpacebarLabel: 'Smart Spacebar (Press Space to type first word)',
             chatToggleLabel: 'Spacebar to Hyphen in Chat On/Off',
             onDesc: 'On = Pressing spacebar during a round will result in a hyphen instead',
             offDesc: 'Off = Pressing spacebar during a round will result in a space',
-            smartSpacebarDescOn: 'On = Spacebar types the first dictionary result in-game',
-            smartSpacebarDescOff: 'Off = Normal spacebar behavior',
             chatDesc: 'On = Spacebar in chat becomes a hyphen',
             chatOffDesc: 'Off = Spacebar in chat remains a spacebar',
             closeInfo: 'This script enhances your JKLM experience. <br><br>You can close this menu with the <strong>ESC</strong> key.',
@@ -166,12 +160,9 @@
         'German': {
             kbHeader: '🐱 Tastatur-Einstellungen',
             toggleLabel: 'Leertaste zu Bindestrich im Spiel',
-            smartSpacebarLabel: 'Smart Leertaste (Erstes Wort schreiben)',
             chatToggleLabel: 'Leertaste zu Bindestrich im Chat',
             onDesc: 'An = Leertaste während einer Runde wird zum Bindestrich',
             offDesc: 'Aus = Leertaste während einer Runde bleibt ein Leerzeichen',
-            smartSpacebarDescOn: 'An = Leertaste schreibt das erste Wort aus dem Wörterbuch',
-            smartSpacebarDescOff: 'Aus = Normales Leertasten-Verhalten',
             chatDesc: 'An = Leertaste im Chat wird zum Bindestrich',
             chatOffDesc: 'Aus = Leertaste im Chat bleibt ein Leerzeichen',
             closeInfo: 'Dieses Skript verbessert dein JKLM-Erlebnis. <br><br>Menü schließen mit <strong>ESC</strong>.',
@@ -1014,7 +1005,6 @@
             const updateKbContent = () => {
                 const isEnabled = getEnabled();
                 const isChatEnabled = getChatEnabled();
-                const isSmartEnabled = getSmartSpacebarEnabled();
                 const t = translations[getLanguage()] || translations['English'];
                 catTab.title = t.kbHeader;
 
@@ -1028,14 +1018,6 @@
                                 <span style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">${isEnabled ? t.onDesc : t.offDesc}</span>
                             </div>
                             <div class="toggle-switch ${isEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
-                        </div>
-
-                        <div class="settings-row" id="toggle-smart-spacebar">
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span style="font-weight: 700; font-size: 15px;">${t.smartSpacebarLabel}</span>
-                                <span style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">${isSmartEnabled ? t.smartSpacebarDescOn : t.smartSpacebarDescOff}</span>
-                            </div>
-                            <div class="toggle-switch ${isSmartEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
                         </div>
 
                         <div class="settings-row" id="toggle-chat-hyphen">
@@ -1373,7 +1355,6 @@
                 if (!row) return;
 
                 if (row.id === 'toggle-space-hyphen') setEnabled(!getEnabled());
-                if (row.id === 'toggle-smart-spacebar') setSmartSpacebarEnabled(!getSmartSpacebarEnabled());
                 if (row.id === 'toggle-chat-hyphen') setChatEnabled(!getChatEnabled());
                 updateKbContent();
             });
@@ -1743,8 +1724,7 @@
 
         const enabled = getEnabled();
         const chatEnabled = getChatEnabled();
-        const smartEnabled = getSmartSpacebarEnabled();
-        if (!enabled && !chatEnabled && !smartEnabled) return;
+        if (!enabled && !chatEnabled) return;
 
         if (e.code === 'Space' || e.key === ' ') {
             const active = document.activeElement;
@@ -1754,21 +1734,6 @@
                 active.classList.contains('chatInput') ||
                 active.id === 'dict-msg-input';
             const isSelfTurn = !!document.querySelector('.selfTurn');
-
-            if (!isChatContext && smartEnabled && isSelfTurn) {
-                const firstWord = document.querySelector('.clickable-word')?.getAttribute('data-word');
-                if (firstWord) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    active.value = '';
-                    try { if (!document.execCommand('insertText', false, firstWord)) throw new Error(); } catch (err) {
-                        active.value = firstWord;
-                        active.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
-                    return;
-                }
-            }
-
             let shouldConvert = false;
             if (isChatContext) {
                 if (chatEnabled) shouldConvert = true;
