@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      2.2
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
-// @author       Natalie
+// @author       root
 // @updateURL    https://raw.githubusercontent.com/Natalie/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/Natalie/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @match        *://*.jklm.fun/*
