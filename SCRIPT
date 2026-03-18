@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      1.0.9
+// @version      1.0
 // @description  Cool JKLM Script
 // @author       Root
 // @match        *://*.jklm.fun/*
@@ -258,9 +258,9 @@
         /* Scrollbar */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+        ::-webkit-scrollbar-thumb { 
+            background: rgba(255, 255, 255, 0.05); 
+            border-radius: 10px; 
         }
         ::-webkit-scrollbar-thumb:hover { background: var(--theme-color); }
 
@@ -289,6 +289,18 @@
             width: calc(100% + 40px);
             box-sizing: border-box;
             backdrop-filter: blur(20px);
+            position: relative;
+        }
+
+        .panel-clock-inner {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--theme-color);
+            letter-spacing: 1px;
+            opacity: 0.6;
         }
 
         .panel-title {
@@ -888,10 +900,9 @@
             const updateClock = () => {
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                const timeShort = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 if (clock) clock.innerText = timeStr;
                 const pClock = document.getElementById('panel-clock');
-                if (pClock) pClock.innerText = timeShort;
+                if (pClock) pClock.innerText = timeStr;
             };
             setInterval(updateClock, 1000);
             updateClock();
@@ -908,6 +919,8 @@
             const getPanelNav = (activeTabId, title) => {
                 const t = translations[getLanguage()] || translations['English'];
                 const clockEnabled = getClockEnabled();
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 return `
                 <div class="panel-nav">
                     <div class="panel-title">
@@ -918,7 +931,7 @@
                             <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn" style="font-size: 16px;">✨</div>
                         </div>
                     </div>
-                    ${clockEnabled ? `<div class="custom-clock" id="panel-clock">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>` : ''}
+                    ${clockEnabled ? `<div class="custom-clock" id="panel-clock">${timeStr}</div>` : ''}
                     <div class="custom-close-x panel-close">✕</div>
                 </div>
                 `;
@@ -1353,7 +1366,7 @@
                                 const word = e.target.getAttribute('data-word');
                                 tooltip.style.display = 'block';
                                 tooltip.innerHTML = `<strong>${word}</strong><br><span style="opacity: 0.7;">Fetching definition...</span>`;
-
+                                
                                 try {
                                     const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
                                     const data = await response.json();
@@ -1455,7 +1468,7 @@
 
                 if (e.target.classList.contains('clickable-word')) {
                     const word = e.target.innerText;
-
+                    
                     navigator.clipboard.writeText(word).then(() => {
                         const originalColor = e.target.style.color;
                         e.target.style.color = 'var(--theme-color)';
