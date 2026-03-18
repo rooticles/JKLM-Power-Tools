@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      2.4
+// @version      2.5
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/Natalie/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
