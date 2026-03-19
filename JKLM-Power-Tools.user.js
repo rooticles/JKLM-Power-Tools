@@ -4,8 +4,8 @@
 // @version      2.5
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
-// @updateURL    https://raw.githubusercontent.com/Natalie/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
-// @downloadURL  https://raw.githubusercontent.com/Natalie/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
+// @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
+// @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @match        *://*.jklm.fun/*
 // @match        *://jklm.fun/*
 // @grant        GM_setValue
