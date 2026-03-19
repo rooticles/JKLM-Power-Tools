@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      4.5
+// @version      4.6
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -22,19 +22,34 @@
     // --- Global Patch for JKLM & Overlay Bugs ---
     const patchGlobalBugs = () => {
         try {
+            const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+            
             // Fix JKLM 'chatUnreadHighlightCount' ReferenceError
-            if (typeof unsafeWindow !== 'undefined') {
-                if (typeof unsafeWindow.chatUnreadHighlightCount === 'undefined') {
-                    unsafeWindow.chatUnreadHighlightCount = 0;
-                }
-            } else if (typeof window.chatUnreadHighlightCount === 'undefined') {
-                window.chatUnreadHighlightCount = 0;
+            if (typeof win.chatUnreadHighlightCount === 'undefined') {
+                win.chatUnreadHighlightCount = 0;
             }
-        } catch (e) {}
+
+            // --- Advanced Stability Patch for external Overlays ---
+            // Prevent "Cannot read properties of undefined (reading 'addEventListener')"
+            // This often happens when scripts expect objects like 'milestones' or 'game' prematurely.
+            if (!win.milestones) win.milestones = { addEventListener: () => {}, removeEventListener: () => {} };
+            
+            // Ensure common JKLM objects have dummy listeners if they are missing
+            const ensureSafe = (objName) => {
+                if (win[objName] && typeof win[objName].addEventListener === 'undefined') {
+                    win[objName].addEventListener = () => {};
+                    win[objName].removeEventListener = () => {};
+                }
+            };
+            ['game', 'socket', 'room'].forEach(ensureSafe);
+
+        } catch (e) {
+            console.warn('[JKLM Power Tools] Patching failed:', e);
+        }
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '4.5';
+    const SCRIPT_VERSION = '4.6';
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
