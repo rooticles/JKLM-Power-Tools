@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      4.4
+// @version      4.5
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -34,7 +34,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '4.4';
+    const SCRIPT_VERSION = '4.5';
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
@@ -1392,23 +1392,35 @@
 
                         // Re-attach tooltip listeners
                         const tooltip = document.getElementById('word-definition-tooltip');
+                        const definitionCache = new Map();
+
                         document.querySelectorAll('.clickable-word').forEach(el => {
                             el.addEventListener('mouseenter', async (e) => {
-                                const word = e.target.getAttribute('data-word');
+                                const word = e.target.getAttribute('data-word').toLowerCase();
                                 tooltip.style.display = 'block';
-                                tooltip.innerHTML = `<strong>${word}</strong><br><span style="opacity: 0.7;">Fetching definition...</span>`;
+                                tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br><span style="opacity: 0.7;">Fetching definition...</span>`;
                                 
+                                if (definitionCache.has(word)) {
+                                    tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>${definitionCache.get(word)}`;
+                                    return;
+                                }
+
                                 try {
-                                    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+                                    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                                    if (!response.ok) throw new Error('Word not found');
+                                    
                                     const data = await response.json();
                                     if (data && data[0] && data[0].meanings[0]) {
                                         const def = data[0].meanings[0].definitions[0].definition;
-                                        tooltip.innerHTML = `<strong>${word}</strong><br>${def}`;
+                                        definitionCache.set(word, def);
+                                        tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>${def}`;
                                     } else {
-                                        tooltip.innerHTML = `<strong>${word}</strong><br>No definition found.`;
+                                        definitionCache.set(word, 'No definition found.');
+                                        tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>No definition found.`;
                                     }
                                 } catch (err) {
-                                    tooltip.innerHTML = `<strong>${word}</strong><br>Could not load definition.`;
+                                    definitionCache.set(word, 'No definition found.');
+                                    tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>No definition found.`;
                                 }
                             });
                             el.addEventListener('mousemove', (e) => {
