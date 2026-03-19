@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      8.2
-// @description  Advanced JKLM Power Tools - Ultimate Edition (Transparent v8.2)
+// @version      8.3
+// @description  Advanced JKLM Power Tools - Ultimate Edition (High Readability v8.3)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -293,7 +293,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '8.2';
+    const SCRIPT_VERSION = '8.3';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -674,6 +674,7 @@
             transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             border-radius: var(--border-radius);
             will-change: transform, opacity;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); /* Text shadow for high readability */
         }
 
         .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left {
@@ -727,7 +728,7 @@
 
         /* Frosted Glass Cards */
         .feature-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(0, 0, 0, 0.45) !important; /* Darker for high readability */
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: var(--border-radius);
             padding: 24px;
@@ -735,7 +736,7 @@
             transition: var(--transition);
             position: relative;
             overflow: hidden;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(12px); /* Stronger blur for text isolation */
         }
 
         .feature-card:hover {
@@ -782,9 +783,9 @@
         /* Glass Inputs */
         .modern-input {
             width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-color);
+            background: rgba(0, 0, 0, 0.6) !important; /* Darker for readability */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff !important;
             padding: 14px 20px;
             border-radius: var(--border-radius);
             font-size: 15px;
@@ -793,6 +794,7 @@
             outline: none;
             box-sizing: border-box;
             backdrop-filter: blur(4px);
+            text-shadow: none; /* No shadow inside inputs for crisp typing */
         }
 
         .modern-input option {
@@ -886,15 +888,16 @@
             display: inline-block;
             padding: 8px 16px;
             margin: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.6) !important; /* Darker background */
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 10px;
             cursor: pointer;
             transition: var(--transition);
-            font-weight: 600;
+            font-weight: 700; /* Bolder */
             font-size: 14px;
-            color: var(--text-color);
+            color: #ffffff !important;
             backdrop-filter: blur(4px);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
 
         .clickable-word:hover {
@@ -917,7 +920,7 @@
         }
 
         .note-item {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(0, 0, 0, 0.5) !important; /* Darker for readability */
             border: 1px solid var(--glass-border);
             border-radius: var(--border-radius-md);
             padding: 24px;
@@ -1081,9 +1084,9 @@
 
         document.documentElement.style.setProperty('--theme-color', themeColor);
         document.documentElement.style.setProperty('--theme-color-rgb', themeRgb);
-        document.documentElement.style.setProperty('--bg-color', 'transparent');
+        document.documentElement.style.setProperty('--bg-color', 'rgba(0,0,0,0.15)');
         document.documentElement.style.setProperty('--bg-rgb', '0,0,0');
-        document.documentElement.style.setProperty('--glass-bg', 'transparent');
+        document.documentElement.style.setProperty('--glass-bg', 'rgba(0,0,0,0.15)');
         document.documentElement.style.setProperty('--border-radius', `${borderRadius}px`);
         document.documentElement.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${themeColor}, #FF69B4)`);
         document.documentElement.style.setProperty('--glow-effect', `0 0 20px rgba(${themeRgb}, 0.4)`);
