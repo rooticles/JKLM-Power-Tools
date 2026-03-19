@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      8.6
-// @description  Advanced JKLM Power Tools - Ultimate Edition (Guardian Stealth v8.6)
+// @version      8.7
+// @description  Advanced JKLM Power Tools - Ultimate Edition (100% English v8.7)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -1263,7 +1263,7 @@
                     <div class="feature-card" style="background: rgba(var(--theme-color-rgb), 0.05); border-color: rgba(var(--theme-color-rgb), 0.2);">
                         <div class="feature-header" style="color: var(--theme-color);">
                             <div class="feature-icon" style="background: rgba(var(--theme-color-rgb), 0.15); box-shadow: var(--glow-effect);">💡</div>
-                            <span>Tipp</span>
+                            <span>Tip</span>
                         </div>
                         <div style="color: var(--text-color); opacity: 0.8; font-size: 14px; line-height: 1.7;">
                             ${t.closeInfo}
@@ -1331,26 +1331,26 @@
 
                             <div style="display: flex; gap: 12px;">
                                 <select class="modern-input" id="dict-search-mode" style="flex: 1; padding: 14px 20px; font-weight: 700; appearance: none; cursor: pointer;">
-                                    <option value="Contains" ${searchMode === 'Contains' ? 'selected' : ''}>Enthält</option>
-                                    <option value="StartsWith" ${searchMode === 'StartsWith' ? 'selected' : ''}>Beginnt mit</option>
-                                    <option value="EndsWith" ${searchMode === 'EndsWith' ? 'selected' : ''}>Endet mit</option>
-                                    <option value="SyllableChain" ${searchMode === 'SyllableChain' ? 'selected' : ''}>Silben-Kette</option>
+                                    <option value="Contains" ${searchMode === 'Contains' ? 'selected' : ''}>Contains</option>
+                                    <option value="StartsWith" ${searchMode === 'StartsWith' ? 'selected' : ''}>Starts With</option>
+                                    <option value="EndsWith" ${searchMode === 'EndsWith' ? 'selected' : ''}>Ends With</option>
+                                    <option value="SyllableChain" ${searchMode === 'SyllableChain' ? 'selected' : ''}>Syllable Chain</option>
                                 </select>
                                 <select class="modern-input" id="dict-word-type" style="flex: 1; padding: 14px 20px; font-weight: 700; appearance: none; cursor: pointer;">
-                                    <option value="All" ${wordType === 'All' ? 'selected' : ''}>Alle Wörter</option>
-                                    <option value="Hyphen" ${wordType === 'Hyphen' ? 'selected' : ''}>Nur Bindestriche</option>
-                                    <option value="Long" ${wordType === 'Long' ? 'selected' : ''}>Lange Wörter</option>
+                                    <option value="All" ${wordType === 'All' ? 'selected' : ''}>All Words</option>
+                                    <option value="Hyphen" ${wordType === 'Hyphen' ? 'selected' : ''}>Hyphen Only</option>
+                                    <option value="Long" ${wordType === 'Long' ? 'selected' : ''}>Long Words</option>
                                     <option value="Casual" ${wordType === 'Casual' ? 'selected' : ''}>Casual</option>
                                     <option value="Shorts" ${wordType === 'Shorts' ? 'selected' : ''}>Shorts</option>
-                                    <option value="Phobia" ${wordType === 'Phobia' ? 'selected' : ''}>Phobien</option>
-                                    <option value="Apostrophes" ${wordType === 'Apostrophes' ? 'selected' : ''}>Apostrophe</option>
+                                    <option value="Phobia" ${wordType === 'Phobia' ? 'selected' : ''}>Phobia</option>
+                                    <option value="Apostrophes" ${wordType === 'Apostrophes' ? 'selected' : ''}>Apostrophes</option>
                                 </select>
                             </div>
 
                             <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
                                 <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
-                                    <span>Wortlänge</span>
-                                    <span style="color: var(--theme-color);"><span id="val-dict-min-len">${minLen}</span> - <span id="val-dict-max-len">${maxLen}</span> Zeichen</span>
+                                    <span>Word Length</span>
+                                    <span style="color: var(--theme-color);"><span id="val-dict-min-len">${minLen}</span> - <span id="val-dict-max-len">${maxLen}</span> chars</span>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 16px;">
                                     <input type="range" id="dict-min-len" min="2" max="30" value="${minLen}" style="flex: 1; accent-color: var(--theme-color); cursor: pointer;">
@@ -1383,7 +1383,7 @@
                         <input type="file" id="dict-file-upload" class="modern-input" accept=".txt" style="margin-bottom: 16px; border-style: solid;">
                         <textarea id="dict-manual-input" class="modern-input" style="min-height: 150px; font-size: 14px; margin-bottom: 16px; font-family: var(--font-mono); line-height: 1.6;" placeholder="${t.dictPlaceholder}">${(getCustomDictionary() || []).join('\n')}</textarea>
                         <button class="modern-button" id="dict-file-confirm" style="width: 100%;">
-                            <span>�</span> ${t.dictUploadBtn}
+                            <span>💾</span> ${t.dictUploadBtn}
                         </button>
                     </div>
 
