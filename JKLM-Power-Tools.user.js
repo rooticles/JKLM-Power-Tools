@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      8.9
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v8.9)
+// @version      9.0
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.0)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -287,7 +287,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '8.9';
+    const SCRIPT_VERSION = '9.0';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -989,6 +989,45 @@
             to { transform: translateX(0) scale(1); opacity: 1; filter: blur(0); }
         }
 
+        /* Lobby Filters */
+        .lobby-filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px auto;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            max-width: 900px;
+            border: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+        }
+        .lobby-filter-btn {
+            padding: 10px 20px;
+            background: #26aa36;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 12px rgba(38, 170, 54, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .lobby-filter-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(38, 170, 54, 0.4);
+            filter: brightness(1.1);
+        }
+        .lobby-filter-btn.active {
+            background: #fff;
+            color: #26aa36;
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
         /* Animated Themes */
         .animated-mesh {
             background: linear-gradient(45deg, #1B1F3B, #2a1f4d, #1b3b3b, #1B1F3B);
@@ -1054,6 +1093,60 @@
         });
     };
     updateThemeStyles();
+
+    let currentLobbyFilter = 'All';
+    const setupLobbyFilters = () => {
+        const playerCountEl = document.querySelector('.home .playerCount');
+        if (!playerCountEl || document.getElementById('lobby-filter-container')) return;
+
+        const container = document.createElement('div');
+        container.id = 'lobby-filter-container';
+        container.className = 'lobby-filter-container';
+
+        const filters = [
+            'All', 'English', 'French', 'Spanish', 'Brazilian Portuguese', 
+            'German', 'Breton', 'Nahuatl', 'Basque', 'Bombparty', 'Popsauce'
+        ];
+
+        filters.forEach(filter => {
+            const btn = document.createElement('button');
+            btn.className = 'lobby-filter-btn';
+            if (filter === currentLobbyFilter) btn.classList.add('active');
+            btn.innerText = filter;
+            btn.onclick = () => {
+                currentLobbyFilter = filter;
+                document.querySelectorAll('.lobby-filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                filterLobbies();
+            };
+            container.appendChild(btn);
+        });
+
+        playerCountEl.after(container);
+    };
+
+    const filterLobbies = () => {
+        const rooms = document.querySelectorAll('.lobbies .room');
+        if (rooms.length === 0) return;
+
+        rooms.forEach(room => {
+            if (currentLobbyFilter === 'All') {
+                room.style.display = '';
+                return;
+            }
+
+            const text = room.innerText.toLowerCase();
+            const filterLower = currentLobbyFilter.toLowerCase();
+            
+            // Special handling for Bombparty/Popsauce to avoid partial matches if needed, 
+            // but innerText should contain the full game name.
+            if (text.includes(filterLower)) {
+                room.style.display = '';
+            } else {
+                room.style.display = 'none';
+            }
+        });
+    };
 
     let lastDetectedSyllable = '';
     let isGameRunning = false;
@@ -1804,9 +1897,13 @@
                     }
                 }
 
+                // Update lobby filters on mutation
+                setupLobbyFilters();
+                filterLobbies();
+
                 const isSelfTurn = !!document.querySelector('.selfTurn');
                 window.lastTurnState = isSelfTurn;
-                
+
                 const gameVisible = !!document.querySelector('.canvasArea') || !!document.querySelector('.syllable');
                 if (gameVisible && !isGameRunning) {
                     isGameRunning = true;
