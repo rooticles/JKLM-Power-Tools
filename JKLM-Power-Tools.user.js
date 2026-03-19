@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      5.4
-// @description  Advanced JKLM Power Tools - Ultra Smooth Edition with German Dictionary Support
+// @version      5.5
+// @description  Advanced JKLM Power Tools - Ultra Smooth Edition with German-in-English Support
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -70,7 +70,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '5.4';
+    const SCRIPT_VERSION = '5.5';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -230,10 +230,28 @@
     let dictionaryLoaded = false;
     let currentDictLang = '';
 
+    let germanReference = new Set();
+    let germanRefLoaded = false;
+
     // --- Local Music Player ---
     const dictionaryUrls = {
         'English': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/121bf1a601ed822553c2e68c38a4cdcd7737d352/words.txt',
         'German': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/master/german.txt'
+    };
+
+    const loadGermanReference = async () => {
+        if (germanRefLoaded) return;
+        try {
+            const response = await fetch(dictionaryUrls['German']);
+            if (!response.ok) throw new Error('Could not load German reference');
+            const text = await response.text();
+            const words = text.split('\n').map(w => w.trim().toLowerCase()).filter(w => w.length > 0);
+            germanReference = new Set(words);
+            germanRefLoaded = true;
+            console.log(`[JKLM Power Tools] German reference loaded: ${germanReference.size} words.`);
+        } catch (err) {
+            console.error('German reference load error:', err);
+        }
     };
 
     const loadDictionary = async (force = false) => {
@@ -1339,13 +1357,10 @@
                 }
 
                 const ensureDictionary = async () => {
-                    if (wordType === 'German' && getDictLanguage() !== 'German') {
-                        setDictLanguage('German');
-                        await loadDictionary(true);
-                        updateDictContent(); // Re-render to update the dropdowns
-                    } else {
-                        await loadDictionary();
+                    if (wordType === 'German') {
+                        await loadGermanReference();
                     }
+                    await loadDictionary();
                 };
 
                 ensureDictionary().then(() => {
@@ -1369,7 +1384,9 @@
                         }
                     }
 
-                    if (wordType === 'Hyphen') {
+                    if (wordType === 'German') {
+                        words = words.filter(w => germanReference.has(w.toLowerCase()));
+                    } else if (wordType === 'Hyphen') {
                         words = words.filter(w => w.includes('-'));
                     } else if (wordType === 'Long') {
                         words = words.filter(w => w.length >= 20);
