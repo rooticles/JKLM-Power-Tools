@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      7.1
-// @description  Advanced JKLM Power Tools - Guardian Edition with Golden-Glow Recovery (v7.1)
+// @version      8.0
+// @description  Advanced JKLM Power Tools - Ultimate Edition (Unbreakable Stability v8.0)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -24,6 +24,19 @@
         try {
             const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
             
+            // --- Global Error Suppressor (Unbreakable Mode) ---
+            win.addEventListener('error', (event) => {
+                const msg = event.message || '';
+                const ignoredErrors = [
+                    'addEventListener', 'milestones', 'socket', 'undefined', 'null',
+                    'PartyPlus', 'overlay.js', 'falcon.jklm.fun'
+                ];
+                if (ignoredErrors.some(err => msg.includes(err))) {
+                    event.stopImmediatePropagation();
+                    event.preventDefault();
+                }
+            }, true);
+
             // Fix JKLM 'chatUnreadHighlightCount' ReferenceError
             if (typeof win.chatUnreadHighlightCount === 'undefined') {
                 win.chatUnreadHighlightCount = 0;
@@ -41,7 +54,7 @@
                 });
 
                 const triggerResume = () => {
-                    const audioCtxs = [win.audioContext, win.AudioContext, win.webkitAudioContext];
+                    const audioCtxs = [win.audioContext, win.AudioContext, win.webkitAudioContext, win.room?.audioContext];
                     audioCtxs.forEach(ctx => {
                         if (ctx && typeof ctx === 'object' && ctx.state === 'suspended') {
                             ctx.resume().catch(() => {});
@@ -56,12 +69,12 @@
             };
             resumeAudio();
 
-            // --- Network Resilience Patch (Guardian Edition v7.1) ---
+            // --- Network Resilience Patch (Guardian Edition v8.0) ---
             const injectFallbackCSS = () => {
                 if (document.getElementById('jklm-power-tools-resilience')) return;
 
                 const fallbackStyles = `
-                    /* Guardian Edition: Comprehensive UI Fallback (v7.1) */
+                    /* Ultimate Edition: Comprehensive UI Fallback (v8.0) */
                     body.resilience-active:not(:has(link[href*="base.css"])) {
                         background: #1B1F3B !important;
                         color: #eee !important;
@@ -198,7 +211,7 @@
             // Initial check with delay
             setTimeout(checkStyles, 3000);
 
-            // --- Ultra Stability Patch (v4 - Nuclear Edition) ---
+            // --- Ultra Stability Patch (v5 - Ultimate Edition) ---
             // This is the absolute final fix for "Cannot read properties of undefined (reading 'addEventListener')"
             
             const createRecursiveProxy = (name = 'root') => {
@@ -209,7 +222,11 @@
                         if (prop === 'toJSON') return () => ({});
                         if (typeof prop === 'symbol') return undefined;
                         
-                        const methods = ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'dispatchEvent', 'setMilestone'];
+                        const methods = [
+                            'addEventListener', 'removeEventListener', 'on', 'off', 'emit', 
+                            'dispatchEvent', 'setMilestone', 'trigger', 'dispatch', 'join', 
+                            'leave', 'send', 'connect', 'disconnect'
+                        ];
                         if (methods.includes(prop)) return noop;
                         
                         return createRecursiveProxy(`${name}.${prop.toString()}`);
@@ -222,14 +239,10 @@
             };
 
             // The "Nuclear Option": Ensure 'milestones' property exists on EVERY object in the JS environment
-            // This prevents 'this.milestones' from ever being undefined in any context.
             if (win.Object && typeof win.Object.prototype.milestones === 'undefined') {
                 let _globalMilestones = win.milestones || createRecursiveProxy('milestones');
                 Object.defineProperty(win.Object.prototype, 'milestones', {
-                    get: function() { 
-                        // If the object itself has a milestones property, return it, otherwise return global
-                        return _globalMilestones; 
-                    },
+                    get: function() { return _globalMilestones; },
                     set: function(val) { 
                         if (this === win) _globalMilestones = val;
                         else this._milestones = val; 
@@ -255,21 +268,20 @@
             };
 
             // Patch global objects
-            ['milestones', 'game', 'socket', 'room', 'client'].forEach(safeProxy);
+            ['milestones', 'game', 'socket', 'room', 'client', 'roomProxy'].forEach(safeProxy);
 
             // Continously monitor for Socket/Emitter definitions to patch prototypes
             const patchPrototypes = () => {
-                ['Socket', 'Emitter', 'EventEmitter'].forEach(objName => {
+                ['Socket', 'Emitter', 'EventEmitter', 'Room', 'Client'].forEach(objName => {
                     const Proto = win[objName] && win[objName].prototype;
                     if (Proto) {
-                        if (typeof Proto.addEventListener === 'undefined') Proto.addEventListener = () => {};
-                        if (typeof Proto.setMilestone === 'undefined') Proto.setMilestone = () => {};
-                        if (typeof Proto.on === 'undefined') Proto.on = () => {};
+                        ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'setMilestone', 'trigger'].forEach(m => {
+                            if (typeof Proto[m] === 'undefined') Proto[m] = () => {};
+                        });
                     }
                 });
             };
             
-            // Run multiple times to catch late-loading scripts
             patchPrototypes();
             setTimeout(patchPrototypes, 500);
             setTimeout(patchPrototypes, 2000);
@@ -281,7 +293,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '7.1';
+    const SCRIPT_VERSION = '8.0';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
