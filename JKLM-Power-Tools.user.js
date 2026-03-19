@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      7.0
-// @description  Advanced JKLM Power Tools - Guardian Edition with Auto-Recovery (v7.0)
+// @version      7.1
+// @description  Advanced JKLM Power Tools - Guardian Edition with Golden-Glow Recovery (v7.1)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -56,53 +56,81 @@
             };
             resumeAudio();
 
-            // --- Network Resilience Patch (Guardian Edition v7.0) ---
+            // --- Network Resilience Patch (Guardian Edition v7.1) ---
             const injectFallbackCSS = () => {
                 if (document.getElementById('jklm-power-tools-resilience')) return;
 
                 const fallbackStyles = `
-                    /* Guardian Edition: Comprehensive UI Fallback (v7.0) */
+                    /* Guardian Edition: Comprehensive UI Fallback (v7.1) */
                     body.resilience-active:not(:has(link[href*="base.css"])) {
                         background: #1B1F3B !important;
                         color: #eee !important;
                         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
                         margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column;
                     }
+                    /* Golden Glow Support in Fallback */
+                    body.resilience-active.golden-glow-theme:not(:has(link[href*="base.css"])) {
+                        background: radial-gradient(circle at center, #2a2005 0%, #1a1400 100%) !important;
+                    }
+                    
                     .page.resilience-active:not(:has(link[href*="bombparty.css"])) {
                         display: flex; flex-direction: column; flex: 1; height: 100vh;
                         background: radial-gradient(circle at center, #2a2d45 0%, #1b1f3b 100%) !important;
                         position: relative; overflow: hidden;
                     }
+                    .golden-glow-theme .page.resilience-active:not(:has(link[href*="bombparty.css"])) {
+                        background: radial-gradient(circle at center, #3d3000 0%, #1a1400 100%) !important;
+                    }
+
                     .top.resilience-active:not(:has(link[href*="bombparty.css"])) {
                         height: 60px; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(255,255,255,0.1);
                     }
+                    .golden-glow-theme .top.resilience-active { border-bottom-color: #ffd700 !important; }
+
                     .middle.resilience-active:not(:has(link[href*="bombparty.css"])) {
                         flex: 1; display: flex; flex-direction: column; position: relative; align-items: center; justify-content: center;
                     }
                     .bottom.resilience-active:not(:has(link[href*="bombparty.css"])) {
                         height: 100px; background: rgba(0,0,0,0.5); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;
                     }
+                    .golden-glow-theme .bottom.resilience-active { border-top-color: #ffd700 !important; }
+
                     .chat.resilience-active:not(:has(link[href*="base.css"])) {
                         position: fixed; right: 0; bottom: 100px; top: 60px; width: 320px;
                         background: rgba(0,0,0,0.7) !important; border-left: 1px solid rgba(255,255,255,0.1) !important;
                         display: flex; flex-direction: column; backdrop-filter: blur(15px); z-index: 1000;
                     }
+                    .golden-glow-theme .chat.resilience-active { border-left-color: #ffd700 !important; background: rgba(20,15,0,0.8) !important; }
+
                     .navigation.resilience-active:not(:has(link[href*="base.css"])) {
                         position: fixed; top: 0; left: 0; right: 0; height: 60px;
                         background: rgba(0,0,0,0.6) !important; display: flex; align-items: center; padding: 0 20px;
                         border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 1001;
                     }
+                    .golden-glow-theme .navigation.resilience-active { border-bottom-color: #ffd700 !important; }
+
                     .canvasArea.resilience-active:not(:has(link[href*="bombparty.css"])) {
                         flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;
                     }
                     .round.resilience-active:not(:has(link[href*="bombparty.css"])) {
                         font-size: 2em; font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.5);
                     }
+                    .golden-glow-theme .round.resilience-active { color: #ffd700 !important; text-shadow: 0 0 20px rgba(255,215,0,0.4); }
+
                     button.resilience-active:not(.modern-button) {
                         background: #26aa36 !important; color: #fff !important; border: none !important;
                         padding: 12px 24px !important; border-radius: 30px !important; font-weight: 800 !important;
                         cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
                     }
+                    .golden-glow-theme button.resilience-active:not(.modern-button) { background: #ffd700 !important; color: #000 !important; }
+                    
+                    /* Guardian Pulse Animation */
+                    @keyframes guardian-pulse {
+                        0% { transform: scale(1); filter: drop-shadow(0 0 0px #ff4444); }
+                        50% { transform: scale(1.1); filter: drop-shadow(0 0 10px #ff4444); }
+                        100% { transform: scale(1); filter: drop-shadow(0 0 0px #ff4444); }
+                    }
+                    .guardian-icon { display: inline-block; animation: guardian-pulse 2s infinite ease-in-out; }
                     
                     /* Fix Power Tools Panel Position in Fallback */
                     .resilience-active .custom-kb-page, .resilience-active .custom-dict-page, .resilience-active .custom-admin-page {
@@ -123,7 +151,7 @@
                 notify.id = 'jklm-resilience-notice';
                 notify.style = 'position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #ff4444; color: white; padding: 12px 40px 12px 24px; border-radius: 12px; font-weight: 900; z-index: 1000000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: sans-serif; display: flex; align-items: center; gap: 10px; transition: 0.5s;';
                 notify.innerHTML = `
-                    <span id="resilience-text">🛡️ Guardian Active: Emergency UI Patch Applied.</span>
+                    <span id="resilience-text"><span class="guardian-icon">🛡️</span> Guardian Active: Emergency UI Patch Applied.</span>
                     <span id="close-resilience-notice" style="position: absolute; right: 12px; cursor: pointer; font-size: 18px; opacity: 0.8; hover: opacity: 1;">✕</span>
                 `;
                 document.body.appendChild(notify);
@@ -253,7 +281,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '7.0';
+    const SCRIPT_VERSION = '7.1';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
