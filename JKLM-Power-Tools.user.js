@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      8.0
-// @description  Advanced JKLM Power Tools - Ultimate Edition (Unbreakable Stability v8.0)
+// @version      8.1
+// @description  Advanced JKLM Power Tools - Ultimate Edition (UI Refresh v8.1)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -293,7 +293,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '8.0';
+    const SCRIPT_VERSION = '8.1';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -385,7 +385,7 @@
     // --- Translations ---
     const translations = {
         'English': {
-            kbHeader: '🐱 Keyboard Settings',
+            kbHeader: '🚀 Keyboard Settings',
             toggleLabel: 'Spacebar to hyphen in Game On/Off',
             chatToggleLabel: 'Spacebar to Hyphen in Chat On/Off',
             onDesc: 'On = Pressing spacebar during a round will result in a hyphen instead',
@@ -393,7 +393,7 @@
             chatDesc: 'On = Spacebar in chat becomes a hyphen',
             chatOffDesc: 'Off = Spacebar in chat remains a spacebar',
             closeInfo: 'This script enhances your JKLM experience. <br><br>You can close this menu with the <strong>ESC</strong> key.',
-            dictHeader: '📚 Dictionary Words',
+            dictHeader: '📖 Dictionary Words',
             msgLabel: 'Write a message',
             msgPlaceholder: 'Your message...',
             msgSend: 'Send',
@@ -404,7 +404,7 @@
             dictSelectLabel: 'Select Dictionary:',
             historyHeader: '📜 History',
             historyEmpty: 'No words in this round yet.',
-            adminHeader: '✨ UI & Settings',
+            adminHeader: '⚙️ UI & Settings',
             adminVisualHeader: '🎨 UI & Visual Aids',
             adminMiniModeLabel: 'Mini-Mode UI',
             adminFontLabel: 'Custom Font:',
@@ -543,23 +543,23 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
         :root {
-            --theme-color: #00d2ff; /* Neon Blue */
-            --theme-color-rgb: 0, 210, 255;
-            --bg-color: #1B1F3B; /* Dark Purple/Navy */
-            --bg-rgb: 27, 31, 59;
-            --glass-bg: rgba(27, 31, 59, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.12);
+            --theme-color: #8A2BE2; /* Blue Violet */
+            --theme-color-rgb: 138, 43, 226;
+            --bg-color: #1A1A2E; /* Dark Blue */
+            --bg-rgb: 26, 26, 46;
+            --glass-bg: rgba(26, 26, 46, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.1);
             --card-bg: rgba(255, 255, 255, 0.05);
             --card-border: rgba(255, 255, 255, 0.1);
-            --border-radius: 20px;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --panel-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            --font-main: 'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-            --accent-gradient: linear-gradient(135deg, var(--theme-color), #ffd700); /* Neon Blue to Gold */
-            --glow-effect: 0 0 15px rgba(var(--theme-color-rgb), 0.3);
+            --border-radius: 16px;
+            --text-color: #E0E0E0; /* Light Gray */
+            --text-muted: #A0A0A0; /* Gray */
+            --panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --transition: 0.3s ease;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+            --accent-gradient: linear-gradient(135deg, var(--theme-color), #FF69B4); /* Hot Pink */
+            --glow-effect: 0 0 20px rgba(var(--theme-color-rgb), 0.4);
         }
 
         /* Glassmorphism Scrollbar */
@@ -1177,9 +1177,9 @@
                 return t;
             };
 
-            const catTab = createTab('cat-btn', '🐱');
-            const dictTab = createTab('dict-btn', '📚');
-            const adminTab = createTab('admin-btn', '✨');
+            const catTab = createTab('cat-btn', '🚀');
+            const dictTab = createTab('dict-btn', '📖');
+            const adminTab = createTab('admin-btn', '⚙️');
 
             [catTab, dictTab, adminTab].forEach(t => {
                 customRow.appendChild(t);
@@ -1221,9 +1221,9 @@
                     <div class="panel-title">
                         <span style="background: linear-gradient(to right, var(--theme-color), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(var(--theme-color-rgb), 0.3));">${title}</span>
                         <div class="custom-tab-group">
-                            <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn">🐱</div>
-                            <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn">📚</div>
-                            <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn">✨</div>
+                            <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn">🚀</div>
+                            <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn">📖</div>
+                            <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn">⚙️</div>
                         </div>
                     </div>
                     ${clockEnabled ? `<div class="custom-clock panel-clock">${timeStr}</div>` : ''}
@@ -1325,7 +1325,7 @@
 
                     <div class="feature-card">
                         <div class="feature-header">
-                            <div class="feature-icon"></div>
+                            <div class="feature-icon">🔍</div>
                             <span>Word Search</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -1372,7 +1372,7 @@
 
                     <div class="feature-card">
                         <div class="feature-header">
-                            <div class="feature-icon">📖</div>
+                            <div class="feature-icon">🌍</div>
                             <span>${t.dictSelectLabel}</span>
                         </div>
                         <select class="modern-input" id="dict-lang-select" style="font-weight: 700; appearance: none; cursor: pointer;">
@@ -1394,7 +1394,7 @@
 
                     <div class="feature-card">
                         <div class="feature-header">
-                            <div class="feature-icon">📝</div>
+                            <div class="feature-icon">📌</div>
                             <span>${t.notesHeader}</span>
                         </div>
                         <div style="display: flex; gap: 12px; margin-bottom: 20px;">
@@ -1497,7 +1497,7 @@
 
                     <div class="feature-card">
                         <div class="feature-header">
-                            <div class="feature-icon">👑</div>
+                            <div class="feature-icon">💎</div>
                             <span>Profile Styles</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -1512,7 +1512,7 @@
 
                     <div class="feature-card">
                         <div class="feature-header">
-                            <div class="feature-icon">⚙️</div>
+                            <div class="feature-icon">🛠️</div>
                             <span>System & UI</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 12px;">
