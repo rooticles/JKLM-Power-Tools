@@ -555,6 +555,13 @@
             backdrop-filter: blur(4px);
         }
 
+        .modern-input option {
+            background-color: #000000; /* Deep black background */
+            color: #ffffff; /* White text for contrast */
+            padding: 12px;
+            font-weight: 500;
+        }
+
         .modern-input:focus {
             border-color: var(--theme-color);
             background: rgba(255, 255, 255, 0.08);
