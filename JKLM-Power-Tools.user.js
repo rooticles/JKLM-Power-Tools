@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      6.8
-// @description  Advanced JKLM Power Tools - Root Edition with Resilience Pro (v6.8)
+// @version      6.9
+// @description  Advanced JKLM Power Tools - Root Edition with Ultimate Resilience (v6.9)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -59,46 +59,77 @@
             // --- Network Resilience Patch (CSS Fallbacks) ---
             const injectFallbackCSS = () => {
                 const fallbackStyles = `
-                    /* Emergency layout fix if JKLM CSS fails */
+                    /* Ultimate Resilience: Comprehensive UI Fallback (v6.9) */
                     body:not(:has(link[href*="base.css"])) {
                         background: #1B1F3B !important;
                         color: #eee !important;
                         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+                        margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column;
                     }
                     .page:not(:has(link[href*="bombparty.css"])) {
-                        display: flex;
-                        flex-direction: column;
-                        height: 100vh;
-                        background: radial-gradient(circle, #2a2d45 0%, #1b1f3b 100%) !important;
+                        display: flex; flex-direction: column; flex: 1; height: 100vh;
+                        background: radial-gradient(circle at center, #2a2d45 0%, #1b1f3b 100%) !important;
+                        position: relative; overflow: hidden;
                     }
-                    .chat { min-width: 320px; background: rgba(0,0,0,0.6) !important; border-left: 1px solid rgba(255,255,255,0.1) !important; backdrop-filter: blur(10px); }
-                    .navigation { height: 60px; background: rgba(0,0,0,0.5) !important; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-                    .navigation .tab { padding: 10px 20px; color: #fff; cursor: pointer; font-weight: 700; border-radius: 8px; margin-right: 10px; }
-                    .navigation .tab.active { background: rgba(255,255,255,0.1); }
-                    .sidebar { width: 300px; background: rgba(0,0,0,0.3); }
-                    .main { flex: 1; display: flex; flex-direction: column; }
-                    .middle { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
-                    .bottom { height: 80px; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; }
-                    button { background: #26aa36; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; }
+                    .top:not(:has(link[href*="bombparty.css"])) {
+                        height: 60px; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(255,255,255,0.1);
+                    }
+                    .middle:not(:has(link[href*="bombparty.css"])) {
+                        flex: 1; display: flex; flex-direction: column; position: relative; align-items: center; justify-content: center;
+                    }
+                    .bottom:not(:has(link[href*="bombparty.css"])) {
+                        height: 100px; background: rgba(0,0,0,0.5); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;
+                    }
+                    .chat:not(:has(link[href*="base.css"])) {
+                        position: fixed; right: 0; bottom: 100px; top: 60px; width: 320px;
+                        background: rgba(0,0,0,0.7) !important; border-left: 1px solid rgba(255,255,255,0.1) !important;
+                        display: flex; flex-direction: column; backdrop-filter: blur(15px); z-index: 1000;
+                    }
+                    .navigation:not(:has(link[href*="base.css"])) {
+                        position: fixed; top: 0; left: 0; right: 0; height: 60px;
+                        background: rgba(0,0,0,0.6) !important; display: flex; align-items: center; padding: 0 20px;
+                        border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 1001;
+                    }
+                    .canvasArea:not(:has(link[href*="bombparty.css"])) {
+                        flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;
+                    }
+                    .round:not(:has(link[href*="bombparty.css"])) {
+                        font-size: 2em; font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.5);
+                    }
+                    button:not(.modern-button) {
+                        background: #26aa36 !important; color: #fff !important; border: none !important;
+                        padding: 12px 24px !important; border-radius: 30px !important; font-weight: 800 !important;
+                        cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                    }
+                    button:not(.modern-button):hover { transform: translateY(-2px); filter: brightness(1.1); }
+                    
+                    /* Fix Power Tools Panel Position in Fallback */
+                    .custom-kb-page, .custom-dict-page, .custom-admin-page {
+                        z-index: 999999 !important;
+                        bottom: 10px !important;
+                    }
+                    body:not(:has(link[href*="base.css"])) .page {
+                        padding-bottom: 60px;
+                    }
                 `;
                 const style = document.createElement('style');
                 style.id = 'jklm-power-tools-resilience';
                 style.textContent = fallbackStyles;
                 document.documentElement.appendChild(style);
-                console.log('[JKLM Power Tools] Network Resilience: Fallback CSS injected.');
+                console.log('[JKLM Power Tools] Network Resilience: Ultimate Fallback CSS injected.');
 
                 // UI Notification with Close Button
                 const notify = document.createElement('div');
                 notify.id = 'jklm-resilience-notice';
-                notify.style = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ff4444; color: white; padding: 12px 40px 12px 24px; border-radius: 12px; font-weight: 900; z-index: 1000000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: sans-serif; display: flex; align-items: center; gap: 10px;';
+                notify.style = 'position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #ff4444; color: white; padding: 12px 40px 12px 24px; border-radius: 12px; font-weight: 900; z-index: 1000000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: sans-serif; display: flex; align-items: center; gap: 10px;';
                 notify.innerHTML = `
-                    <span>⚠️ JKLM Connection Issues Detected! Fallback UI Enabled.</span>
+                    <span>⚠️ JKLM Server Error! Emergency UI Patch Applied.</span>
                     <span id="close-resilience-notice" style="position: absolute; right: 12px; cursor: pointer; font-size: 18px; opacity: 0.8; hover: opacity: 1;">✕</span>
                 `;
                 document.body.appendChild(notify);
                 
                 document.getElementById('close-resilience-notice').onclick = () => notify.remove();
-                setTimeout(() => { if(notify.parentNode) notify.remove(); }, 8000);
+                setTimeout(() => { if(notify.parentNode) notify.remove(); }, 10000);
             };
 
             // Detect missing CSS files with Delay (Resilience Pro)
@@ -204,7 +235,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '6.5';
+    const SCRIPT_VERSION = '6.9';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -969,6 +1000,14 @@
         }
 
         body.golden-glow-theme ::placeholder { color: rgba(255, 255, 255, 0.5) !important; }
+
+        /* Ultimate Resilience Support for Golden Glow */
+        body.golden-glow-theme .page,
+        body.golden-glow-theme .middle,
+        body.golden-glow-theme .bottom,
+        body.golden-glow-theme .top {
+            border-color: rgba(255, 215, 0, 0.3) !important;
+        }
     `;
     document.head.appendChild(style);
 
