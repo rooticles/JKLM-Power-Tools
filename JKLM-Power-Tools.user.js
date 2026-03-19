@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      9.6
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.6)
+// @version      9.7
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.7)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '9.6';
+    const SCRIPT_VERSION = '9.7';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1039,6 +1039,31 @@
         .home .playerCount b {
             color: var(--theme-color) !important;
         }
+
+        /* Custom Room Card Background & Bubble */
+        .lobbies .room {
+            background-size: cover !important;
+            background-position: center !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        .lobbies .room:hover {
+            transform: translateY(-5px) scale(1.02) !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3) !important;
+        }
+
+        .lobbies .room .userCount {
+            font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif !important;
+            font-weight: 800 !important;
+            color: #fff !important;
+            background: var(--accent-gradient) !important;
+            padding: 4px 14px !important;
+            border-radius: 50px !important;
+            box-shadow: 0 4px 15px rgba(var(--theme-color-rgb), 0.4) !important;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+        }
     `;
     document.head.appendChild(style);
 
@@ -1092,6 +1117,15 @@
             document.body.style.setProperty('background-size', 'cover', 'important');
             document.body.style.setProperty('background-position', 'center', 'important');
             document.body.style.setProperty('background-attachment', 'fixed', 'important');
+        }
+
+        // Apply Room Background to Lobby Cards (The rooms shown on home page)
+        if (roomBg) {
+            document.querySelectorAll('.lobbies .room').forEach(card => {
+                card.style.setProperty('background-image', `url("${roomBg}")`, 'important');
+                card.style.setProperty('background-size', 'cover', 'important');
+                card.style.setProperty('background-position', 'center', 'important');
+            });
         }
 
         document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
