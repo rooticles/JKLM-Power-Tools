@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      6.5
-// @description  Advanced JKLM Power Tools - Root Edition with Golden Glow JKLM UI
+// @version      6.6
+// @description  Advanced JKLM Power Tools - Root Edition with Network Resilience (v1)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -27,6 +27,56 @@
             // Fix JKLM 'chatUnreadHighlightCount' ReferenceError
             if (typeof win.chatUnreadHighlightCount === 'undefined') {
                 win.chatUnreadHighlightCount = 0;
+            }
+
+            // --- Network Resilience Patch (CSS Fallbacks) ---
+            const injectFallbackCSS = () => {
+                const fallbackStyles = `
+                    /* Emergency layout fix if JKLM CSS fails */
+                    body:not(:has(link[href*="base.css"])) {
+                        background: #1B1F3B !important;
+                        color: #eee !important;
+                        font-family: sans-serif !important;
+                    }
+                    .page:not(:has(link[href*="bombparty.css"])) {
+                        display: flex;
+                        flex-direction: column;
+                        height: 100vh;
+                        background: radial-gradient(circle, #2a2d45 0%, #1b1f3b 100%) !important;
+                    }
+                    .chat { min-width: 300px; background: rgba(0,0,0,0.4); border-left: 1px solid rgba(255,255,255,0.1); }
+                    .navigation { height: 50px; background: rgba(0,0,0,0.5); display: flex; align-items: center; padding: 0 20px; }
+                `;
+                const style = document.createElement('style');
+                style.id = 'jklm-power-tools-resilience';
+                style.textContent = fallbackStyles;
+                document.documentElement.appendChild(style);
+                console.log('[JKLM Power Tools] Network Resilience: Fallback CSS injected.');
+
+                // UI Notification
+                const notify = document.createElement('div');
+                notify.style = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ff4444; color: white; padding: 12px 24px; border-radius: 12px; font-weight: 900; z-index: 1000000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: sans-serif;';
+                notify.innerHTML = '⚠️ JKLM Connection Issues Detected! Fallback UI Enabled.';
+                document.body.appendChild(notify);
+                setTimeout(() => notify.remove(), 5000);
+            };
+
+            // Detect missing CSS files (ERR_CONNECTION_CLOSED etc.)
+            const checkStyles = () => {
+                const criticalStyles = ['base.css', 'game.css', 'bombparty.css'];
+                const loadedStyles = Array.from(document.styleSheets).map(s => s.href || '');
+                const missingCount = criticalStyles.filter(cs => !loadedStyles.some(ls => ls.includes(cs))).length;
+                
+                if (missingCount >= 2) {
+                    injectFallbackCSS();
+                }
+            };
+            
+            // Wait for DOM to check styles
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', checkStyles);
+            } else {
+                checkStyles();
             }
 
             // --- Ultra Stability Patch (v4 - Nuclear Edition) ---
