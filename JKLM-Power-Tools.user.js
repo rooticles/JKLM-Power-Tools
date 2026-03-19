@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      9.1
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.1)
+// @version      9.2
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.2)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -289,7 +289,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '9.1';
+    const SCRIPT_VERSION = '9.2';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -653,7 +653,7 @@
             display: none;
             padding: 20px;
             color: var(--text-color);
-            background: var(--glass-bg);
+            background: rgba(26, 26, 46, 0.95);
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
             height: 100vh;
@@ -1066,9 +1066,9 @@
 
         document.documentElement.style.setProperty('--theme-color', themeColor);
         document.documentElement.style.setProperty('--theme-color-rgb', themeRgb);
-        document.documentElement.style.setProperty('--bg-color', 'rgba(0,0,0,0.15)');
-        document.documentElement.style.setProperty('--bg-rgb', '0,0,0');
-        document.documentElement.style.setProperty('--glass-bg', 'rgba(0,0,0,0.15)');
+        document.documentElement.style.setProperty('--bg-color', '#1A1A2E');
+        document.documentElement.style.setProperty('--bg-rgb', '26, 26, 46');
+        document.documentElement.style.setProperty('--glass-bg', 'rgba(26, 26, 46, 0.75)');
         document.documentElement.style.setProperty('--border-radius', `${borderRadius}px`);
         document.documentElement.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${themeColor}, #FF69B4)`);
         document.documentElement.style.setProperty('--glow-effect', `0 0 20px rgba(${themeRgb}, 0.4)`);
@@ -1088,10 +1088,18 @@
             const animName = animationType === 'slideIn' ? `slideInPanel${panelPosition.charAt(0).toUpperCase() + panelPosition.slice(1)}` : animationType;
             p.style.animation = `${animName} 0.6s cubic-bezier(0.16, 1, 0.3, 1)`;
             
-            p.style.backgroundImage = 'none';
-            p.style.background = 'transparent';
-            p.style.backdropFilter = 'none';
-            p.style.webkitBackdropFilter = 'none';
+            if (animationType === 'animated-mesh') {
+                p.classList.add('animated-mesh');
+                p.style.background = 'transparent';
+                p.style.backdropFilter = 'none';
+            } else if (animationType === 'animated-matrix') {
+                p.classList.add('animated-matrix');
+                p.style.background = 'rgba(0,0,0,0.9)';
+                p.style.backdropFilter = 'blur(10px)';
+            } else {
+                p.style.background = 'rgba(26, 26, 46, 0.95)';
+                p.style.backdropFilter = 'blur(16px)';
+            }
         });
     };
     updateThemeStyles();
