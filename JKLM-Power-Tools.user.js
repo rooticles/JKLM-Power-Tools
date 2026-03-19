@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      6.7
-// @description  Advanced JKLM Power Tools - Root Edition with Audio Autoplay Fix
+// @version      6.8
+// @description  Advanced JKLM Power Tools - Root Edition with Resilience Pro (v6.8)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -63,7 +63,7 @@
                     body:not(:has(link[href*="base.css"])) {
                         background: #1B1F3B !important;
                         color: #eee !important;
-                        font-family: sans-serif !important;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
                     }
                     .page:not(:has(link[href*="bombparty.css"])) {
                         display: flex;
@@ -71,8 +71,15 @@
                         height: 100vh;
                         background: radial-gradient(circle, #2a2d45 0%, #1b1f3b 100%) !important;
                     }
-                    .chat { min-width: 300px; background: rgba(0,0,0,0.4); border-left: 1px solid rgba(255,255,255,0.1); }
-                    .navigation { height: 50px; background: rgba(0,0,0,0.5); display: flex; align-items: center; padding: 0 20px; }
+                    .chat { min-width: 320px; background: rgba(0,0,0,0.6) !important; border-left: 1px solid rgba(255,255,255,0.1) !important; backdrop-filter: blur(10px); }
+                    .navigation { height: 60px; background: rgba(0,0,0,0.5) !important; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+                    .navigation .tab { padding: 10px 20px; color: #fff; cursor: pointer; font-weight: 700; border-radius: 8px; margin-right: 10px; }
+                    .navigation .tab.active { background: rgba(255,255,255,0.1); }
+                    .sidebar { width: 300px; background: rgba(0,0,0,0.3); }
+                    .main { flex: 1; display: flex; flex-direction: column; }
+                    .middle { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+                    .bottom { height: 80px; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; }
+                    button { background: #26aa36; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; }
                 `;
                 const style = document.createElement('style');
                 style.id = 'jklm-power-tools-resilience';
@@ -80,23 +87,31 @@
                 document.documentElement.appendChild(style);
                 console.log('[JKLM Power Tools] Network Resilience: Fallback CSS injected.');
 
-                // UI Notification
+                // UI Notification with Close Button
                 const notify = document.createElement('div');
-                notify.style = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ff4444; color: white; padding: 12px 24px; border-radius: 12px; font-weight: 900; z-index: 1000000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: sans-serif;';
-                notify.innerHTML = '⚠️ JKLM Connection Issues Detected! Fallback UI Enabled.';
+                notify.id = 'jklm-resilience-notice';
+                notify.style = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ff4444; color: white; padding: 12px 40px 12px 24px; border-radius: 12px; font-weight: 900; z-index: 1000000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: sans-serif; display: flex; align-items: center; gap: 10px;';
+                notify.innerHTML = `
+                    <span>⚠️ JKLM Connection Issues Detected! Fallback UI Enabled.</span>
+                    <span id="close-resilience-notice" style="position: absolute; right: 12px; cursor: pointer; font-size: 18px; opacity: 0.8; hover: opacity: 1;">✕</span>
+                `;
                 document.body.appendChild(notify);
-                setTimeout(() => notify.remove(), 5000);
+                
+                document.getElementById('close-resilience-notice').onclick = () => notify.remove();
+                setTimeout(() => { if(notify.parentNode) notify.remove(); }, 8000);
             };
 
-            // Detect missing CSS files (ERR_CONNECTION_CLOSED etc.)
+            // Detect missing CSS files with Delay (Resilience Pro)
             const checkStyles = () => {
-                const criticalStyles = ['base.css', 'game.css', 'bombparty.css'];
-                const loadedStyles = Array.from(document.styleSheets).map(s => s.href || '');
-                const missingCount = criticalStyles.filter(cs => !loadedStyles.some(ls => ls.includes(cs))).length;
-                
-                if (missingCount >= 2) {
-                    injectFallbackCSS();
-                }
+                setTimeout(() => {
+                    const criticalStyles = ['base.css', 'game.css', 'bombparty.css'];
+                    const loadedStyles = Array.from(document.styleSheets).map(s => s.href || '');
+                    const missingCount = criticalStyles.filter(cs => !loadedStyles.some(ls => ls.includes(cs))).length;
+                    
+                    if (missingCount >= 2) {
+                        injectFallbackCSS();
+                    }
+                }, 3000); // 3 Second Delay to allow slow loads
             };
             
             // Wait for DOM to check styles
