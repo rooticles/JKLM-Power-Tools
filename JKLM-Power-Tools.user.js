@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      3.4
+// @version      3.5
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -19,7 +19,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '3.4';
+    const SCRIPT_VERSION = '3.5';
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
@@ -558,8 +558,8 @@
         }
 
         .modern-input option {
-            background-color: #000000; /* Deep black background */
-            color: #ffffff; /* White text for contrast */
+            background-color: #000000 !important; /* Deep black for all browsers */
+            color: #ffffff !important; /* White text for contrast */
             padding: 12px;
             font-weight: 500;
         }
