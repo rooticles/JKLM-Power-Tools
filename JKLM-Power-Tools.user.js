@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      5.8
-// @description  Advanced JKLM Power Tools - Ultra Smooth Edition with Fixed German Dictionary URL
+// @version      5.9
+// @description  Advanced JKLM Power Tools - Ultra Smooth Edition - English Only
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -70,7 +70,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '5.8';
+    const SCRIPT_VERSION = '5.9';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -209,7 +209,6 @@
             dictFoundWords: 'Found {count} words:',
             dictNoResultsShort: 'No results.',
             english: 'English',
-            german: 'All German Words',
             // Features
             notesHeader: '📝 Notes',
             notesDesc: 'Keep track of your thoughts and strategies',
@@ -227,28 +226,9 @@
     let dictionaryLoaded = false;
     let currentDictLang = '';
 
-    let germanReference = new Set();
-    let germanRefLoaded = false;
-
     // --- Local Music Player ---
     const dictionaryUrls = {
-        'English': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/121bf1a601ed822553c2e68c38a4cdcd7737d352/words.txt',
-        'German': 'https://raw.githubusercontent.com/MarvinJWendt/2f4f4154b8ae218600eb091a5706b5f4/raw/all_german_words.txt'
-    };
-
-    const loadGermanReference = async () => {
-        if (germanRefLoaded) return;
-        try {
-            const response = await fetch(dictionaryUrls['German']);
-            if (!response.ok) throw new Error('Could not load German reference');
-            const text = await response.text();
-            const words = text.split('\n').map(w => w.trim().toLowerCase()).filter(w => w.length > 0);
-            germanReference = new Set(words);
-            germanRefLoaded = true;
-            console.log(`[JKLM Power Tools] German reference loaded: ${germanReference.size} words.`);
-        } catch (err) {
-            console.error('German reference load error:', err);
-        }
+        'English': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/121bf1a601ed822553c2e68c38a4cdcd7737d352/words.txt'
     };
 
     const loadDictionary = async (force = false) => {
@@ -1040,7 +1020,6 @@
                                 </select>
                                 <select class="modern-input" id="dict-word-type" style="flex: 1; padding: 14px 20px; font-weight: 700; appearance: none; cursor: pointer;">
                                     <option value="All" ${wordType === 'All' ? 'selected' : ''}>All Words</option>
-                                    <option value="German" ${wordType === 'German' ? 'selected' : ''}>All German Words</option>
                                     <option value="Hyphen" ${wordType === 'Hyphen' ? 'selected' : ''}>Hyphen Only</option>
                                     <option value="Long" ${wordType === 'Long' ? 'selected' : ''}>Long Words</option>
                                     <option value="Casual" ${wordType === 'Casual' ? 'selected' : ''}>Casual</option>
@@ -1342,21 +1321,11 @@
                 }
 
                 const ensureDictionary = async () => {
-                    if (wordType === 'German') {
-                        await loadGermanReference();
-                    }
                     await loadDictionary();
                 };
 
                 ensureDictionary().then(() => {
-                    let words;
-                    if (wordType === 'German') {
-                        // Use full German dictionary as source
-                        words = Array.from(germanReference).map(w => w.toUpperCase());
-                    } else {
-                        // Use currently selected dictionary (e.g. English)
-                        words = [...dictionary];
-                    }
+                    let words = [...dictionary];
                     
                     const minLen = getMinWordLength();
                     const maxLen = getMaxWordLength();
