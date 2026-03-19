@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      5.1
-// @description  Advanced JKLM Power Tools with Multi-Source Definitions and UI Customization
+// @version      5.2
+// @description  Advanced JKLM Power Tools - Ultra Smooth Edition
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -70,7 +70,16 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '5.1';
+    const SCRIPT_VERSION = '5.2';
+
+    // --- Performance Helpers ---
+    const debounce = (func, wait) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    };
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
@@ -213,6 +222,7 @@
 
     // --- Dictionary Logic ---
     let dictionary = [];
+    let lowercasedDictionary = [];
     let dictionaryLoaded = false;
     let currentDictLang = '';
 
@@ -227,6 +237,7 @@
 
         if (lang === 'Custom') {
             dictionary = getCustomDictionary();
+            lowercasedDictionary = dictionary.map(w => w.toLowerCase());
             dictionaryLoaded = true;
             currentDictLang = lang;
             return;
@@ -239,12 +250,14 @@
 
             const text = await response.text();
             dictionary = text.split('\n').map(w => w.trim()).filter(w => w.length > 0);
+            lowercasedDictionary = dictionary.map(w => w.toLowerCase());
 
             dictionaryLoaded = true;
             currentDictLang = lang;
         } catch (err) {
             console.error('Dictionary load error:', err);
             dictionary = ["ERASEMENT", "BIZARRENESSES", "PROMINENT"];
+            lowercasedDictionary = dictionary.map(w => w.toLowerCase());
             dictionaryLoaded = true;
             currentDictLang = lang;
         }
@@ -253,7 +266,13 @@
     const findWords = (syllable) => {
         if (!syllable) return [];
         const search = syllable.toLowerCase();
-        return dictionary.filter(word => word.toLowerCase().includes(search));
+        const results = [];
+        for (let i = 0; i < lowercasedDictionary.length; i++) {
+            if (lowercasedDictionary[i].includes(search)) {
+                results.push(dictionary[i]);
+            }
+        }
+        return results;
     };
 
     const shuffleArray = (array) => {
@@ -426,6 +445,7 @@
             font-family: var(--font-main);
             transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             border-radius: var(--border-radius);
+            will-change: transform, opacity;
         }
 
         .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left {
@@ -1520,23 +1540,27 @@
                     updateSuggestions();
                 }
             });
+            const debouncedUpdateSuggestions = debounce(() => {
+                updateSuggestions();
+            }, 150);
+
             dictPage.addEventListener('input', (e) => {
                 if (e.target.id === 'dict-msg-input') {
-                    updateSuggestions();
+                    debouncedUpdateSuggestions();
                 }
                 if (e.target.id === 'dict-min-len') {
                     const val = parseInt(e.target.value);
                     setMinWordLength(val);
                     const span = document.getElementById('val-dict-min-len');
                     if (span) span.innerText = val;
-                    updateSuggestions();
+                    debouncedUpdateSuggestions();
                 }
                 if (e.target.id === 'dict-max-len') {
                     const val = parseInt(e.target.value);
                     setMaxWordLength(val);
                     const span = document.getElementById('val-dict-max-len');
                     if (span) span.innerText = val;
-                    updateSuggestions();
+                    debouncedUpdateSuggestions();
                 }
             });
             dictPage.addEventListener('keydown', (e) => {
