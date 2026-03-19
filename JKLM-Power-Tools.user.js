@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      3.0
+// @version      3.1
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -679,8 +679,6 @@
             opacity: 1 !important;
             visibility: visible !important;
         }
-    `;
-    document.head.appendChild(style);
 
         .note-item {
             background: rgba(255, 255, 255, 0.02);
