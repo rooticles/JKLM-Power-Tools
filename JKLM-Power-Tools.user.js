@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      9.4
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.4)
+// @version      9.5
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.5)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '9.4';
+    const SCRIPT_VERSION = '9.5';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1982,6 +1982,8 @@
             GM_addValueChangeListener('sidebarWidth', (n, o, nv) => updateSidebarWidths(nv));
             GM_addValueChangeListener('themeColor', () => updateThemeStyles());
             GM_addValueChangeListener('bgColor', () => updateThemeStyles());
+            GM_addValueChangeListener('lobbyBgUrl', () => updateThemeStyles());
+            GM_addValueChangeListener('roomBgUrl', () => updateThemeStyles());
 
             window.addEventListener('keydown', (e) => {
                 if (e.key === getToggleKey()) {
