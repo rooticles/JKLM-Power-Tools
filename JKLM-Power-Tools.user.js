@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      3.5
+// @version      3.6
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -19,7 +19,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '3.5';
+    const SCRIPT_VERSION = '3.6';
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
@@ -991,9 +991,47 @@
                 dictPage.innerHTML = `
                 ${getPanelNav('dict-btn', t.dictHeader)}
                 <div class="custom-page-content">
+                    ${historyHtml}
+
                     <div class="feature-card">
                         <div class="feature-header">
-                            <div class="feature-icon"></div>
+                            <div class="feature-icon">📖</div>
+                            <span>${t.dictSelectLabel}</span>
+                        </div>
+                        <select class="modern-input" id="dict-lang-select" style="font-weight: 700; appearance: none; cursor: pointer;">
+                            ${options}
+                            <option value="Custom" ${dictLang === 'Custom' ? 'selected' : ''}>${t.dictCustomUpload}</option>
+                        </select>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">📝</div>
+                            <span>${t.notesHeader}</span>
+                        </div>
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                            <input type="text" id="new-note-input" class="modern-input" placeholder="${t.notePlaceholder}" style="flex: 1;">
+                            <button class="modern-button" id="add-note-btn" style="min-width: 60px; padding: 0;">+</button>
+                        </div>
+                        <div id="notes-list" style="display: flex; flex-direction: column;">
+                            ${notesHtml}
+                        </div>
+                    </div>
+
+                    <div id="custom-dict-upload-area" style="display: ${dictLang === 'Custom' ? 'block' : 'none'}; margin-bottom: 24px; padding: 28px; background: rgba(var(--theme-color-rgb), 0.08); border-radius: 24px; border: 2px dashed rgba(var(--theme-color-rgb), 0.3); backdrop-filter: blur(10px);">
+                        <div style="font-size: 15px; color: var(--text-color); font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                            <span>📁</span> ${t.dictUploadDesc}
+                        </div>
+                        <input type="file" id="dict-file-upload" class="modern-input" accept=".txt" style="margin-bottom: 16px; border-style: solid;">
+                        <textarea id="dict-manual-input" class="modern-input" style="min-height: 150px; font-size: 14px; margin-bottom: 16px; font-family: var(--font-mono); line-height: 1.6;" placeholder="${t.dictPlaceholder}">${(getCustomDictionary() || []).join('\n')}</textarea>
+                        <button class="modern-button" id="dict-file-confirm" style="width: 100%;">
+                            <span>�</span> ${t.dictUploadBtn}
+                        </button>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">🔍</div>
                             <span>Word Search</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -1031,44 +1069,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    ${historyHtml}
-
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">📖</div>
-                            <span>${t.dictSelectLabel}</span>
-                        </div>
-                        <select class="modern-input" id="dict-lang-select" style="font-weight: 700; appearance: none; cursor: pointer;">
-                            ${options}
-                            <option value="Custom" ${dictLang === 'Custom' ? 'selected' : ''}>${t.dictCustomUpload}</option>
-                        </select>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">📝</div>
-                            <span>${t.notesHeader}</span>
-                        </div>
-                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                            <input type="text" id="new-note-input" class="modern-input" placeholder="${t.notePlaceholder}" style="flex: 1;">
-                            <button class="modern-button" id="add-note-btn" style="min-width: 60px; padding: 0;">+</button>
-                        </div>
-                        <div id="notes-list" style="display: flex; flex-direction: column;">
-                            ${notesHtml}
-                        </div>
-                    </div>
-
-                    <div id="custom-dict-upload-area" style="display: ${dictLang === 'Custom' ? 'block' : 'none'}; margin-bottom: 24px; padding: 28px; background: rgba(var(--theme-color-rgb), 0.08); border-radius: 24px; border: 2px dashed rgba(var(--theme-color-rgb), 0.3); backdrop-filter: blur(10px);">
-                        <div style="font-size: 15px; color: var(--text-color); font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
-                            <span>📁</span> ${t.dictUploadDesc}
-                        </div>
-                        <input type="file" id="dict-file-upload" class="modern-input" accept=".txt" style="margin-bottom: 16px; border-style: solid;">
-                        <textarea id="dict-manual-input" class="modern-input" style="min-height: 150px; font-size: 14px; margin-bottom: 16px; font-family: var(--font-mono); line-height: 1.6;" placeholder="${t.dictPlaceholder}">${(getCustomDictionary() || []).join('\n')}</textarea>
-                        <button class="modern-button" id="dict-file-confirm" style="width: 100%;">
-                            <span>�</span> ${t.dictUploadBtn}
-                        </button>
                     </div>
 
                     <div class="feature-card" id="dict-results-container" style="background: rgba(0,0,0,0.3); border-color: var(--glass-border); padding: 28px;">
