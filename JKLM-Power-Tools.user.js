@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      5.5
-// @description  Advanced JKLM Power Tools - Ultra Smooth Edition with German-in-English Support
+// @version      5.6
+// @description  Advanced JKLM Power Tools - Ultra Smooth Edition with Full German Dictionary
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -70,7 +70,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '5.5';
+    const SCRIPT_VERSION = '5.6';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1364,7 +1364,15 @@
                 };
 
                 ensureDictionary().then(() => {
-                    let words = [...dictionary];
+                    let words;
+                    if (wordType === 'German') {
+                        // Use full German dictionary as source
+                        words = Array.from(germanReference).map(w => w.toUpperCase());
+                    } else {
+                        // Use currently selected dictionary (e.g. English)
+                        words = [...dictionary];
+                    }
+                    
                     const minLen = getMinWordLength();
                     const maxLen = getMaxWordLength();
 
@@ -1384,9 +1392,9 @@
                         }
                     }
 
-                    if (wordType === 'German') {
-                        words = words.filter(w => germanReference.has(w.toLowerCase()));
-                    } else if (wordType === 'Hyphen') {
+                    if (wordType === 'Hyphen') {
+                        words = words.filter(w => w.includes('-'));
+                    } else if (wordType === 'Long') {
                         words = words.filter(w => w.includes('-'));
                     } else if (wordType === 'Long') {
                         words = words.filter(w => w.length >= 20);
