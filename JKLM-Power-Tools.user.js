@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      6.1
-// @description  Advanced JKLM Power Tools - Root Edition with Profile Styles & Animated Themes
+// @version      6.2
+// @description  Advanced JKLM Power Tools - Root Edition with Ultra-Stability Patch (v2)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -30,39 +30,41 @@
             }
 
             // --- Ultra Stability Patch for external Overlays (PartyPlus etc.) ---
-            // This prevents "Cannot read properties of undefined (reading 'addEventListener')"
-            
             const createDummyEmitter = () => ({
                 addEventListener: () => {},
                 removeEventListener: () => {},
                 dispatchEvent: () => true,
                 on: () => {},
                 off: () => {},
-                emit: () => {}
+                emit: () => {},
+                setMilestone: () => {} // Specific to some overlay bugs
             });
 
-            // Patch milestones globally with a getter/setter to ensure it's never undefined
-            if (typeof win.milestones === 'undefined') {
-                let _milestones = createDummyEmitter();
-                Object.defineProperty(win, 'milestones', {
-                    get: () => _milestones,
-                    set: (val) => { if (val) _milestones = val; },
+            const safeProxy = (name) => {
+                let _val = win[name] || createDummyEmitter();
+                Object.defineProperty(win, name, {
+                    get: () => _val,
+                    set: (val) => { 
+                        if (val && typeof val === 'object') {
+                            // Ensure the new object has basic emitter methods
+                            ['addEventListener', 'removeEventListener', 'on', 'off', 'emit'].forEach(m => {
+                                if (typeof val[m] === 'undefined') val[m] = () => {};
+                            });
+                            _val = val; 
+                        }
+                    },
                     configurable: true
                 });
-            }
+            };
 
-            // Ensure common JKLM objects and their prototypes are safe
-            const objectsToPatch = ['game', 'socket', 'room', 'client'];
-            objectsToPatch.forEach(name => {
-                if (typeof win[name] === 'undefined') {
-                    win[name] = createDummyEmitter();
-                } else {
-                    if (typeof win[name].addEventListener === 'undefined') {
-                        win[name].addEventListener = () => {};
-                        win[name].removeEventListener = () => {};
-                    }
-                }
-            });
+            // Patch all common objects that scripts like PartyPlus access
+            ['milestones', 'game', 'socket', 'room', 'client'].forEach(safeProxy);
+
+            // Special handling for Socket prototype to prevent overlay.js errors
+            if (win.Socket && win.Socket.prototype) {
+                if (!win.Socket.prototype.addEventListener) win.Socket.prototype.addEventListener = () => {};
+                if (!win.Socket.prototype.setMilestone) win.Socket.prototype.setMilestone = () => {};
+            }
 
         } catch (e) {
             console.warn('[JKLM Power Tools] Stability patch failed:', e);
@@ -70,7 +72,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '6.1';
+    const SCRIPT_VERSION = '6.2';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
