@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      2.6
+// @version      2.7
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -921,7 +921,7 @@
                 nav.after(customRow);
             }
 
-            if (document.getElementById('cat-btn')) return;
+            if (document.getElementById('dict-btn')) return;
 
             const createTab = (id, icon) => {
                 const t = document.createElement('div');
@@ -970,7 +970,6 @@
                     <div class="panel-title">
                         <span style="background: linear-gradient(to right, var(--theme-color), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${title}</span>
                         <div style="display: flex; gap: 5px; margin-left: 10px;">
-                            <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn" style="font-size: 16px;">🐱</div>
                             <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn" style="font-size: 16px;">📚</div>
                             <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn" style="font-size: 16px;">✨</div>
                         </div>
@@ -1253,7 +1252,6 @@
                 }
             };
 
-            catTab.addEventListener('click', (e) => { e.preventDefault(); toggleTab(catTab, kbPage); });
             dictTab.addEventListener('click', (e) => { e.preventDefault(); toggleTab(dictTab, dictPage); });
             adminTab.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1263,9 +1261,9 @@
 
             nav.addEventListener('click', (e) => {
                 const clicked = e.target.closest('.tab') || e.target.closest('.custom-tab');
-                if (clicked && ![catTab, dictTab, adminTab].includes(clicked)) {
+                if (clicked && ![dictTab, adminTab].includes(clicked)) {
                     allCustomPages.forEach(p => p.classList.remove('active'));
-                    [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
+                    [dictTab, adminTab].forEach(t => t.classList.remove('active'));
                 }
             });
 
@@ -1280,7 +1278,6 @@
                     const tabBtn = e.target.closest('.panel-nav .custom-tab');
                     if (tabBtn) {
                         const targetId = tabBtn.getAttribute('data-target');
-                        if (targetId === 'cat-btn') toggleTab(catTab, kbPage);
                         if (targetId === 'dict-btn') toggleTab(dictTab, dictPage);
                         if (targetId === 'admin-btn') {
                             updateAdminContent();
@@ -1288,15 +1285,6 @@
                         }
                     }
                 });
-            });
-
-            kbPage.addEventListener('click', (e) => {
-                const row = e.target.closest('.settings-row');
-                if (!row) return;
-
-                if (row.id === 'toggle-space-hyphen') setEnabled(!getEnabled());
-                if (row.id === 'toggle-chat-hyphen') setChatEnabled(!getChatEnabled());
-                updateKbContent();
             });
 
             const updateSuggestions = () => {
@@ -1557,7 +1545,6 @@
             adminPage.addEventListener('change', (e) => {
                 if (e.target.id === 'admin-language-select') {
                     setLanguage(e.target.value);
-                    updateKbContent();
                     updateDictContent();
                     updateAdminContent();
                 }
