@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      3.1
+// @version      3.2
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -304,21 +304,26 @@
     // --- CSS Styles ---
     const style = document.createElement('style');
     style.innerHTML = `
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
         :root {
             --theme-color: #4caf50;
             --theme-color-rgb: 76, 175, 80;
-            --bg-color: #0b0d11;
-            --bg-rgb: 11, 13, 17;
-            --glass-bg: rgba(11, 13, 17, 0.82);
+            --bg-color: #0a0b0f;
+            --bg-rgb: 10, 11, 15;
+            --glass-bg: rgba(10, 11, 15, 0.75);
             --glass-border: rgba(255, 255, 255, 0.08);
-            --border-radius: 24px;
-            --text-color: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --border-radius-lg: 32px;
+            --border-radius-md: 20px;
+            --border-radius-sm: 14px;
+            --text-color: #f8fafc;
             --text-muted: #94a3b8;
-            --panel-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
-            --transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            --panel-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8);
+            --transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
             --font-main: 'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
             --accent-gradient: linear-gradient(135deg, var(--theme-color), rgba(var(--theme-color-rgb), 0.6));
         }
 
@@ -326,64 +331,64 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { 
-            background: rgba(255, 255, 255, 0.08); 
+            background: rgba(255, 255, 255, 0.1); 
             border-radius: 20px; 
             border: 2px solid transparent;
-            background-clip: padding-box;
+            background-clip: content-box;
         }
-        ::-webkit-scrollbar-thumb:hover { background: var(--theme-color); background-clip: padding-box; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--theme-color); }
 
         .custom-nav-row {
             display: flex;
             align-items: center;
             justify-content: center;
             background: rgba(0, 0, 0, 0.3);
-            height: 48px;
+            height: 58px;
             width: 100%;
             border-bottom: 1px solid var(--glass-border);
             position: relative;
             z-index: 10001;
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            backdrop-filter: blur(32px) saturate(180%);
+            -webkit-backdrop-filter: blur(32px) saturate(180%);
+            gap: 12px;
+            padding: 0 20px;
+            box-sizing: border-box;
         }
 
         .panel-nav {
             display: flex;
             align-items: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0));
-            height: 80px;
+            height: 100px;
             margin: -20px -20px 20px -20px;
-            padding: 0 30px;
+            padding: 0 32px;
             width: calc(100% + 40px);
             box-sizing: border-box;
-            position: relative;
+            position: sticky;
+            top: -20px;
+            z-index: 100;
+            background: linear-gradient(to bottom, var(--bg-color) 0%, rgba(var(--bg-rgb), 0.85) 70%, transparent 100%);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--glass-border);
         }
 
         .panel-title {
             font-weight: 800;
-            font-size: 20px;
+            font-size: 24px;
             color: var(--text-color);
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 24px;
             flex: 1;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.04em;
         }
 
-        .custom-clock {
-            margin-left: auto;
-            margin-right: 15px;
-            font-family: var(--font-main);
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-color);
-            padding: 8px 18px;
+        .custom-tab-group {
+            display: flex;
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 100px;
+            padding: 6px;
+            border-radius: 20px;
             border: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            gap: 6px;
         }
 
         .custom-tab {
@@ -391,39 +396,26 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            padding: 0 18px;
-            height: 100%;
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
             font-size: 20px;
             transition: var(--transition);
-            position: relative;
             color: var(--text-muted);
-            opacity: 0.6;
-            filter: grayscale(0.8);
+            position: relative;
         }
 
         .custom-tab:hover {
-            opacity: 1;
-            filter: grayscale(0.3);
-            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-color);
+            background: rgba(255, 255, 255, 0.08);
             transform: translateY(-2px);
         }
 
         .custom-tab.active {
-            opacity: 1;
-            filter: grayscale(0);
-            color: var(--theme-color);
-            background: rgba(var(--theme-color-rgb), 0.05);
-        }
-
-        .custom-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: var(--accent-gradient);
-            box-shadow: 0 -4px 15px rgba(var(--theme-color-rgb), 0.5);
+            color: white;
+            background: var(--theme-color);
+            box-shadow: 0 8px 20px rgba(var(--theme-color-rgb), 0.4);
+            transform: translateY(-2px) scale(1.05);
         }
 
         .custom-kb-page, .custom-dict-page, .custom-admin-page {
@@ -431,10 +423,11 @@
             padding: 20px;
             color: var(--text-color);
             background: var(--glass-bg);
-            backdrop-filter: blur(50px) saturate(200%);
-            -webkit-backdrop-filter: blur(50px) saturate(200%);
+            backdrop-filter: blur(80px) saturate(250%);
+            -webkit-backdrop-filter: blur(80px) saturate(250%);
             height: 100vh;
             overflow-y: auto;
+            overflow-x: hidden;
             box-sizing: border-box;
             width: 650px;
             box-shadow: var(--panel-shadow);
@@ -442,31 +435,9 @@
             top: 0;
             z-index: 9999;
             font-family: var(--font-main);
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
             border-left: 1px solid var(--glass-border);
             border-right: 1px solid var(--glass-border);
-        }
-
-        .custom-kb-page.pos-right, .custom-dict-page.pos-right, .custom-admin-page.pos-right {
-            right: 0;
-            left: auto;
-            animation: slideInPanelRight 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left {
-            left: 0;
-            right: auto;
-            animation: slideInPanelLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes slideInPanelRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes slideInPanelLeft {
-            from { transform: translateX(-100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
         }
 
         .custom-kb-page.active, .custom-dict-page.active, .custom-admin-page.active {
@@ -475,31 +446,156 @@
 
         .custom-close-x {
             cursor: pointer;
-            font-size: 14px;
-            color: var(--text-muted);
-            transition: var(--transition);
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 14px;
+            border-radius: 18px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            transition: var(--transition);
+            margin-left: 20px;
         }
 
         .custom-close-x:hover {
             color: #ffffff;
             background: #ef4444;
             border-color: #ef4444;
-            transform: rotate(90deg) scale(1.05);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
         }
+
+        /* Modern Cards */
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius-lg);
+            padding: 28px;
+            margin-bottom: 24px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(var(--theme-color-rgb), 0.4);
+            transform: translateY(-6px);
+            box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.4);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-header {
+            font-weight: 800;
+            font-size: 19px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--text-color);
+            letter-spacing: -0.02em;
+        }
+
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(var(--theme-color-rgb), 0.12);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--theme-color);
+            font-size: 22px;
+            box-shadow: inset 0 0 15px rgba(var(--theme-color-rgb), 0.15);
+        }
+
+        /* Improved Inputs */
+        .modern-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            color: var(--text-color);
+            padding: 18px 24px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-family: var(--font-main);
+            transition: var(--transition);
+            outline: none;
+            box-sizing: border-box;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .modern-input:focus {
+            border-color: var(--theme-color);
+            background: rgba(0, 0, 0, 0.55);
+            box-shadow: 0 0 0 5px rgba(var(--theme-color-rgb), 0.15), inset 0 2px 4px rgba(0,0,0,0.1);
+            transform: scale(1.01);
+        }
+
+        .modern-button {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: 18px 32px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 12px 24px -6px rgba(var(--theme-color-rgb), 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modern-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            opacity: 0;
+            transition: var(--transition);
+            pointer-events: none;
+        }
+
+        .modern-button:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 20px 40px -8px rgba(var(--theme-color-rgb), 0.6);
+            filter: brightness(1.15);
+        }
+
+        .modern-button:hover::after { opacity: 1; transform: translate(10%, 10%); }
+
+        .modern-button:active { transform: translateY(0) scale(0.97); }
 
         .settings-row {
             padding: 20px 24px;
             background: rgba(255, 255, 255, 0.03);
-            border-radius: var(--border-radius);
+            border-radius: var(--border-radius-md);
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
@@ -507,292 +603,169 @@
             cursor: pointer;
             transition: var(--transition);
             border: 1px solid var(--glass-border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .settings-row:hover {
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.07);
             border-color: rgba(var(--theme-color-rgb), 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            transform: translateX(6px);
         }
 
         .toggle-switch {
-            width: 52px;
-            height: 28px;
-            background: rgba(255, 255, 255, 0.1);
+            width: 60px;
+            height: 34px;
+            background: rgba(255, 255, 255, 0.12);
             border-radius: 100px;
             position: relative;
             cursor: pointer;
             transition: var(--transition);
+            border: 1px solid var(--glass-border);
         }
 
         .toggle-switch.on {
             background: var(--theme-color);
-            box-shadow: 0 0 15px rgba(var(--theme-color-rgb), 0.4);
+            box-shadow: 0 0 25px rgba(var(--theme-color-rgb), 0.5);
+            border-color: rgba(var(--theme-color-rgb), 0.3);
         }
 
         .toggle-knob {
-            width: 22px;
-            height: 22px;
+            width: 26px;
+            height: 26px;
             background: white;
             border-radius: 50%;
             position: absolute;
             top: 3px;
             left: 3px;
             transition: var(--transition);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         .toggle-switch.on .toggle-knob {
-            left: 27px;
-        }
-
-        .custom-msg-input, .custom-dict-select {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
-            color: var(--text-color);
-            padding: 16px 20px;
-            border-radius: 16px;
-            font-size: 15px;
-            font-family: var(--font-main);
-            transition: var(--transition);
-            outline: none;
-        }
-
-        .custom-msg-input:focus, .custom-dict-select:focus {
-            border-color: var(--theme-color);
-            background: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 0 0 4px rgba(var(--theme-color-rgb), 0.1);
-        }
-
-        .custom-msg-send {
-            background: var(--accent-gradient);
-            color: white;
-            border: none;
-            padding: 16px 28px;
-            border-radius: 16px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 15px;
-            transition: var(--transition);
-            box-shadow: 0 10px 15px -3px rgba(var(--theme-color-rgb), 0.3);
-        }
-
-        .custom-msg-send:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 20px -3px rgba(var(--theme-color-rgb), 0.4);
-            filter: brightness(1.1);
-        }
-
-        .feature-section {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--glass-border);
-            border-radius: 28px;
-            padding: 24px;
-            margin-bottom: 24px;
-            backdrop-filter: blur(10px);
-        }
-
-        .feature-header {
-            font-weight: 800;
-            font-size: 16px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--text-color);
-        }
-
-        .feature-header span:first-child {
-            width: 36px;
-            height: 36px;
-            background: rgba(var(--theme-color-rgb), 0.1);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--theme-color);
-            font-size: 18px;
+            left: 30px;
+            transform: scale(1.1);
         }
 
         .clickable-word {
             display: inline-block;
-            padding: 6px 12px;
-            margin: 4px;
-            background: rgba(255, 255, 255, 0.04);
+            padding: 10px 20px;
+            margin: 6px;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
-            border-radius: 10px;
+            border-radius: 16px;
             cursor: pointer;
             transition: var(--transition);
-            font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text-color);
+            letter-spacing: 0.05em;
         }
 
         .clickable-word:hover {
             background: var(--theme-color);
             color: white;
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 5px 15px rgba(var(--theme-color-rgb), 0.3);
             border-color: var(--theme-color);
+            transform: translateY(-5px) scale(1.12);
+            box-shadow: 0 12px 24px rgba(var(--theme-color-rgb), 0.5);
         }
 
-        .custom-preset-btn {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 18px;
-            padding: 12px;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
+        .badge-count {
+            background: rgba(var(--theme-color-rgb), 0.15);
+            color: var(--theme-color);
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1px;
         }
 
-        .custom-preset-btn:hover {
-            background: rgba(255, 255, 255, 0.06);
-            transform: translateY(-3px);
-        }
-
-        .custom-preset-btn.active {
-            border-color: var(--theme-color);
-            background: rgba(var(--theme-color-rgb), 0.08);
-        }
-
-        .preset-preview {
-            width: 100%;
-            height: 35px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        /* Stealth Mode (F2) */
-        .selective-hidden {
-            opacity: 0 !important;
-            pointer-events: none !important;
-            transition: opacity 0.3s ease !important;
-        }
-
-        .selective-hidden img {
-            opacity: 1 !important;
-            visibility: visible !important;
+        .custom-clock {
+            font-family: var(--font-mono);
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--theme-color);
+            background: rgba(var(--theme-color-rgb), 0.1);
+            padding: 8px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(var(--theme-color-rgb), 0.2);
+            letter-spacing: 1px;
         }
 
         .note-item {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 18px;
-            margin-bottom: 12px;
+            border-radius: var(--border-radius-md);
+            padding: 24px;
+            margin-bottom: 16px;
             transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            backdrop-filter: blur(5px);
         }
 
         .note-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--theme-color);
-            transform: translateX(5px);
-        }
-
-        .custom-dict-results {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            padding: 20px;
-            margin-top: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .clickable-word {
-            display: inline-block;
-            padding: 6px 14px;
-            margin: 4px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        .clickable-word:hover {
-            background: var(--theme-color);
-            color: white;
-            border-color: var(--theme-color);
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(var(--theme-color-rgb), 0.4);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(var(--theme-color-rgb), 0.4);
+            transform: translateX(10px) translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
         }
 
         .word-tooltip {
             position: fixed;
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
+            background: rgba(var(--bg-rgb), 0.96);
+            backdrop-filter: blur(24px) saturate(180%);
             border: 1px solid var(--theme-color);
-            padding: 12px;
-            border-radius: 12px;
+            padding: 20px;
+            border-radius: 22px;
             z-index: 10002;
-            max-width: 250px;
-            font-size: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 320px;
+            font-size: 14px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
             pointer-events: none;
             display: none;
             color: var(--text-color);
-            line-height: 1.4;
+            line-height: 1.6;
+            animation: tooltipFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .selective-hidden {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            backdrop-filter: none !important;
-            pointer-events: none !important;
-            transition: none !important;
-        }
-
-        .selective-hidden * {
-            visibility: hidden !important;
-            opacity: 0 !important;
-            transition: none !important;
-        }
-
-        .selective-hidden img {
-            visibility: visible !important;
-            opacity: 0.8 !important;
-            filter: drop-shadow(0 0 10px var(--theme-color)) !important;
-            pointer-events: auto !important;
-            transition: 0.3s;
-        }
-
-        .selective-hidden img:hover {
-            opacity: 1 !important;
-            transform: scale(1.2) !important;
+        @keyframes tooltipFade { 
+            from { opacity: 0; transform: translateY(15px) scale(0.95); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
         }
 
         .note-delete {
-            width: 28px;
-            height: 28px;
-            background: rgba(255, 68, 68, 0.1);
-            border: 1px solid rgba(255, 68, 68, 0.2);
-            border-radius: 8px;
-            color: #ff4444;
+            width: 36px;
+            height: 36px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            color: #ef4444;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
             transition: var(--transition);
+            font-size: 16px;
         }
 
         .note-delete:hover {
-            background: #ff4444;
+            background: #ef4444;
             color: white;
-            transform: scale(1.1);
+            transform: scale(1.15) rotate(90deg);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
         }
 
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        /* Responsive Animations */
+        @keyframes slideInPanelRight {
+            from { transform: translateX(100%) scale(0.96); opacity: 0; filter: blur(10px); }
+            to { transform: translateX(0) scale(1); opacity: 1; filter: blur(0); }
+        }
+
+        @keyframes slideInPanelLeft {
+            from { transform: translateX(-100%) scale(0.96); opacity: 0; filter: blur(10px); }
+            to { transform: translateX(0) scale(1); opacity: 1; filter: blur(0); }
+        }
     `;
     document.head.appendChild(style);
 
@@ -878,7 +851,7 @@
                 const t = document.createElement('div');
                 t.className = 'custom-tab';
                 t.id = id;
-                t.innerHTML = `<span style="transform: translateY(1px); pointer-events: none;">${icon}</span>`;
+                t.innerHTML = `<span>${icon}</span>`;
                 return t;
             };
 
@@ -893,6 +866,7 @@
             const clock = document.createElement('div');
             clock.id = 'custom-clock';
             clock.className = 'custom-clock';
+            clock.style.marginLeft = 'auto';
             customRow.appendChild(clock);
 
             const updateClock = () => {
@@ -922,11 +896,11 @@
                 return `
                 <div class="panel-nav">
                     <div class="panel-title">
-                        <span style="background: linear-gradient(to right, var(--theme-color), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${title}</span>
-                        <div style="display: flex; gap: 5px; margin-left: 10px;">
-                            <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn" style="font-size: 16px;">🐱</div>
-                            <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn" style="font-size: 16px;">📚</div>
-                            <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn" style="font-size: 16px;">✨</div>
+                        <span style="background: linear-gradient(to right, var(--theme-color), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(var(--theme-color-rgb), 0.3));">${title}</span>
+                        <div class="custom-tab-group">
+                            <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn">🐱</div>
+                            <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn">📚</div>
+                            <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn">✨</div>
                         </div>
                     </div>
                     ${clockEnabled ? `<div class="custom-clock" id="panel-clock">${timeStr}</div>` : ''}
@@ -944,30 +918,38 @@
                 kbPage.innerHTML = `
                 ${getPanelNav('cat-btn', t.kbHeader)}
                 <div class="custom-page-content">
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div class="settings-row" id="toggle-space-hyphen">
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span style="font-weight: 700; font-size: 15px;">${t.toggleLabel}</span>
-                                <span style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">${isEnabled ? t.onDesc : t.offDesc}</span>
-                            </div>
-                            <div class="toggle-switch ${isEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">⌨️</div>
+                            <span>${t.kbHeader}</span>
                         </div>
-
-                        <div class="settings-row" id="toggle-chat-hyphen">
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span style="font-weight: 700; font-size: 15px;">${t.chatToggleLabel}</span>
-                                <span style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">${isChatEnabled ? t.chatDesc : t.chatOffDesc}</span>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="settings-row" id="toggle-space-hyphen">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-weight: 700; font-size: 16px;">${t.toggleLabel}</span>
+                                    <span style="color: var(--text-muted); font-size: 13px; line-height: 1.4;">${isEnabled ? t.onDesc : t.offDesc}</span>
+                                </div>
+                                <div class="toggle-switch ${isEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
                             </div>
-                            <div class="toggle-switch ${isChatEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
+
+                            <div class="settings-row" id="toggle-chat-hyphen">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-weight: 700; font-size: 16px;">${t.chatToggleLabel}</span>
+                                    <span style="color: var(--text-muted); font-size: 13px; line-height: 1.4;">${isChatEnabled ? t.chatDesc : t.chatOffDesc}</span>
+                                </div>
+                                <div class="toggle-switch ${isChatEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
+                            </div>
                         </div>
                     </div>
 
-                    <div style="margin-top: 30px; padding: 20px; background: linear-gradient(to bottom right, rgba(var(--theme-color-rgb), 0.1), rgba(0,0,0,0.2)); border-radius: 16px; border: 1px solid rgba(var(--theme-color-rgb), 0.2); color: var(--text-muted); font-size: 13px; line-height: 1.6; position: relative; overflow: hidden;">
-                        <div style="position: absolute; right: -10px; bottom: -10px; font-size: 60px; opacity: 0.05; transform: rotate(-15deg);">💡</div>
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: var(--theme-color); font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
-                            <span>💡</span> Info
+                    <div class="feature-card" style="background: linear-gradient(135deg, rgba(var(--theme-color-rgb), 0.1), rgba(0,0,0,0.2));">
+                        <div class="feature-header" style="color: var(--theme-color);">
+                            <div class="feature-icon">💡</div>
+                            <span>Quick Tip</span>
                         </div>
-                        ${t.closeInfo}
+                        <div style="color: var(--text-muted); font-size: 14px; line-height: 1.7;">
+                            ${t.closeInfo}
+                        </div>
                     </div>
                 </div>
             `;
@@ -989,24 +971,26 @@
                 }
 
                 const historyHtml = history.length > 0 ? `
-                <div style="margin-top: 15px; padding: 16px; background: rgba(255, 255, 255, 0.03); border-radius: 16px; border: 1px solid var(--glass-border);">
-                    <div style="font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center;">
-                        <span>Recent</span>
-                        <span id="clear-history" style="cursor: pointer; color: #ff4444; font-size: 10px; background: rgba(255, 68, 68, 0.1); padding: 4px 8px; border-radius: 6px; transition: 0.2s;">CLEAR</span>
+                <div style="margin-top: 15px; padding: 20px; background: rgba(255, 255, 255, 0.04); border-radius: 20px; border: 1px solid var(--glass-border);">
+                    <div style="font-size: 13px; font-weight: 800; color: var(--text-muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 2px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>📜 Recent</span>
+                        <span id="clear-history" style="cursor: pointer; color: #ff4444; font-size: 11px; background: rgba(255, 68, 68, 0.1); padding: 6px 12px; border-radius: 10px; transition: 0.3s; font-weight: 700;">CLEAR</span>
                     </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        ${history.map(h => `<span class="history-chip" style="padding: 6px 12px; background: rgba(var(--theme-color-rgb), 0.1); border-radius: 10px; font-size: 12px; cursor: pointer; border: 1px solid rgba(var(--theme-color-rgb), 0.2); font-weight: 600; transition: 0.2s;">${h}</span>`).join('')}
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        ${history.map(h => `<span class="history-chip" style="padding: 8px 16px; background: rgba(var(--theme-color-rgb), 0.12); border-radius: 12px; font-size: 13px; cursor: pointer; border: 1px solid rgba(var(--theme-color-rgb), 0.2); font-weight: 700; transition: 0.3s; color: var(--text-color);">${h}</span>`).join('')}
                     </div>
                 </div>
             ` : '';
 
                 const notesHtml = notes.length > 0 ? notes.slice(0, 5).map((note, index) => `
                     <div class="note-item">
+                        <div style="flex: 1;">
+                            <div class="note-content" style="font-size: 14px; line-height: 1.5; color: var(--text-color); font-weight: 500;">${note.content}</div>
+                            <div class="note-timestamp" style="font-size: 11px; opacity: 0.5; margin-top: 8px; font-weight: 600;">${new Date(note.timestamp).toLocaleString()}</div>
+                        </div>
                         <button class="note-delete" data-index="${index}">✕</button>
-                        <div class="note-content" style="font-size: 13px; line-height: 1.4; margin-bottom: 5px;">${note.content}</div>
-                        <div class="note-timestamp" style="font-size: 10px; opacity: 0.6;">${new Date(note.timestamp).toLocaleString()}</div>
                     </div>
-                `).join('') : `<div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px;">${t.noNotes}</div>`;
+                `).join('') : `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 14px; font-weight: 600;">${t.noNotes}</div>`;
 
                 const minLen = getMinWordLength();
                 const maxLen = getMaxWordLength();
@@ -1014,87 +998,99 @@
                 dictPage.innerHTML = `
                 ${getPanelNav('dict-btn', t.dictHeader)}
                 <div class="custom-page-content">
-                    <div class="feature-section">
+                    <div class="feature-card">
                         <div class="feature-header">
-                            <span>📝</span> ${t.notesHeader}
+                            <div class="feature-icon">📝</div>
+                            <span>${t.notesHeader}</span>
                         </div>
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <input type="text" id="new-note-input" class="custom-msg-input" placeholder="${t.notePlaceholder}" style="margin-top: 0;">
-                            <button class="custom-msg-send" id="add-note-btn" style="min-width: 50px;">+</button>
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                            <input type="text" id="new-note-input" class="modern-input" placeholder="${t.notePlaceholder}" style="flex: 1;">
+                            <button class="modern-button" id="add-note-btn" style="min-width: 60px; padding: 0;">+</button>
                         </div>
-                        <div id="notes-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div id="notes-list" style="display: flex; flex-direction: column;">
                             ${notesHtml}
                         </div>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-                        <div style="position: relative;">
-                            <input type="text" class="custom-msg-input" id="dict-msg-input" placeholder="Type letters..." style="padding-right: 45px; height: 50px; font-size: 16px; font-weight: 600;">
-                            <div style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 18px; opacity: 0.5;">🔍</div>
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">🔍</div>
+                            <span>Word Search</span>
                         </div>
-
-                        <div style="display: flex; gap: 10px;">
-                            <select class="custom-dict-select" id="dict-search-mode" style="flex: 1; height: 45px; font-weight: 600;">
-                                <option value="Contains" ${searchMode === 'Contains' ? 'selected' : ''}>Contains</option>
-                                <option value="StartsWith" ${searchMode === 'StartsWith' ? 'selected' : ''}>Starts With</option>
-                                <option value="EndsWith" ${searchMode === 'EndsWith' ? 'selected' : ''}>Ends With</option>
-                                <option value="SyllableChain" ${searchMode === 'SyllableChain' ? 'selected' : ''}>Syllable Chain</option>
-                            </select>
-                            <select class="custom-dict-select" id="dict-word-type" style="flex: 1; height: 45px; font-weight: 600;">
-                                <option value="All" ${wordType === 'All' ? 'selected' : ''}>All Words</option>
-                                <option value="Hyphen" ${wordType === 'Hyphen' ? 'selected' : ''}>Hyphen Only</option>
-                                <option value="Long" ${wordType === 'Long' ? 'selected' : ''}>Long Words Only</option>
-                                <option value="Casual" ${wordType === 'Casual' ? 'selected' : ''}>Casual Words</option>
-                                <option value="Shorts" ${wordType === 'Shorts' ? 'selected' : ''}>Shorts</option>
-                                <option value="Phobia" ${wordType === 'Phobia' ? 'selected' : ''}>Phobia</option>
-                                <option value="Apostrophes" ${wordType === 'Apostrophes' ? 'selected' : ''}>Apostrophes</option>
-                            </select>
-                        </div>
-
-                        <div class="feature-section" style="padding: 15px; margin-bottom: 0;">
-                            <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px;">
-                                <span>Word Length</span>
-                                <span>${minLen} - ${maxLen}</span>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div style="position: relative;">
+                                <input type="text" class="modern-input" id="dict-msg-input" placeholder="Type letters..." style="padding-right: 60px; font-weight: 700; font-size: 18px;">
+                                <div style="position: absolute; right: 24px; top: 50%; transform: translateY(-50%); font-size: 20px; opacity: 0.6;">⚡</div>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <input type="range" id="dict-min-len" min="2" max="30" value="${minLen}" style="flex: 1; accent-color: var(--theme-color);">
-                                <input type="range" id="dict-max-len" min="2" max="30" value="${maxLen}" style="flex: 1; accent-color: var(--theme-color);">
+
+                            <div style="display: flex; gap: 12px;">
+                                <select class="modern-input" id="dict-search-mode" style="flex: 1; padding: 14px 20px; font-weight: 700; appearance: none; cursor: pointer;">
+                                    <option value="Contains" ${searchMode === 'Contains' ? 'selected' : ''}>Contains</option>
+                                    <option value="StartsWith" ${searchMode === 'StartsWith' ? 'selected' : ''}>Starts With</option>
+                                    <option value="EndsWith" ${searchMode === 'EndsWith' ? 'selected' : ''}>Ends With</option>
+                                    <option value="SyllableChain" ${searchMode === 'SyllableChain' ? 'selected' : ''}>Syllable Chain</option>
+                                </select>
+                                <select class="modern-input" id="dict-word-type" style="flex: 1; padding: 14px 20px; font-weight: 700; appearance: none; cursor: pointer;">
+                                    <option value="All" ${wordType === 'All' ? 'selected' : ''}>All Words</option>
+                                    <option value="Hyphen" ${wordType === 'Hyphen' ? 'selected' : ''}>Hyphen Only</option>
+                                    <option value="Long" ${wordType === 'Long' ? 'selected' : ''}>Long Words</option>
+                                    <option value="Casual" ${wordType === 'Casual' ? 'selected' : ''}>Casual</option>
+                                    <option value="Shorts" ${wordType === 'Shorts' ? 'selected' : ''}>Shorts</option>
+                                    <option value="Phobia" ${wordType === 'Phobia' ? 'selected' : ''}>Phobia</option>
+                                    <option value="Apostrophes" ${wordType === 'Apostrophes' ? 'selected' : ''}>Apostrophes</option>
+                                </select>
+                            </div>
+
+                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
+                                    <span>Word Length</span>
+                                    <span style="color: var(--theme-color);">${minLen} - ${maxLen} chars</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 16px;">
+                                    <input type="range" id="dict-min-len" min="2" max="30" value="${minLen}" style="flex: 1; accent-color: var(--theme-color); cursor: pointer;">
+                                    <input type="range" id="dict-max-len" min="2" max="30" value="${maxLen}" style="flex: 1; accent-color: var(--theme-color); cursor: pointer;">
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     ${historyHtml}
 
-                    <div class="feature-section" style="margin-top: 20px;">
+                    <div class="feature-card">
                         <div class="feature-header">
-                            <span>📖</span> ${t.dictSelectLabel}
+                            <div class="feature-icon">📖</div>
+                            <span>${t.dictSelectLabel}</span>
                         </div>
-                        <select class="custom-dict-select" id="dict-lang-select">
+                        <select class="modern-input" id="dict-lang-select" style="font-weight: 700; appearance: none; cursor: pointer;">
                             ${options}
                             <option value="Custom" ${dictLang === 'Custom' ? 'selected' : ''}>${t.dictCustomUpload}</option>
                         </select>
                     </div>
 
-                    <div id="custom-dict-upload-area" style="display: ${dictLang === 'Custom' ? 'block' : 'none'}; margin-bottom: 20px; padding: 20px; background: rgba(var(--theme-color-rgb), 0.05); border-radius: 16px; border: 2px dashed rgba(var(--theme-color-rgb), 0.3);">
-                        <div style="font-size: 13px; color: var(--text-color); font-weight: 700; margin-bottom: 12px;">${t.dictUploadDesc}</div>
-                        <input type="file" id="dict-file-upload" class="custom-msg-input" accept=".txt" style="margin-bottom: 12px; border-style: solid;">
-                        <textarea id="dict-manual-input" class="custom-msg-input" style="min-height: 120px; font-size: 13px; margin-bottom: 12px; font-family: monospace;" placeholder="${t.dictPlaceholder}">${(getCustomDictionary() || []).join('\n')}</textarea>
-                        <button class="custom-msg-send" id="dict-file-confirm" style="width: 100%;">
-                            <span>💾</span> ${t.dictUploadBtn}
+                    <div id="custom-dict-upload-area" style="display: ${dictLang === 'Custom' ? 'block' : 'none'}; margin-bottom: 24px; padding: 28px; background: rgba(var(--theme-color-rgb), 0.08); border-radius: 24px; border: 2px dashed rgba(var(--theme-color-rgb), 0.3); backdrop-filter: blur(10px);">
+                        <div style="font-size: 15px; color: var(--text-color); font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                            <span>📁</span> ${t.dictUploadDesc}
+                        </div>
+                        <input type="file" id="dict-file-upload" class="modern-input" accept=".txt" style="margin-bottom: 16px; border-style: solid;">
+                        <textarea id="dict-manual-input" class="modern-input" style="min-height: 150px; font-size: 14px; margin-bottom: 16px; font-family: var(--font-mono); line-height: 1.6;" placeholder="${t.dictPlaceholder}">${(getCustomDictionary() || []).join('\n')}</textarea>
+                        <button class="modern-button" id="dict-file-confirm" style="width: 100%;">
+                            <span>�</span> ${t.dictUploadBtn}
                         </button>
                     </div>
 
-                    <div class="custom-dict-results" id="dict-results-container" style="border-radius: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); padding: 20px;">
-                        <div class="custom-dict-result-header" id="dict-result-header" style="font-size: 14px; font-weight: 800; color: var(--theme-color); margin-bottom: 15px;"></div>
-                        <div class="custom-dict-result-list" id="dict-result-list" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+                    <div class="feature-card" id="dict-results-container" style="background: rgba(0,0,0,0.3); border-color: var(--glass-border); padding: 28px;">
+                        <div class="custom-dict-result-header" id="dict-result-header" style="font-size: 16px; font-weight: 800; color: var(--theme-color); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;"></div>
+                        <div class="custom-dict-result-list" id="dict-result-list" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
                     </div>
 
-                    <div style="margin-top: 30px; padding: 20px; background: linear-gradient(to bottom right, rgba(var(--theme-color-rgb), 0.1), rgba(0,0,0,0.2)); border-radius: 16px; border: 1px solid rgba(var(--theme-color-rgb), 0.2); color: var(--text-muted); font-size: 13px; line-height: 1.6; position: relative; overflow: hidden;">
-                        <div style="position: absolute; right: -10px; bottom: -10px; font-size: 60px; opacity: 0.05; transform: rotate(-15deg);">💡</div>
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: var(--theme-color); font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
-                            <span>💡</span> Tip
+                    <div class="feature-card" style="background: linear-gradient(135deg, rgba(var(--theme-color-rgb), 0.1), rgba(0,0,0,0.2));">
+                        <div class="feature-header" style="color: var(--theme-color);">
+                            <div class="feature-icon">💡</div>
+                            <span>Pro Tip</span>
                         </div>
-                        Click on a word to copy it to your clipboard.
+                        <div style="color: var(--text-muted); font-size: 14px; line-height: 1.7;">
+                            Click on any word to copy it instantly. Hover to see its definition!
+                        </div>
                     </div>
                 </div>
             `;
@@ -1114,78 +1110,100 @@
                 adminPage.innerHTML = `
                 ${getPanelNav('admin-btn', t.adminHeader)}
                 <div class="custom-page-content">
-                    <div class="feature-section">
-                        <div class="feature-header"><span>🎨</span> Appearance</div>
-                        <div style="display: flex; flex-direction: column; gap: 15px;">
-                            <div style="display: flex; gap: 10px;">
-                                <div style="flex: 1; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                                    <span style="font-size: 10px; font-weight: 800; color: var(--text-muted); letter-spacing: 1px;">THEME</span>
-                                    <input type="color" class="custom-theme-picker" id="admin-theme-picker" value="${themeColor}">
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">🎨</div>
+                            <span>Visual Appearance</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <div style="display: flex; gap: 15px;">
+                                <div style="flex: 1; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 20px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; align-items: center; gap: 12px; transition: 0.3s;" class="color-picker-container">
+                                    <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase;">THEME</span>
+                                    <input type="color" class="custom-theme-picker" id="admin-theme-picker" value="${themeColor}" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,0.1); cursor: pointer;">
                                 </div>
-                                <div style="flex: 1; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                                    <span style="font-size: 10px; font-weight: 800; color: var(--text-muted); letter-spacing: 1px;">BACKGROUND</span>
-                                    <input type="color" class="custom-theme-picker" id="admin-bg-picker" value="${bgColor}">
+                                <div style="flex: 1; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 20px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; align-items: center; gap: 12px; transition: 0.3s;" class="color-picker-container">
+                                    <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase;">BACKDROP</span>
+                                    <input type="color" class="custom-theme-picker" id="admin-bg-picker" value="${bgColor}" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,0.1); cursor: pointer;">
                                 </div>
                             </div>
 
-                            <div class="settings-row" id="toggle-panel-pos">
+                            <div class="settings-row" id="toggle-panel-pos" style="padding: 16px 20px;">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700;">Panel Position</span>
-                                    <span style="color: var(--text-muted); font-size: 12px;">Currently: ${panelPosition.toUpperCase()}</span>
+                                    <span style="font-weight: 700; font-size: 15px;">Panel Side</span>
+                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Currently anchored to ${panelPosition.toUpperCase()}</span>
                                 </div>
-                                <div style="display: flex; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 4px;">
-                                    <div id="pos-left-btn" style="padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 800; ${panelPosition === 'left' ? 'background: var(--theme-color); color: white;' : 'color: var(--text-muted);'}">LEFT</div>
-                                    <div id="pos-right-btn" style="padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 800; ${panelPosition === 'right' ? 'background: var(--theme-color); color: white;' : 'color: var(--text-muted);'}">RIGHT</div>
+                                <div style="display: flex; background: rgba(0,0,0,0.3); border-radius: 14px; padding: 5px; border: 1px solid var(--glass-border);">
+                                    <div id="pos-left-btn" style="padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.3s; ${panelPosition === 'left' ? 'background: var(--theme-color); color: white; box-shadow: 0 4px 12px rgba(var(--theme-color-rgb), 0.3);' : 'color: var(--text-muted);'}">LEFT</div>
+                                    <div id="pos-right-btn" style="padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.3s; ${panelPosition === 'right' ? 'background: var(--theme-color); color: white; box-shadow: 0 4px 12px rgba(var(--theme-color-rgb), 0.3);' : 'color: var(--text-muted);'}">RIGHT</div>
                                 </div>
                             </div>
 
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700;">
-                                    <span>Glass Blur</span>
-                                    <span>${Math.round(glassOpacity * 100)}%</span>
+                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
+                                    <span>Glass Transparency</span>
+                                    <span style="color: var(--theme-color);">${Math.round(glassOpacity * 100)}%</span>
                                 </div>
-                                <input type="range" id="admin-glass-opacity" min="0" max="1" step="0.05" value="${glassOpacity}" style="accent-color: var(--theme-color);">
+                                <input type="range" id="admin-glass-opacity" min="0" max="1" step="0.05" value="${glassOpacity}" style="width: 100%; accent-color: var(--theme-color); cursor: pointer;">
                             </div>
 
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700;">
-                                    <span>Corners</span>
-                                    <span>${borderRadius}px</span>
+                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
+                                    <span>Corner Softness</span>
+                                    <span style="color: var(--theme-color);">${borderRadius}px</span>
                                 </div>
-                                <input type="range" id="admin-border-radius" min="0" max="40" step="1" value="${borderRadius}" style="accent-color: var(--theme-color);">
+                                <input type="range" id="admin-border-radius" min="0" max="40" step="1" value="${borderRadius}" style="width: 100%; accent-color: var(--theme-color); cursor: pointer;">
                             </div>
 
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <div style="font-size: 13px; font-weight: 700;">Custom Wallpaper URL</div>
-                                <input type="text" id="admin-bg-image-url" class="custom-msg-input" value="${bgImageUrl}" placeholder="https://...">
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <div style="font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Custom Wallpaper URL</div>
+                                <input type="text" id="admin-bg-image-url" class="modern-input" value="${bgImageUrl}" placeholder="https://images.unsplash.com/...">
                             </div>
                         </div>
                     </div>
 
-                    <div class="feature-section">
-                        <div class="feature-header"><span>📱</span> Interface</div>
-                        <div class="settings-row" id="toggle-language">
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span style="font-weight: 700;">Language / Sprache</span>
-                                <span style="color: var(--text-muted); font-size: 12px;">Currently: ${getLanguage()}</span>
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">⚙️</div>
+                            <span>System & UI</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div class="settings-row" id="toggle-language">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-weight: 700; font-size: 15px;">Interface Language</span>
+                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Currently using ${getLanguage()}</span>
+                                </div>
+                                <select id="admin-language-select" class="modern-input" style="width: 140px; padding: 10px 15px; font-size: 13px; font-weight: 800; appearance: none; cursor: pointer; text-align: center;">
+                                    <option value="English" ${getLanguage() === 'English' ? 'selected' : ''}>English</option>
+                                    <option value="German" ${getLanguage() === 'German' ? 'selected' : ''}>Deutsch</option>
+                                </select>
                             </div>
-                            <select id="admin-language-select" class="custom-dict-select" style="width: 120px; height: 36px; padding: 4px 10px; margin-top: 0; font-size: 12px; font-weight: 800;">
-                                <option value="English" ${getLanguage() === 'English' ? 'selected' : ''}>English</option>
-                                <option value="German" ${getLanguage() === 'German' ? 'selected' : ''}>Deutsch</option>
-                            </select>
-                        </div>
-                        <div class="settings-row" id="toggle-clock">
-                            <span style="font-weight: 700;">Show System Clock</span>
-                            <div class="toggle-switch ${clockEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
-                        </div>
-                        <div class="settings-row">
-                            <span style="font-weight: 700;">${t.toggleKeyLabel}</span>
-                            <input type="text" id="admin-toggle-key" class="custom-msg-input" value="${getToggleKey()}" style="width: 100px; text-align: center; font-weight: 800; margin-top: 0;">
+
+                            <div class="settings-row" id="toggle-clock">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-weight: 700; font-size: 15px;">System Clock</span>
+                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Display time in the navigation bar</span>
+                                </div>
+                                <div class="toggle-switch ${clockEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
+                            </div>
+
+                            <div class="settings-row" style="cursor: default;">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-weight: 700; font-size: 15px;">Panel Toggle Hotkey</span>
+                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Press key to quickly hide/show panel</span>
+                                </div>
+                                <input type="text" id="admin-toggle-key" class="modern-input" value="${getToggleKey()}" style="width: 80px; text-align: center; font-weight: 900; padding: 10px; border-radius: 12px; background: rgba(var(--theme-color-rgb), 0.1); color: var(--theme-color); border-color: rgba(var(--theme-color-rgb), 0.2);">
+                            </div>
                         </div>
                     </div>
 
-                    <div style="text-align: center; padding: 30px; opacity: 0.3; font-size: 10px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--text-color);">
-                        JKLM POWER TOOLS v3.0
+                    <div style="display: flex; flex-direction: column; align-items: center; padding: 40px 20px; gap: 15px;">
+                        <div style="font-size: 11px; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; color: var(--theme-color); opacity: 0.8; text-shadow: 0 0 15px rgba(var(--theme-color-rgb), 0.4);">
+                            JKLM POWER TOOLS
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="padding: 5px 12px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 10px; font-weight: 800; color: var(--text-muted); border: 1px solid var(--glass-border);">VERSION 3.2</span>
+                            <span style="padding: 5px 12px; background: rgba(var(--theme-color-rgb), 0.1); border-radius: 8px; font-size: 10px; font-weight: 800; color: var(--theme-color); border: 1px solid rgba(var(--theme-color-rgb), 0.2);">ROOT EDITION</span>
+                        </div>
                     </div>
                 </div>
             `;
