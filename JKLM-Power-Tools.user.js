@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      10.1
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.1)
+// @version      10.2
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.2)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '10.1';
+    const SCRIPT_VERSION = '10.2';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1025,8 +1025,8 @@
             to { background-position: 0% 100%; }
         }
 
-        /* Rainbow Stats Animation */
-        .home .playerCount {
+        /* Player Count & Stats Visibility */
+        .playerCount {
             color: #000 !important;
             font-weight: 800 !important;
             font-size: 1em !important;
@@ -1044,9 +1044,15 @@
             pointer-events: auto !important;
         }
 
-        .home .playerCount b {
+        .playerCount b {
             color: var(--theme-color) !important;
             text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff !important;
+        }
+
+        .home {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
         /* Custom Room Card Background & Bubble */
@@ -2024,6 +2030,23 @@
                 }
             });
             gameObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+            // Hard-enforce visibility for the "Play with..." text (v10.2)
+             setInterval(() => {
+                 const pc = document.querySelector('.playerCount');
+                 if (pc) {
+                     pc.style.setProperty('display', 'inline-block', 'important');
+                     pc.style.setProperty('visibility', 'visible', 'important');
+                     pc.style.setProperty('opacity', '1', 'important');
+                 }
+                 const h = document.querySelector('.home');
+                 if (h) {
+                     h.style.setProperty('display', 'block', 'important');
+                     h.style.setProperty('visibility', 'visible', 'important');
+                     h.style.setProperty('opacity', '1', 'important');
+                 }
+                 updateThemeStyles();
+             }, 1000);
 
             GM_addValueChangeListener('spaceToHyphenEnabled', () => updateKbContent());
             GM_addValueChangeListener('spaceToHyphenChatEnabled', () => updateKbContent());
