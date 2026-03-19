@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      8.5
-// @description  Advanced JKLM Power Tools - Ultimate Edition (English Unified v8.5)
+// @version      8.6
+// @description  Advanced JKLM Power Tools - Ultimate Edition (Guardian Stealth v8.6)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -173,6 +173,14 @@
                     notify.style.opacity = '0';
                     setTimeout(() => notify.remove(), 500);
                 };
+
+                // Auto-remove after 1 second (Stealth Mode)
+                setTimeout(() => {
+                    if (document.getElementById('jklm-resilience-notice')) {
+                        notify.style.opacity = '0';
+                        setTimeout(() => notify.remove(), 500);
+                    }
+                }, 1000);
             };
 
             const removeFallbackCSS = () => {
@@ -293,7 +301,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '8.3';
+    const SCRIPT_VERSION = '8.6';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
