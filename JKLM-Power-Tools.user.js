@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      8.8
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v8.8)
+// @version      8.9
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v8.9)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -287,7 +287,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '8.8';
+    const SCRIPT_VERSION = '8.9';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
