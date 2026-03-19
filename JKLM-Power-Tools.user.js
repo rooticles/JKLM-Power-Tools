@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      9.8
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.8)
+// @version      9.9
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.9)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '9.8';
+    const SCRIPT_VERSION = '9.9';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1031,18 +1031,21 @@
         /* Rainbow Stats Animation */
         .home .playerCount {
             color: #000 !important;
-            font-weight: 900 !important;
-            font-size: 1.2em !important;
+            font-weight: 800 !important;
+            font-size: 1em !important;
             display: inline-block;
             opacity: 1 !important;
             visibility: visible !important;
-            text-shadow: 0 0 1px #fff, 0 0 1px #fff, 0 0 1px #fff !important; /* White outline for black text */
-            margin: 15px 0 !important;
+            text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff !important;
+            background: none !important;
+            -webkit-background-clip: initial !important;
+            -webkit-text-fill-color: initial !important;
+            margin: 10px 0 !important;
         }
 
         .home .playerCount b {
             color: var(--theme-color) !important;
-            text-shadow: 0 0 5px rgba(var(--theme-color-rgb), 0.3) !important;
+            text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff !important;
         }
 
         /* Custom Room Card Background & Bubble */
