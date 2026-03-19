@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      4.8
-// @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
+// @version      5.0
+// @description  Advanced JKLM Power Tools with Multi-Source Definitions and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -70,7 +70,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '4.8';
+    const SCRIPT_VERSION = '5.0';
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
@@ -1436,30 +1436,49 @@
                         document.querySelectorAll('.clickable-word').forEach(el => {
                             el.addEventListener('mouseenter', async (e) => {
                                 const word = e.target.getAttribute('data-word').toLowerCase();
+                                const currentDict = getDictLanguage().toLowerCase();
                                 tooltip.style.display = 'block';
-                                tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br><span style="opacity: 0.7;">Fetching definition...</span>`;
+                                tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br><span style="opacity: 0.7;">Searching definition...</span>`;
                                 
                                 if (definitionCache.has(word)) {
                                     tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>${definitionCache.get(word)}`;
                                     return;
                                 }
 
-                                try {
-                                    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-                                    if (!response.ok) throw new Error('Word not found');
-                                    
-                                    const data = await response.json();
-                                    if (data && data[0] && data[0].meanings[0]) {
-                                        const def = data[0].meanings[0].definitions[0].definition;
-                                        definitionCache.set(word, def);
-                                        tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>${def}`;
-                                    } else {
-                                        definitionCache.set(word, 'No definition found.');
-                                        tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>No definition found.`;
-                                    }
-                                } catch (err) {
-                                    definitionCache.set(word, 'No definition found.');
-                                    tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>No definition found.`;
+                                const fetchDefinition = async (w) => {
+                                    // Try Free Dictionary API first (Fastest)
+                                    try {
+                                        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${w}`);
+                                        if (response.ok) {
+                                            const data = await response.json();
+                                            if (data?.[0]?.meanings?.[0]?.definitions?.[0]) {
+                                                return data[0].meanings[0].definitions[0].definition;
+                                            }
+                                        }
+                                    } catch (e) {}
+
+                                    // Fallback to Wiktionary (Very reliable, supports many languages)
+                                    try {
+                                        const lang = currentDict.includes('german') ? 'de' : 'en';
+                                        const response = await fetch(`https://${lang}.wiktionary.org/api/rest_v1/page/summary/${encodeURIComponent(w)}`);
+                                        if (response.ok) {
+                                            const data = await response.json();
+                                            if (data.extract) return data.extract;
+                                        }
+                                    } catch (e) {}
+
+                                    return null;
+                                };
+
+                                const def = await fetchDefinition(word);
+                                if (def) {
+                                    definitionCache.set(word, def);
+                                    tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>${def}`;
+                                } else {
+                                    const googleLink = `https://www.google.com/search?q=definition+${word}`;
+                                    const errorMsg = `No precise definition found. <a href="${googleLink}" target="_blank" style="color: var(--theme-color); text-decoration: underline;">Search on Google</a>`;
+                                    definitionCache.set(word, errorMsg);
+                                    tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>${errorMsg}`;
                                 }
                             });
                             el.addEventListener('mousemove', (e) => {
