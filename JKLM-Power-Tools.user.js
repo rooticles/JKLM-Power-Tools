@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      8.4
-// @description  Advanced JKLM Power Tools - Ultimate Edition (Professional Localization v8.4)
+// @version      8.5
+// @description  Advanced JKLM Power Tools - Ultimate Edition (English Unified v8.5)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -385,66 +385,66 @@
     // --- Translations ---
     const translations = {
         'English': {
-            kbHeader: '🚀 Tastatur-Einstellungen',
-            toggleLabel: 'Leertaste zu Bindestrich (Spiel)',
-            chatToggleLabel: 'Leertaste zu Bindestrich (Chat)',
-            onDesc: 'Aktiviert: Die Leertaste wird während einer Runde automatisch in einen Bindestrich umgewandelt.',
-            offDesc: 'Deaktiviert: Die Leertaste funktioniert normal.',
-            chatDesc: 'Aktiviert: Deine Leertaste im Chat sendet stattdessen einen Bindestrich.',
-            chatOffDesc: 'Deaktiviert: Der Chat verhält sich wie gewohnt.',
-            closeInfo: 'Dieses Script optimiert dein JKLM-Erlebnis. <br><br>Du kannst dieses Menü jederzeit mit der <strong>ESC-Taste</strong> schließen.',
-            dictHeader: '📖 Wortsuche & Wörterbuch',
-            msgLabel: 'Nachricht schreiben',
-            msgPlaceholder: 'Buchstaben eingeben...',
-            msgSend: 'Senden',
-            dictResultPrefix: 'Es wurden {count} passende Wörter gefunden:',
-            dictNoResults: 'Keine Wörter gefunden.',
-            dictSearchModeLabel: 'Suchmodus:',
-            dictWordTypeLabel: 'Wort-Kategorie:',
-            dictSelectLabel: 'Sprachauswahl:',
-            historyHeader: '📜 Verlauf',
-            historyEmpty: 'Noch keine Wörter in dieser Runde gesucht.',
+            kbHeader: '🚀 Keyboard Settings',
+            toggleLabel: 'Spacebar to Hyphen (Game)',
+            chatToggleLabel: 'Spacebar to Hyphen (Chat)',
+            onDesc: 'Enabled: Spacebar will automatically be converted to a hyphen during rounds.',
+            offDesc: 'Disabled: Spacebar functions normally.',
+            chatDesc: 'Enabled: Your spacebar in chat sends a hyphen instead.',
+            chatOffDesc: 'Disabled: Chat behaves as usual.',
+            closeInfo: 'This script optimizes your JKLM experience. <br><br>You can close this menu at any time with the <strong>ESC key</strong>.',
+            dictHeader: '📖 Word Search & Dictionary',
+            msgLabel: 'Write message',
+            msgPlaceholder: 'Type letters...',
+            msgSend: 'Send',
+            dictResultPrefix: 'Found {count} matching words:',
+            dictNoResults: 'No words found.',
+            dictSearchModeLabel: 'Search Mode:',
+            dictWordTypeLabel: 'Word Category:',
+            dictSelectLabel: 'Language Selection:',
+            historyHeader: '📜 History',
+            historyEmpty: 'No words searched in this round yet.',
             adminHeader: '⚙️ Design & System',
-            adminVisualHeader: '🎨 Visuelles Design',
-            adminMiniModeLabel: 'Kompakt-Modus',
-            adminFontLabel: 'Schriftart:',
-            adminThemeLabel: 'Akzentfarbe:',
-            adminBgLabel: 'Hintergrundfarbe:',
-            adminPresetsLabel: '🎨 Design-Vorlagen:',
-            adminCppHeader: '🖼️ Benutzerdefiniertes Profilbild',
-            adminCppDesc: 'Lade ein Bild hoch (lokal):',
-            adminCppBtn: 'Profilbild anwenden',
-            adminCppError: 'Datei zu groß (>10Kb).',
-            adminCppSuccess: 'Erfolgreich angewendet.',
-            adminSidebarWidthLabel: 'Panel-Breite (Pixel):',
+            adminVisualHeader: '🎨 Visual Design',
+            adminMiniModeLabel: 'Compact Mode',
+            adminFontLabel: 'Font:',
+            adminThemeLabel: 'Accent Color:',
+            adminBgLabel: 'Background Color:',
+            adminPresetsLabel: '🎨 Design Presets:',
+            adminCppHeader: '🖼️ Custom Profile Picture',
+            adminCppDesc: 'Upload an image (local):',
+            adminCppBtn: 'Apply Profile Picture',
+            adminCppError: 'File too large (>10Kb).',
+            adminCppSuccess: 'Applied successfully.',
+            adminSidebarWidthLabel: 'Panel Width (pixels):',
             adminMinLabel: 'Minimum: 180.',
-            adminLoginHeader: '🛡️ Admin-Bereich',
-            adminUserPlaceholder: 'Benutzername...',
-            adminPassPlaceholder: 'Passwort...',
-            adminLoginBtn: 'Anmelden',
-            adminLogoutBtn: 'Abmelden',
-            adminLoginError: 'Zugangsdaten ungültig!',
-            adminGlassLabel: 'Transparenz:',
-            adminRadiusLabel: 'Ecken-Abrundung:',
-            adminClockLabel: 'Systemuhr',
-            adminThemeAnimLabel: 'Animierte Akzente',
-            adminBgImageLabel: 'Hintergrundbild (URL):',
-            adminAnimLabel: 'Öffnungs-Animation:',
-            dictCustomUpload: 'Eigenes Wörterbuch',
-            dictUploadDesc: 'Lade eine .txt Datei hoch oder füge Wörter manuell ein:',
-            dictUploadBtn: 'Wörter speichern',
-            dictPlaceholder: 'Wort 1\nWort 2\nWort 3...',
-            dictFoundWords: '{count} Wörter gefunden:',
-            dictNoResultsShort: 'Keine Ergebnisse.',
-            english: 'Englisch',
+            adminLoginHeader: '🛡️ Admin Area',
+            adminUserPlaceholder: 'Username...',
+            adminPassPlaceholder: 'Password...',
+            adminLoginBtn: 'Login',
+            adminLogoutBtn: 'Logout',
+            adminLoginError: 'Invalid credentials!',
+            adminGlassLabel: 'Transparency:',
+            adminRadiusLabel: 'Corner Softness:',
+            adminClockLabel: 'System Clock',
+            adminThemeAnimLabel: 'Animated Accents',
+            adminBgImageLabel: 'Background Image (URL):',
+            adminAnimLabel: 'Open Animation:',
+            dictCustomUpload: 'Custom Dictionary',
+            dictUploadDesc: 'Upload a .txt file or paste words manually:',
+            dictUploadBtn: 'Save Words',
+            dictPlaceholder: 'Word 1\nWord 2\nWord 3...',
+            dictFoundWords: '{count} words found:',
+            dictNoResultsShort: 'No results.',
+            english: 'English',
             // Features
-            notesHeader: '� Strategie-Notizen',
-            notesDesc: 'Verwalte deine Gedanken und Spielzüge.',
-            addNote: 'Notiz hinzufügen',
-            notePlaceholder: 'Deine Notiz hier...',
-            saveNote: 'Speichern',
-            noNotes: 'Noch keine Notizen vorhanden.',
-            toggleKeyLabel: 'Panel-Schnellzugriff (Taste)'
+            notesHeader: '📌 Strategy Notes',
+            notesDesc: 'Manage your thoughts and strategies.',
+            addNote: 'Add Note',
+            notePlaceholder: 'Your note here...',
+            saveNote: 'Save',
+            noNotes: 'No notes available yet.',
+            toggleKeyLabel: 'Panel Fast-Access (Key)'
         }
     };
 
@@ -1396,10 +1396,10 @@
                     <div class="feature-card" style="background: rgba(var(--theme-color-rgb), 0.05); border-color: rgba(var(--theme-color-rgb), 0.2);">
                         <div class="feature-header" style="color: var(--theme-color);">
                             <div class="feature-icon" style="background: rgba(var(--theme-color-rgb), 0.15); box-shadow: var(--glow-effect);">💡</div>
-                            <span>Pro-Tipp</span>
+                            <span>Pro-Tip</span>
                         </div>
                         <div style="color: var(--text-color); opacity: 0.8; font-size: 14px; line-height: 1.7;">
-                            Klicke auf ein Wort, um es sofort zu kopieren. Nutze die Filter, um die besten Wörter für deine Runde zu finden!
+                            Click on any word to copy it instantly. Use the filters to find the best words for your round!
                         </div>
                     </div>
                 </div>
@@ -1430,19 +1430,19 @@
                         <div style="display: flex; flex-direction: column; gap: 20px;">
                             <div style="display: flex; gap: 15px;">
                                 <div style="flex: 1; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 20px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; align-items: center; gap: 12px; transition: 0.3s;" class="color-picker-container">
-                                    <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase;">AKZENTFARBE</span>
+                                    <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase;">ACCENT COLOR</span>
                                     <input type="color" class="custom-theme-picker" id="admin-theme-picker" value="${themeColor}" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,0.1); cursor: pointer;">
                                 </div>
                             </div>
 
                             <div class="settings-row" id="toggle-panel-pos" style="padding: 16px 20px;">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700; font-size: 15px;">Panel-Seite</span>
-                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Aktuell auf der ${panelPosition === 'left' ? 'LINKEN' : 'RECHTEN'} Seite</span>
+                                    <span style="font-weight: 700; font-size: 15px;">Panel Side</span>
+                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Currently on the ${panelPosition.toUpperCase()} side</span>
                                 </div>
                                 <div style="display: flex; background: rgba(0,0,0,0.3); border-radius: 14px; padding: 5px; border: 1px solid var(--glass-border);">
-                                    <div id="pos-left-btn" style="padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.3s; ${panelPosition === 'left' ? 'background: var(--theme-color); color: white; box-shadow: 0 4px 12px rgba(var(--theme-color-rgb), 0.3);' : 'color: var(--text-muted);'}">LINKS</div>
-                                    <div id="pos-right-btn" style="padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.3s; ${panelPosition === 'right' ? 'background: var(--theme-color); color: white; box-shadow: 0 4px 12px rgba(var(--theme-color-rgb), 0.3);' : 'color: var(--text-muted);'}">RECHTS</div>
+                                    <div id="pos-left-btn" style="padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.3s; ${panelPosition === 'left' ? 'background: var(--theme-color); color: white; box-shadow: 0 4px 12px rgba(var(--theme-color-rgb), 0.3);' : 'color: var(--text-muted);'}">LEFT</div>
+                                    <div id="pos-right-btn" style="padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.3s; ${panelPosition === 'right' ? 'background: var(--theme-color); color: white; box-shadow: 0 4px 12px rgba(var(--theme-color-rgb), 0.3);' : 'color: var(--text-muted);'}">RIGHT</div>
                                 </div>
                             </div>
 
@@ -1459,13 +1459,13 @@
                     <div class="feature-card">
                         <div class="feature-header">
                             <div class="feature-icon">💎</div>
-                            <span>Profil-Effekte</span>
+                            <span>Profile Effects</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 15px;">
-                            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">Aktiviere exklusive visuelle Effekte für deinen Avatar (nur für dich sichtbar).</div>
+                            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">Enable exclusive visual effects for your avatar (visible to you only).</div>
                             <select class="modern-input" id="admin-profile-style">
-                                <option value="none" ${profileStyle === 'none' ? 'selected' : ''}>Keine</option>
-                                <option value="gold" ${profileStyle === 'gold' ? 'selected' : ''}>Golden Glow (Legendär)</option>
+                                <option value="none" ${profileStyle === 'none' ? 'selected' : ''}>None</option>
+                                <option value="gold" ${profileStyle === 'gold' ? 'selected' : ''}>Golden Glow (Legendary)</option>
                                 <option value="neon" ${profileStyle === 'neon' ? 'selected' : ''}>Neon Pulse (Root)</option>
                             </select>
                         </div>
@@ -1479,16 +1479,16 @@
                         <div style="display: flex; flex-direction: column; gap: 12px;">
                             <div class="settings-row" id="toggle-clock">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700; font-size: 15px;">Systemuhr</span>
-                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Zeigt die aktuelle Uhrzeit in der Navigation an.</span>
+                                    <span style="font-weight: 700; font-size: 15px;">System Clock</span>
+                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Displays the current time in the navigation bar.</span>
                                 </div>
                                 <div class="toggle-switch ${clockEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
                             </div>
 
                             <div class="settings-row" style="cursor: default;">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700; font-size: 15px;">Schnellzugriff-Taste</span>
-                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Taste zum schnellen Öffnen/Schließen des Panels.</span>
+                                    <span style="font-weight: 700; font-size: 15px;">Fast-Access Key</span>
+                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Key to quickly open/close the panel.</span>
                                 </div>
                                 <input type="text" id="admin-toggle-key" class="modern-input" value="${getToggleKey()}" style="width: 80px; text-align: center; font-weight: 900; padding: 10px; border-radius: 12px; background: rgba(var(--theme-color-rgb), 0.1); color: var(--theme-color); border-color: rgba(var(--theme-color-rgb), 0.2);">
                             </div>
