@@ -35,15 +35,15 @@
     const setCustomDictionary = (val) => GM_setValue('customDictionary', val);
     const getSidebarWidth = () => GM_getValue('sidebarWidth', 650);
     const setSidebarWidth = (val) => GM_setValue('sidebarWidth', val);
-    const getThemeColor = () => GM_getValue('themeColor', '#4caf50');
+    const getThemeColor = () => GM_getValue('themeColor', '#00d2ff');
     const setThemeColor = (val) => GM_setValue('themeColor', val);
-    const getBgColor = () => GM_getValue('bgColor', '#1a1a1a');
+    const getBgColor = () => GM_getValue('bgColor', '#1B1F3B');
     const setBgColor = (val) => GM_setValue('bgColor', val);
 
     const getLanguage = () => GM_getValue('language', 'English');
     const setLanguage = (val) => GM_setValue('language', val);
 
-    const getGlassOpacity = () => GM_getValue('glassOpacity', 0.85);
+    const getGlassOpacity = () => GM_getValue('glassOpacity', 0.7);
     const setGlassOpacity = (val) => GM_setValue('glassOpacity', val);
     const getBorderRadius = () => GM_getValue('borderRadius', 16);
     const setBorderRadius = (val) => GM_setValue('borderRadius', val);
@@ -307,88 +307,89 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
         :root {
-            --theme-color: #4caf50;
-            --theme-color-rgb: 76, 175, 80;
-            --bg-color: #0a0b0f;
-            --bg-rgb: 10, 11, 15;
-            --glass-bg: rgba(10, 11, 15, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --card-bg: rgba(255, 255, 255, 0.03);
+            --theme-color: #00d2ff; /* Neon Blue */
+            --theme-color-rgb: 0, 210, 255;
+            --bg-color: #1B1F3B; /* Dark Purple/Navy */
+            --bg-rgb: 27, 31, 59;
+            --glass-bg: rgba(27, 31, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --card-bg: rgba(255, 255, 255, 0.05);
             --card-border: rgba(255, 255, 255, 0.1);
-            --border-radius-lg: 32px;
-            --border-radius-md: 20px;
-            --border-radius-sm: 14px;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
             --text-color: #f8fafc;
             --text-muted: #94a3b8;
-            --panel-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8);
-            --transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            --panel-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             --font-main: 'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
-            --accent-gradient: linear-gradient(135deg, var(--theme-color), rgba(var(--theme-color-rgb), 0.6));
+            --accent-gradient: linear-gradient(135deg, var(--theme-color), #ffd700); /* Neon Blue to Gold */
+            --glow-effect: 0 0 15px rgba(var(--theme-color-rgb), 0.3);
         }
 
-        /* Modern Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        /* Glassmorphism Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { 
             background: rgba(255, 255, 255, 0.1); 
-            border-radius: 20px; 
+            border-radius: 10px; 
             border: 2px solid transparent;
             background-clip: content-box;
         }
-        ::-webkit-scrollbar-thumb:hover { background: var(--theme-color); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(var(--theme-color-rgb), 0.5); }
 
         .custom-nav-row {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.3);
-            height: 58px;
+            background: rgba(27, 31, 59, 0.4);
+            height: 60px;
             width: 100%;
             border-bottom: 1px solid var(--glass-border);
             position: relative;
             z-index: 10001;
-            backdrop-filter: blur(32px) saturate(180%);
-            -webkit-backdrop-filter: blur(32px) saturate(180%);
-            gap: 12px;
-            padding: 0 20px;
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            gap: 15px;
+            padding: 0 25px;
             box-sizing: border-box;
         }
 
         .panel-nav {
             display: flex;
             align-items: center;
-            height: 100px;
+            height: 80px;
             margin: -20px -20px 20px -20px;
-            padding: 0 32px;
+            padding: 0 24px;
             width: calc(100% + 40px);
             box-sizing: border-box;
             position: sticky;
             top: -20px;
             z-index: 100;
-            background: linear-gradient(to bottom, var(--bg-color) 0%, rgba(var(--bg-rgb), 0.85) 70%, transparent 100%);
-            backdrop-filter: blur(12px);
+            background: rgba(27, 31, 59, 0.4);
+            backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--glass-border);
         }
 
         .panel-title {
-            font-weight: 800;
-            font-size: 24px;
+            font-weight: 700;
+            font-size: 22px;
             color: var(--text-color);
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 20px;
             flex: 1;
-            letter-spacing: -0.04em;
+            letter-spacing: -0.02em;
         }
 
         .custom-tab-group {
             display: flex;
             background: rgba(255, 255, 255, 0.05);
-            padding: 6px;
-            border-radius: 20px;
+            padding: 5px;
+            border-radius: 14px;
             border: 1px solid var(--glass-border);
-            gap: 6px;
+            gap: 5px;
         }
 
         .custom-tab {
@@ -396,10 +397,10 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            width: 44px;
-            height: 44px;
-            border-radius: 16px;
-            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            font-size: 18px;
             transition: var(--transition);
             color: var(--text-muted);
             position: relative;
@@ -407,15 +408,16 @@
 
         .custom-tab:hover {
             color: var(--text-color);
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+            box-shadow: var(--glow-effect);
         }
 
         .custom-tab.active {
             color: white;
             background: var(--theme-color);
-            box-shadow: 0 8px 20px rgba(var(--theme-color-rgb), 0.4);
-            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 0 20px rgba(var(--theme-color-rgb), 0.5);
+            transform: scale(1.1);
         }
 
         .custom-kb-page, .custom-dict-page, .custom-admin-page {
@@ -423,8 +425,8 @@
             padding: 20px;
             color: var(--text-color);
             background: var(--glass-bg);
-            backdrop-filter: blur(80px) saturate(250%);
-            -webkit-backdrop-filter: blur(80px) saturate(250%);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
             height: 100vh;
             overflow-y: auto;
             overflow-x: hidden;
@@ -435,56 +437,62 @@
             top: 0;
             z-index: 9999;
             font-family: var(--font-main);
-            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             border-left: 1px solid var(--glass-border);
             border-right: 1px solid var(--glass-border);
         }
 
         .custom-kb-page.active, .custom-dict-page.active, .custom-admin-page.active {
             display: block;
+            animation: fadeInGlass 0.5s ease-out;
+        }
+
+        @keyframes fadeInGlass {
+            from { opacity: 0; backdrop-filter: blur(0px); }
+            to { opacity: 1; backdrop-filter: blur(16px); }
         }
 
         .custom-close-x {
             cursor: pointer;
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 18px;
+            border-radius: 12px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
             color: var(--text-muted);
             transition: var(--transition);
-            margin-left: 20px;
+            margin-left: 15px;
         }
 
         .custom-close-x:hover {
             color: #ffffff;
-            background: #ef4444;
-            border-color: #ef4444;
-            transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+            background: rgba(239, 68, 68, 0.5);
+            border-color: rgba(239, 68, 68, 0.8);
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
         }
 
-        /* Modern Cards */
+        /* Frosted Glass Cards */
         .feature-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--border-radius-lg);
-            padding: 28px;
-            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius-md);
+            padding: 24px;
+            margin-bottom: 20px;
             transition: var(--transition);
             position: relative;
             overflow: hidden;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
         }
 
         .feature-card:hover {
             background: rgba(255, 255, 255, 0.06);
             border-color: rgba(var(--theme-color-rgb), 0.4);
-            transform: translateY(-6px);
-            box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2), var(--glow-effect);
         }
 
         .feature-card::before {
@@ -493,129 +501,104 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 4px;
+            height: 2px;
             background: var(--accent-gradient);
-            opacity: 0;
-            transition: var(--transition);
-        }
-
-        .feature-card:hover::before {
-            opacity: 1;
+            opacity: 0.3;
         }
 
         .feature-header {
-            font-weight: 800;
-            font-size: 19px;
-            margin-bottom: 24px;
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
             color: var(--text-color);
-            letter-spacing: -0.02em;
         }
 
         .feature-icon {
-            width: 44px;
-            height: 44px;
-            background: rgba(var(--theme-color-rgb), 0.12);
-            border-radius: 16px;
+            width: 38px;
+            height: 38px;
+            background: rgba(var(--theme-color-rgb), 0.1);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--theme-color);
-            font-size: 22px;
-            box-shadow: inset 0 0 15px rgba(var(--theme-color-rgb), 0.15);
+            font-size: 20px;
+            box-shadow: inset 0 0 10px rgba(var(--theme-color-rgb), 0.2);
         }
 
-        /* Improved Inputs */
+        /* Glass Inputs */
         .modern-input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-color);
-            padding: 18px 24px;
-            border-radius: 20px;
-            font-size: 16px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 15px;
             font-family: var(--font-main);
             transition: var(--transition);
             outline: none;
             box-sizing: border-box;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            backdrop-filter: blur(4px);
         }
 
         .modern-input:focus {
             border-color: var(--theme-color);
-            background: rgba(0, 0, 0, 0.55);
-            box-shadow: 0 0 0 5px rgba(var(--theme-color-rgb), 0.15), inset 0 2px 4px rgba(0,0,0,0.1);
-            transform: scale(1.01);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(var(--theme-color-rgb), 0.1), var(--glow-effect);
+            transform: scale(1.02);
         }
 
         .modern-button {
             background: var(--accent-gradient);
-            color: white;
+            color: #1B1F3B;
             border: none;
-            padding: 18px 32px;
-            border-radius: 20px;
+            padding: 14px 28px;
+            border-radius: 14px;
             cursor: pointer;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 15px;
             transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            box-shadow: 0 12px 24px -6px rgba(var(--theme-color-rgb), 0.5);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .modern-button::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
-            opacity: 0;
-            transition: var(--transition);
-            pointer-events: none;
+            gap: 10px;
+            box-shadow: 0 8px 16px rgba(var(--theme-color-rgb), 0.3);
         }
 
         .modern-button:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 20px 40px -8px rgba(var(--theme-color-rgb), 0.6);
-            filter: brightness(1.15);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 12px 24px rgba(var(--theme-color-rgb), 0.5), var(--glow-effect);
+            filter: brightness(1.1);
         }
 
-        .modern-button:hover::after { opacity: 1; transform: translate(10%, 10%); }
-
-        .modern-button:active { transform: translateY(0) scale(0.97); }
-
         .settings-row {
-            padding: 20px 24px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: var(--border-radius-md);
-            margin-bottom: 12px;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
             transition: var(--transition);
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .settings-row:hover {
-            background: rgba(255, 255, 255, 0.07);
-            border-color: rgba(var(--theme-color-rgb), 0.3);
-            transform: translateX(6px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
         }
 
         .toggle-switch {
-            width: 60px;
-            height: 34px;
-            background: rgba(255, 255, 255, 0.12);
-            border-radius: 100px;
+            width: 50px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
             position: relative;
             cursor: pointer;
             transition: var(--transition);
@@ -624,70 +607,56 @@
 
         .toggle-switch.on {
             background: var(--theme-color);
-            box-shadow: 0 0 25px rgba(var(--theme-color-rgb), 0.5);
-            border-color: rgba(var(--theme-color-rgb), 0.3);
+            box-shadow: var(--glow-effect);
         }
 
         .toggle-knob {
-            width: 26px;
-            height: 26px;
+            width: 22px;
+            height: 22px;
             background: white;
             border-radius: 50%;
             position: absolute;
-            top: 3px;
-            left: 3px;
+            top: 2px;
+            left: 2px;
             transition: var(--transition);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         .toggle-switch.on .toggle-knob {
-            left: 30px;
-            transform: scale(1.1);
+            left: 24px;
         }
 
         .clickable-word {
             display: inline-block;
-            padding: 10px 20px;
-            margin: 6px;
+            padding: 8px 16px;
+            margin: 4px;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
             cursor: pointer;
             transition: var(--transition);
-            font-weight: 700;
-            font-size: 15px;
+            font-weight: 600;
+            font-size: 14px;
             color: var(--text-color);
-            letter-spacing: 0.05em;
+            backdrop-filter: blur(4px);
         }
 
         .clickable-word:hover {
             background: var(--theme-color);
-            color: white;
-            border-color: var(--theme-color);
-            transform: translateY(-5px) scale(1.12);
-            box-shadow: 0 12px 24px rgba(var(--theme-color-rgb), 0.5);
-        }
-
-        .badge-count {
-            background: rgba(var(--theme-color-rgb), 0.15);
-            color: var(--theme-color);
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 13px;
-            font-weight: 800;
-            letter-spacing: 1px;
+            color: #1B1F3B;
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: var(--glow-effect);
         }
 
         .custom-clock {
             font-family: var(--font-mono);
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             color: var(--theme-color);
             background: rgba(var(--theme-color-rgb), 0.1);
-            padding: 8px 16px;
-            border-radius: 14px;
+            padding: 6px 14px;
+            border-radius: 10px;
             border: 1px solid rgba(var(--theme-color-rgb), 0.2);
-            letter-spacing: 1px;
+            box-shadow: var(--glow-effect);
         }
 
         .note-item {
@@ -781,8 +750,8 @@
         const animationType = getAnimationType();
         const panelPosition = getPanelPosition();
 
-        const themeRgb = themeColor.match(/\w\w/g).map(x => parseInt(x, 16)).join(',');
-        const bgRgb = bgColor.match(/\w\w/g).map(x => parseInt(x, 16)).join(',');
+        const themeRgb = themeColor.match(/[A-Za-z0-9]{2}/g).map(x => parseInt(x, 16)).join(',');
+        const bgRgb = bgColor.match(/[A-Za-z0-9]{2}/g).map(x => parseInt(x, 16)).join(',');
 
         document.documentElement.style.setProperty('--theme-color', themeColor);
         document.documentElement.style.setProperty('--theme-color-rgb', themeRgb);
@@ -790,6 +759,8 @@
         document.documentElement.style.setProperty('--bg-rgb', bgRgb);
         document.documentElement.style.setProperty('--glass-bg', `rgba(${bgRgb}, ${glassOpacity})`);
         document.documentElement.style.setProperty('--border-radius', `${borderRadius}px`);
+        document.documentElement.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${themeColor}, #ffd700)`);
+        document.documentElement.style.setProperty('--glow-effect', `0 0 15px rgba(${themeRgb}, 0.3)`);
 
         const getLuminance = (hex) => {
             const rgb = parseInt(hex.slice(1), 16);
@@ -942,12 +913,12 @@
                         </div>
                     </div>
 
-                    <div class="feature-card" style="background: linear-gradient(135deg, rgba(var(--theme-color-rgb), 0.1), rgba(0,0,0,0.2));">
+                    <div class="feature-card" style="background: rgba(var(--theme-color-rgb), 0.05); border-color: rgba(var(--theme-color-rgb), 0.2);">
                         <div class="feature-header" style="color: var(--theme-color);">
-                            <div class="feature-icon">💡</div>
+                            <div class="feature-icon" style="background: rgba(var(--theme-color-rgb), 0.15); box-shadow: var(--glow-effect);">💡</div>
                             <span>Quick Tip</span>
                         </div>
-                        <div style="color: var(--text-muted); font-size: 14px; line-height: 1.7;">
+                        <div style="color: var(--text-color); opacity: 0.8; font-size: 14px; line-height: 1.7;">
                             ${t.closeInfo}
                         </div>
                     </div>
@@ -971,13 +942,13 @@
                 }
 
                 const historyHtml = history.length > 0 ? `
-                <div style="margin-top: 15px; padding: 20px; background: rgba(255, 255, 255, 0.04); border-radius: 20px; border: 1px solid var(--glass-border);">
-                    <div style="font-size: 13px; font-weight: 800; color: var(--text-muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 2px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="margin-top: 15px; padding: 20px; background: rgba(255, 255, 255, 0.02); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(4px);">
+                    <div style="font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1.5px; display: flex; justify-content: space-between; align-items: center;">
                         <span>📜 Recent</span>
-                        <span id="clear-history" style="cursor: pointer; color: #ff4444; font-size: 11px; background: rgba(255, 68, 68, 0.1); padding: 6px 12px; border-radius: 10px; transition: 0.3s; font-weight: 700;">CLEAR</span>
+                        <span id="clear-history" style="cursor: pointer; color: #ff4444; font-size: 10px; background: rgba(255, 68, 68, 0.1); padding: 5px 10px; border-radius: 8px; transition: 0.3s; font-weight: 700; border: 1px solid rgba(255,68,68,0.2);">CLEAR</span>
                     </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                        ${history.map(h => `<span class="history-chip" style="padding: 8px 16px; background: rgba(var(--theme-color-rgb), 0.12); border-radius: 12px; font-size: 13px; cursor: pointer; border: 1px solid rgba(var(--theme-color-rgb), 0.2); font-weight: 700; transition: 0.3s; color: var(--text-color);">${h}</span>`).join('')}
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        ${history.map(h => `<span class="history-chip" style="padding: 6px 12px; background: rgba(var(--theme-color-rgb), 0.08); border-radius: 10px; font-size: 12px; cursor: pointer; border: 1px solid rgba(var(--theme-color-rgb), 0.15); font-weight: 700; transition: 0.3s; color: var(--text-color);">${h}</span>`).join('')}
                     </div>
                 </div>
             ` : '';
@@ -1083,12 +1054,12 @@
                         <div class="custom-dict-result-list" id="dict-result-list" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
                     </div>
 
-                    <div class="feature-card" style="background: linear-gradient(135deg, rgba(var(--theme-color-rgb), 0.1), rgba(0,0,0,0.2));">
+                    <div class="feature-card" style="background: rgba(var(--theme-color-rgb), 0.05); border-color: rgba(var(--theme-color-rgb), 0.2);">
                         <div class="feature-header" style="color: var(--theme-color);">
-                            <div class="feature-icon">💡</div>
+                            <div class="feature-icon" style="background: rgba(var(--theme-color-rgb), 0.15); box-shadow: var(--glow-effect);">💡</div>
                             <span>Pro Tip</span>
                         </div>
-                        <div style="color: var(--text-muted); font-size: 14px; line-height: 1.7;">
+                        <div style="color: var(--text-color); opacity: 0.8; font-size: 14px; line-height: 1.7;">
                             Click on any word to copy it instantly. Hover to see its definition!
                         </div>
                     </div>
