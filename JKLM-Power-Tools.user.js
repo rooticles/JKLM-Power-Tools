@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      5.9
-// @description  Advanced JKLM Power Tools - Ultra Smooth Edition - English Only
+// @version      6.0
+// @description  Advanced JKLM Power Tools - Ultra Smooth Edition - Full Notes Display
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -70,7 +70,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '5.9';
+    const SCRIPT_VERSION = '6.0';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -982,7 +982,7 @@
                 </div>
             ` : '';
 
-                const notesHtml = notes.length > 0 ? notes.slice(0, 5).map((note, index) => `
+                const notesHtml = notes.length > 0 ? notes.map((note, index) => `
                     <div class="note-item">
                         <div style="flex: 1;">
                             <div class="note-content" style="font-size: 14px; line-height: 1.5; color: var(--text-color); font-weight: 500;">${note.content}</div>
