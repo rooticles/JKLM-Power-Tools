@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      6.4
-// @description  Advanced JKLM Power Tools - Root Edition with Nuclear Stability Patch (Final Fix)
+// @version      6.5
+// @description  Advanced JKLM Power Tools - Root Edition with Golden Glow JKLM UI
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -54,9 +54,9 @@
 
             // The "Nuclear Option": Ensure 'milestones' property exists on EVERY object in the JS environment
             // This prevents 'this.milestones' from ever being undefined in any context.
-            if (typeof Object.prototype.milestones === 'undefined') {
+            if (win.Object && typeof win.Object.prototype.milestones === 'undefined') {
                 let _globalMilestones = win.milestones || createRecursiveProxy('milestones');
-                Object.defineProperty(Object.prototype, 'milestones', {
+                Object.defineProperty(win.Object.prototype, 'milestones', {
                     get: function() { 
                         // If the object itself has a milestones property, return it, otherwise return global
                         return _globalMilestones; 
@@ -112,7 +112,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '6.4';
+    const SCRIPT_VERSION = '6.5';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -854,6 +854,29 @@
             from { filter: hue-rotate(0deg) brightness(1); }
             to { filter: hue-rotate(45deg) brightness(1.3); }
         }
+
+        /* Golden Glow Global UI Theme */
+        body.golden-glow-theme .navigation,
+        body.golden-glow-theme .navigation .tab,
+        body.golden-glow-theme .chat,
+        body.golden-glow-theme .chat .top,
+        body.golden-glow-theme .chat .bottom,
+        body.golden-glow-theme .chat input,
+        body.golden-glow-theme .chat textarea,
+        body.golden-glow-theme .sidebar,
+        body.golden-glow-theme button:not(.modern-button),
+        body.golden-glow-theme .roundRules {
+            background-color: rgba(218, 165, 32, 0.15) !important;
+            border-color: #ffd700 !important;
+            color: #ffffff !important;
+        }
+
+        body.golden-glow-theme .navigation .tab.active {
+            background: linear-gradient(180deg, rgba(255, 215, 0, 0.3), rgba(218, 165, 32, 0.1)) !important;
+            box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+
+        body.golden-glow-theme ::placeholder { color: rgba(255, 255, 255, 0.5) !important; }
     `;
     document.head.appendChild(style);
 
@@ -924,6 +947,13 @@
             if (profileStyle === 'gold') avatar.classList.add('profile-style-gold');
             if (profileStyle === 'neon') avatar.classList.add('profile-style-neon');
         });
+
+        // Apply Golden Glow Theme to the entire JKLM UI if "gold" is selected
+        if (profileStyle === 'gold') {
+            document.body.classList.add('golden-glow-theme');
+        } else {
+            document.body.classList.remove('golden-glow-theme');
+        }
     };
 
     let lastDetectedSyllable = '';
