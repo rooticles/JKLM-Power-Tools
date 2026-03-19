@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      2.7
+// @version      2.8
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -20,6 +20,13 @@
     'use strict';
 
     // --- Storage Helpers ---
+    const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
+    const setEnabled = (val) => GM_setValue('spaceToHyphenEnabled', val);
+    const getChatEnabled = () => GM_getValue('spaceToHyphenChatEnabled', false);
+    const setChatEnabled = (val) => GM_setValue('spaceToHyphenChatEnabled', val);
+    const getSmartSpacebarEnabled = () => GM_getValue('smartSpacebarEnabled', false);
+    const setSmartSpacebarEnabled = (val) => GM_setValue('smartSpacebarEnabled', val);
+
     const getDictLanguage = () => GM_getValue('dictLanguage', 'English');
     const setDictLanguage = (val) => GM_setValue('dictLanguage', val);
     const getSearchMode = () => GM_getValue('dictSearchMode', 'Contains');
@@ -91,6 +98,16 @@
     // --- Translations ---
     const translations = {
         'English': {
+            kbHeader: '🐱 Keyboard Settings',
+            toggleLabel: 'Spacebar to hyphen in Game On/Off',
+            smartSpacebarLabel: 'Smart Spacebar (Press Space to type first word)',
+            chatToggleLabel: 'Spacebar to Hyphen in Chat On/Off',
+            onDesc: 'On = Pressing spacebar during a round will result in a hyphen instead',
+            offDesc: 'Off = Pressing spacebar during a round will result in a space',
+            smartSpacebarDescOn: 'On = Spacebar types the first dictionary result in-game',
+            smartSpacebarDescOff: 'Off = Normal spacebar behavior',
+            chatDesc: 'On = Spacebar in chat becomes a hyphen',
+            chatOffDesc: 'Off = Spacebar in chat remains a spacebar',
             closeInfo: 'This script enhances your JKLM experience. <br><br>You can close this menu with the <strong>ESC</strong> key.',
             dictHeader: '📚 Dictionary Words',
             msgLabel: 'Write a message',
@@ -147,6 +164,16 @@
             toggleKeyLabel: 'Panel Toggle Hotkey'
         },
         'German': {
+            kbHeader: '🐱 Tastatur-Einstellungen',
+            toggleLabel: 'Leertaste zu Bindestrich im Spiel',
+            smartSpacebarLabel: 'Smart Leertaste (Erstes Wort schreiben)',
+            chatToggleLabel: 'Leertaste zu Bindestrich im Chat',
+            onDesc: 'An = Leertaste während einer Runde wird zum Bindestrich',
+            offDesc: 'Aus = Leertaste während einer Runde bleibt ein Leerzeichen',
+            smartSpacebarDescOn: 'An = Leertaste schreibt das erste Wort aus dem Wörterbuch',
+            smartSpacebarDescOff: 'Aus = Normales Leertasten-Verhalten',
+            chatDesc: 'An = Leertaste im Chat wird zum Bindestrich',
+            chatOffDesc: 'Aus = Leertaste im Chat bleibt ein Leerzeichen',
             closeInfo: 'Dieses Skript verbessert dein JKLM-Erlebnis. <br><br>Menü schließen mit <strong>ESC</strong>.',
             dictHeader: '📚 Wörterbuch',
             msgLabel: 'Nachricht schreiben',
@@ -921,7 +948,7 @@
                 nav.after(customRow);
             }
 
-            if (document.getElementById('dict-btn')) return;
+            if (document.getElementById('cat-btn')) return;
 
             const createTab = (id, icon) => {
                 const t = document.createElement('div');
@@ -931,10 +958,11 @@
                 return t;
             };
 
+            const catTab = createTab('cat-btn', '🐱');
             const dictTab = createTab('dict-btn', '📚');
             const adminTab = createTab('admin-btn', '✨');
 
-            [dictTab, adminTab].forEach(t => {
+            [catTab, dictTab, adminTab].forEach(t => {
                 customRow.appendChild(t);
             });
 
@@ -953,12 +981,14 @@
             setInterval(updateClock, 1000);
             updateClock();
 
+            const kbPage = document.createElement('div');
+            kbPage.className = 'custom-kb-page';
             const dictPage = document.createElement('div');
             dictPage.className = 'custom-dict-page';
             const adminPage = document.createElement('div');
             adminPage.className = 'custom-admin-page';
 
-            const allCustomPages = [dictPage, adminPage];
+            const allCustomPages = [kbPage, dictPage, adminPage];
 
             const getPanelNav = (activeTabId, title) => {
                 const t = translations[getLanguage()] || translations['English'];
@@ -970,6 +1000,7 @@
                     <div class="panel-title">
                         <span style="background: linear-gradient(to right, var(--theme-color), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${title}</span>
                         <div style="display: flex; gap: 5px; margin-left: 10px;">
+                            <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn" style="font-size: 16px;">🐱</div>
                             <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn" style="font-size: 16px;">📚</div>
                             <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn" style="font-size: 16px;">✨</div>
                         </div>
@@ -978,6 +1009,53 @@
                     <div class="custom-close-x panel-close">✕</div>
                 </div>
                 `;
+            };
+
+            const updateKbContent = () => {
+                const isEnabled = getEnabled();
+                const isChatEnabled = getChatEnabled();
+                const isSmartEnabled = getSmartSpacebarEnabled();
+                const t = translations[getLanguage()] || translations['English'];
+                catTab.title = t.kbHeader;
+
+                kbPage.innerHTML = `
+                ${getPanelNav('cat-btn', t.kbHeader)}
+                <div class="custom-page-content">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div class="settings-row" id="toggle-space-hyphen">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-weight: 700; font-size: 15px;">${t.toggleLabel}</span>
+                                <span style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">${isEnabled ? t.onDesc : t.offDesc}</span>
+                            </div>
+                            <div class="toggle-switch ${isEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
+                        </div>
+
+                        <div class="settings-row" id="toggle-smart-spacebar">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-weight: 700; font-size: 15px;">${t.smartSpacebarLabel}</span>
+                                <span style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">${isSmartEnabled ? t.smartSpacebarDescOn : t.smartSpacebarDescOff}</span>
+                            </div>
+                            <div class="toggle-switch ${isSmartEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
+                        </div>
+
+                        <div class="settings-row" id="toggle-chat-hyphen">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-weight: 700; font-size: 15px;">${t.chatToggleLabel}</span>
+                                <span style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">${isChatEnabled ? t.chatDesc : t.chatOffDesc}</span>
+                            </div>
+                            <div class="toggle-switch ${isChatEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px; padding: 20px; background: linear-gradient(to bottom right, rgba(var(--theme-color-rgb), 0.1), rgba(0,0,0,0.2)); border-radius: 16px; border: 1px solid rgba(var(--theme-color-rgb), 0.2); color: var(--text-muted); font-size: 13px; line-height: 1.6; position: relative; overflow: hidden;">
+                        <div style="position: absolute; right: -10px; bottom: -10px; font-size: 60px; opacity: 0.05; transform: rotate(-15deg);">💡</div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: var(--theme-color); font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
+                            <span>💡</span> Info
+                        </div>
+                        ${t.closeInfo}
+                    </div>
+                </div>
+            `;
             };
 
             const updateDictContent = () => {
@@ -1198,6 +1276,7 @@
             `;
             };
 
+            updateKbContent();
             updateDictContent();
             updateAdminContent();
 
@@ -1217,11 +1296,11 @@
             document.body.appendChild(tooltip);
 
             window.closeCustomTabs = () => {
-                [dictTab, adminTab].forEach(t => t.classList.remove('active'));
+                [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
                 allCustomPages.forEach(p => p.classList.remove('active'));
                 if (customRow) customRow.style.display = 'flex';
                 const home = nav.querySelector('[data-tab="home"]') || nav.querySelector('.tab') || nav.querySelector('.custom-tab');
-                if (home && ![dictTab, adminTab].includes(home)) home.click();
+                if (home && ![catTab, dictTab, adminTab].includes(home)) home.click();
             };
 
             const toggleTab = (tab, page) => {
@@ -1252,6 +1331,7 @@
                 }
             };
 
+            catTab.addEventListener('click', (e) => { e.preventDefault(); toggleTab(catTab, kbPage); });
             dictTab.addEventListener('click', (e) => { e.preventDefault(); toggleTab(dictTab, dictPage); });
             adminTab.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1261,9 +1341,9 @@
 
             nav.addEventListener('click', (e) => {
                 const clicked = e.target.closest('.tab') || e.target.closest('.custom-tab');
-                if (clicked && ![dictTab, adminTab].includes(clicked)) {
+                if (clicked && ![catTab, dictTab, adminTab].includes(clicked)) {
                     allCustomPages.forEach(p => p.classList.remove('active'));
-                    [dictTab, adminTab].forEach(t => t.classList.remove('active'));
+                    [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
                 }
             });
 
@@ -1278,6 +1358,7 @@
                     const tabBtn = e.target.closest('.panel-nav .custom-tab');
                     if (tabBtn) {
                         const targetId = tabBtn.getAttribute('data-target');
+                        if (targetId === 'cat-btn') toggleTab(catTab, kbPage);
                         if (targetId === 'dict-btn') toggleTab(dictTab, dictPage);
                         if (targetId === 'admin-btn') {
                             updateAdminContent();
@@ -1285,6 +1366,16 @@
                         }
                     }
                 });
+            });
+
+            kbPage.addEventListener('click', (e) => {
+                const row = e.target.closest('.settings-row');
+                if (!row) return;
+
+                if (row.id === 'toggle-space-hyphen') setEnabled(!getEnabled());
+                if (row.id === 'toggle-smart-spacebar') setSmartSpacebarEnabled(!getSmartSpacebarEnabled());
+                if (row.id === 'toggle-chat-hyphen') setChatEnabled(!getChatEnabled());
+                updateKbContent();
             });
 
             const updateSuggestions = () => {
@@ -1613,6 +1704,9 @@
             });
             gameObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
 
+            GM_addValueChangeListener('spaceToHyphenEnabled', () => updateKbContent());
+            GM_addValueChangeListener('spaceToHyphenChatEnabled', () => updateKbContent());
+            GM_addValueChangeListener('smartSpacebarEnabled', () => updateKbContent());
             GM_addValueChangeListener('dictLanguage', () => { dictionaryLoaded = false; loadDictionary(true).then(() => updateDictContent()); });
             GM_addValueChangeListener('sidebarWidth', (n, o, nv) => updateSidebarWidths(nv));
             GM_addValueChangeListener('themeColor', () => updateThemeStyles());
@@ -1631,7 +1725,7 @@
                     }
                 }
 
-                if (e.key === 'Escape' && [dictTab, adminTab].some(t => t.classList.contains('active'))) {
+                if (e.key === 'Escape' && [catTab, dictTab, adminTab].some(t => t.classList.contains('active'))) {
                     window.closeCustomTabs();
                 }
             });
@@ -1646,6 +1740,52 @@
             e.preventDefault();
             sendToChat('GG');
             return;
+        }
+
+        const enabled = getEnabled();
+        const chatEnabled = getChatEnabled();
+        const smartEnabled = getSmartSpacebarEnabled();
+        if (!enabled && !chatEnabled && !smartEnabled) return;
+
+        if (e.code === 'Space' || e.key === ' ') {
+            const active = document.activeElement;
+            if (!active || !(active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
+            const isChatContext = active.closest('.chat') ||
+                active.placeholder?.toLowerCase().includes('chat') ||
+                active.classList.contains('chatInput') ||
+                active.id === 'dict-msg-input';
+            const isSelfTurn = !!document.querySelector('.selfTurn');
+
+            if (!isChatContext && smartEnabled && isSelfTurn) {
+                const firstWord = document.querySelector('.clickable-word')?.getAttribute('data-word');
+                if (firstWord) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    active.value = '';
+                    try { if (!document.execCommand('insertText', false, firstWord)) throw new Error(); } catch (err) {
+                        active.value = firstWord;
+                        active.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    return;
+                }
+            }
+
+            let shouldConvert = false;
+            if (isChatContext) {
+                if (chatEnabled) shouldConvert = true;
+            } else {
+                if (enabled && isSelfTurn) shouldConvert = true;
+            }
+            if (shouldConvert) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                try { if (!document.execCommand('insertText', false, '-')) throw new Error(); } catch (err) {
+                    const start = active.selectionStart, end = active.selectionEnd;
+                    active.value = active.value.substring(0, start) + '-' + active.value.substring(end);
+                    active.selectionStart = active.selectionEnd = start + 1;
+                    active.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
         }
     }, true);
 
