@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      8.1
-// @description  Advanced JKLM Power Tools - Ultimate Edition (UI Refresh v8.1)
+// @version      8.2
+// @description  Advanced JKLM Power Tools - Ultimate Edition (Transparent v8.2)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -293,7 +293,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '8.1';
+    const SCRIPT_VERSION = '8.2';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1071,41 +1071,26 @@
 
     const updateThemeStyles = () => {
         const themeColor = getThemeColor();
-        const bgColor = getBgColor();
         const font = getCustomFont();
-        const glassOpacity = getGlassOpacity();
         const borderRadius = getBorderRadius();
         const clockEnabled = getClockEnabled();
-        const themeAnimEnabled = getThemeAnimEnabled();
-        const bgImageUrl = getBgImageUrl();
         const animationType = getAnimationType();
         const panelPosition = getPanelPosition();
-        const animatedTheme = getAnimatedTheme();
 
         const themeRgb = themeColor.match(/[A-Za-z0-9]{2}/g).map(x => parseInt(x, 16)).join(',');
-        const bgRgb = bgColor.match(/[A-Za-z0-9]{2}/g).map(x => parseInt(x, 16)).join(',');
 
         document.documentElement.style.setProperty('--theme-color', themeColor);
         document.documentElement.style.setProperty('--theme-color-rgb', themeRgb);
-        document.documentElement.style.setProperty('--bg-color', bgColor);
-        document.documentElement.style.setProperty('--bg-rgb', bgRgb);
-        document.documentElement.style.setProperty('--glass-bg', `rgba(${bgRgb}, ${glassOpacity})`);
+        document.documentElement.style.setProperty('--bg-color', 'transparent');
+        document.documentElement.style.setProperty('--bg-rgb', '0,0,0');
+        document.documentElement.style.setProperty('--glass-bg', 'transparent');
         document.documentElement.style.setProperty('--border-radius', `${borderRadius}px`);
-        document.documentElement.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${themeColor}, #ffd700)`);
-        document.documentElement.style.setProperty('--glow-effect', `0 0 15px rgba(${themeRgb}, 0.3)`);
+        document.documentElement.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${themeColor}, #FF69B4)`);
+        document.documentElement.style.setProperty('--glow-effect', `0 0 20px rgba(${themeRgb}, 0.4)`);
 
-        const getLuminance = (hex) => {
-            const rgb = parseInt(hex.slice(1), 16);
-            const r = (rgb >> 16) & 0xff;
-            const g = (rgb >> 8) & 0xff;
-            const b = (rgb >> 0) & 0xff;
-            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        };
-
-        const luminance = getLuminance(bgColor);
-        const textColor = luminance > 128 ? '#0f172a' : '#ffffff';
-        const textMuted = luminance > 128 ? '#64748b' : '#94a3b8';
-        const glassBorder = luminance > 128 ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)';
+        const textColor = '#ffffff';
+        const textMuted = '#A0A0A0';
+        const glassBorder = 'rgba(255, 255, 255, 0.1)';
 
         document.documentElement.style.setProperty('--text-color', textColor);
         document.documentElement.style.setProperty('--text-muted', textMuted);
@@ -1114,15 +1099,14 @@
         document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
             p.classList.remove('pos-left', 'pos-right', 'animated-mesh', 'animated-matrix');
             p.classList.add(`pos-${panelPosition}`);
-            if (animatedTheme === 'mesh') p.classList.add('animated-mesh');
-            if (animatedTheme === 'matrix') p.classList.add('animated-matrix');
             
             const animName = animationType === 'slideIn' ? `slideInPanel${panelPosition.charAt(0).toUpperCase() + panelPosition.slice(1)}` : animationType;
-            p.style.animation = `${animName} 0.6s cubic-bezier(0.16, 1, 0.3, 1)${animatedTheme !== 'none' ? `, ${animatedTheme === 'mesh' ? 'meshGradient 15s ease infinite' : 'matrixFlow 4s linear infinite'}` : ''}`;
+            p.style.animation = `${animName} 0.6s cubic-bezier(0.16, 1, 0.3, 1)`;
             
-            p.style.backgroundImage = bgImageUrl ? `linear-gradient(rgba(${bgRgb}, ${glassOpacity}), rgba(${bgRgb}, ${glassOpacity})), url(${bgImageUrl})` : 'none';
-            p.style.backgroundSize = 'cover';
-            p.style.backgroundPosition = 'center';
+            p.style.backgroundImage = 'none';
+            p.style.background = 'transparent';
+            p.style.backdropFilter = 'none';
+            p.style.webkitBackdropFilter = 'none';
         });
     };
     updateThemeStyles();
@@ -1443,22 +1427,9 @@
                         <div style="display: flex; flex-direction: column; gap: 20px;">
                             <div style="display: flex; gap: 15px;">
                                 <div style="flex: 1; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 20px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; align-items: center; gap: 12px; transition: 0.3s;" class="color-picker-container">
-                                    <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase;">THEME</span>
+                                    <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase;">THEME COLOR</span>
                                     <input type="color" class="custom-theme-picker" id="admin-theme-picker" value="${themeColor}" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,0.1); cursor: pointer;">
                                 </div>
-                                <div style="flex: 1; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 20px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; align-items: center; gap: 12px; transition: 0.3s;" class="color-picker-container">
-                                    <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase;">BACKDROP</span>
-                                    <input type="color" class="custom-theme-picker" id="admin-bg-picker" value="${bgColor}" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,0.1); cursor: pointer;">
-                                </div>
-                            </div>
-
-                            <div style="display: flex; flex-direction: column; gap: 10px;">
-                                <div style="font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Animated Themes</div>
-                                <select class="modern-input" id="admin-animated-theme">
-                                    <option value="none" ${animatedTheme === 'none' ? 'selected' : ''}>Static (Classic)</option>
-                                    <option value="mesh" ${animatedTheme === 'mesh' ? 'selected' : ''}>Mesh Gradient (Smooth)</option>
-                                    <option value="matrix" ${animatedTheme === 'matrix' ? 'selected' : ''}>Neon Flow (Matrix)</option>
-                                </select>
                             </div>
 
                             <div class="settings-row" id="toggle-panel-pos" style="padding: 16px 20px;">
@@ -1474,23 +1445,10 @@
 
                             <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
                                 <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
-                                    <span>Glass Transparency</span>
-                                    <span style="color: var(--theme-color);"><span id="val-admin-glass-opacity">${Math.round(glassOpacity * 100)}</span>%</span>
-                                </div>
-                                <input type="range" id="admin-glass-opacity" min="0" max="1" step="0.05" value="${glassOpacity}" style="width: 100%; accent-color: var(--theme-color); cursor: pointer;">
-                            </div>
-
-                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
                                     <span>Corner Softness</span>
                                     <span style="color: var(--theme-color);"><span id="val-admin-border-radius">${borderRadius}</span>px</span>
                                 </div>
                                 <input type="range" id="admin-border-radius" min="0" max="40" step="1" value="${borderRadius}" style="width: 100%; accent-color: var(--theme-color); cursor: pointer;">
-                            </div>
-
-                            <div style="display: flex; flex-direction: column; gap: 10px;">
-                                <div style="font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Custom Wallpaper URL</div>
-                                <input type="text" id="admin-bg-image-url" class="modern-input" value="${bgImageUrl}" placeholder="https://images.unsplash.com/...">
                             </div>
                         </div>
                     </div>
@@ -1887,10 +1845,6 @@
                     setAnimationType(e.target.value);
                     updateThemeStyles();
                 }
-                if (e.target.id === 'admin-animated-theme') {
-                    setAnimatedTheme(e.target.value);
-                    updateThemeStyles();
-                }
                 if (e.target.id === 'admin-profile-style') {
                     setProfileStyle(e.target.value);
                     updateProfileStyles();
@@ -1902,26 +1856,11 @@
                     setThemeColor(e.target.value);
                     updateThemeStyles();
                 }
-                if (e.target.id === 'admin-bg-picker') {
-                    setBgColor(e.target.value);
-                    updateThemeStyles();
-                }
-                if (e.target.id === 'admin-glass-opacity') {
-                    const val = parseFloat(e.target.value);
-                    setGlassOpacity(val);
-                    const span = document.getElementById('val-admin-glass-opacity');
-                    if (span) span.innerText = Math.round(val * 100);
-                    updateThemeStyles();
-                }
                 if (e.target.id === 'admin-border-radius') {
                     const val = parseInt(e.target.value, 10);
                     setBorderRadius(val);
                     const span = document.getElementById('val-admin-border-radius');
                     if (span) span.innerText = val;
-                    updateThemeStyles();
-                }
-                if (e.target.id === 'admin-bg-image-url') {
-                    setBgImageUrl(e.target.value.trim());
                     updateThemeStyles();
                 }
             });
