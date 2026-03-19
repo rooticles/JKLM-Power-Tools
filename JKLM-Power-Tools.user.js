@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      10.4
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.4)
+// @version      10.5
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.5)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '10.4';
+    const SCRIPT_VERSION = '10.5';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -305,8 +305,6 @@
     const setBgImageUrl = (val) => GM_setValue('bgImageUrl', val);
     const getLobbyBgUrl = () => GM_getValue('lobbyBgUrl', '');
     const setLobbyBgUrl = (val) => GM_setValue('lobbyBgUrl', val);
-    const getRoomBgUrl = () => GM_getValue('roomBgUrl', '');
-    const setRoomBgUrl = (val) => GM_setValue('roomBgUrl', val);
     const getAnimationType = () => GM_getValue('animationType', 'slideIn');
     const setAnimationType = (val) => GM_setValue('animationType', val);
 
@@ -1114,35 +1112,15 @@
 
         // Apply Global Backgrounds
         const lobbyBg = getLobbyBgUrl();
-        const roomBg = getRoomBgUrl();
         const isLobby = document.body.classList.contains('home') || !!document.querySelector('.home');
-        const isRoom = document.body.classList.contains('room') || !!document.querySelector('.room') || !!document.querySelector('.game');
 
         if (isLobby && lobbyBg) {
             document.body.style.setProperty('background-image', `url("${lobbyBg}")`, 'important');
             document.body.style.setProperty('background-size', 'cover', 'important');
             document.body.style.setProperty('background-position', 'center', 'important');
             document.body.style.setProperty('background-attachment', 'fixed', 'important');
-        } else if ((isRoom || !isLobby) && roomBg) {
-            // Apply to body and specific room/game containers to ensure visibility
-            const targets = [document.body, document.querySelector('.room'), document.querySelector('.game'), document.querySelector('.main')];
-            targets.forEach(t => {
-                if (t) {
-                    t.style.setProperty('background-image', `url("${roomBg}")`, 'important');
-                    t.style.setProperty('background-size', 'cover', 'important');
-                    t.style.setProperty('background-position', 'center', 'important');
-                    t.style.setProperty('background-attachment', 'fixed', 'important');
-                }
-            });
-        }
-
-        // Apply Room Background to Lobby Cards (The rooms shown on home page)
-        if (roomBg) {
-            document.querySelectorAll('.lobbies .room').forEach(card => {
-                card.style.setProperty('background-image', `url("${roomBg}")`, 'important');
-                card.style.setProperty('background-size', 'cover', 'important');
-                card.style.setProperty('background-position', 'center', 'important');
-            });
+        } else {
+            document.body.style.backgroundImage = '';
         }
 
         document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
@@ -1533,7 +1511,6 @@
                 const clockEnabled = getClockEnabled();
                 const bgImageUrl = getBgImageUrl();
                 const lobbyBgUrl = getLobbyBgUrl();
-                const roomBgUrl = getRoomBgUrl();
                 const panelPosition = getPanelPosition();
                 const animatedTheme = getAnimatedTheme();
                 adminTab.title = t.adminHeader;
@@ -1550,10 +1527,6 @@
                             <div style="display: flex; flex-direction: column; gap: 4px;">
                                 <span style="font-weight: 700; font-size: 14px;">Lobby Background (URL)</span>
                                 <input type="text" id="admin-lobby-bg" class="modern-input" value="${lobbyBgUrl}" placeholder="https://...">
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span style="font-weight: 700; font-size: 14px;">Room Background (URL)</span>
-                                <input type="text" id="admin-room-bg" class="modern-input" value="${roomBgUrl}" placeholder="https://...">
                             </div>
                         </div>
                     </div>
@@ -1987,10 +1960,6 @@
                     setLobbyBgUrl(e.target.value);
                     updateThemeStyles();
                 }
-                if (e.target.id === 'admin-room-bg') {
-                    setRoomBgUrl(e.target.value);
-                    updateThemeStyles();
-                }
             });
 
             adminPage.addEventListener('keydown', (e) => {
@@ -2066,7 +2035,6 @@
             GM_addValueChangeListener('themeColor', () => updateThemeStyles());
             GM_addValueChangeListener('bgColor', () => updateThemeStyles());
             GM_addValueChangeListener('lobbyBgUrl', () => updateThemeStyles());
-            GM_addValueChangeListener('roomBgUrl', () => updateThemeStyles());
 
             window.addEventListener('keydown', (e) => {
                 if (e.key === getToggleKey()) {
