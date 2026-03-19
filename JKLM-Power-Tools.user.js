@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      4.0
+// @version      4.1
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -19,7 +19,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '4.0';
+    const SCRIPT_VERSION = '4.1';
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
@@ -866,8 +866,9 @@
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 if (clock) clock.innerText = timeStr;
-                const pClock = document.getElementById('panel-clock');
-                if (pClock) pClock.innerText = timeStr;
+                document.querySelectorAll('.panel-clock').forEach(el => {
+                    el.innerText = timeStr;
+                });
             };
             setInterval(updateClock, 1000);
             updateClock();
@@ -896,7 +897,7 @@
                             <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn">✨</div>
                         </div>
                     </div>
-                    ${clockEnabled ? `<div class="custom-clock" id="panel-clock">${timeStr}</div>` : ''}
+                    ${clockEnabled ? `<div class="custom-clock panel-clock">${timeStr}</div>` : ''}
                     <div class="custom-close-x panel-close">✕</div>
                 </div>
                 `;
