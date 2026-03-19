@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      5.0
+// @version      5.1
 // @description  Advanced JKLM Power Tools with Multi-Source Definitions and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -70,7 +70,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '5.0';
+    const SCRIPT_VERSION = '5.1';
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
@@ -93,8 +93,7 @@
     const getBgColor = () => GM_getValue('bgColor', '#1B1F3B');
     const setBgColor = (val) => GM_setValue('bgColor', val);
 
-    const getLanguage = () => GM_getValue('language', 'English');
-    const setLanguage = (val) => GM_setValue('language', val);
+    const getLanguage = () => 'English';
 
     const getGlassOpacity = () => GM_getValue('glassOpacity', 0.7);
     const setGlassOpacity = (val) => GM_setValue('glassOpacity', val);
@@ -200,7 +199,6 @@
             dictPlaceholder: 'Paste your words here...',
             dictFoundWords: 'Found {count} words:',
             dictNoResultsShort: 'No results.',
-            german: 'German',
             english: 'English',
             // Features
             notesHeader: '📝 Notes',
@@ -210,68 +208,6 @@
             saveNote: 'Save Note',
             noNotes: 'No notes yet. Start writing!',
             toggleKeyLabel: 'Panel Toggle Hotkey'
-        },
-        'German': {
-            kbHeader: '🐱 Tastatur-Einstellungen',
-            toggleLabel: 'Leertaste zu Bindestrich im Spiel',
-            chatToggleLabel: 'Leertaste zu Bindestrich im Chat',
-            onDesc: 'An = Leertaste während einer Runde wird zum Bindestrich',
-            offDesc: 'Aus = Leertaste während einer Runde bleibt ein Leerzeichen',
-            chatDesc: 'An = Leertaste im Chat wird zum Bindestrich',
-            chatOffDesc: 'Aus = Leertaste im Chat bleibt ein Leerzeichen',
-            closeInfo: 'Dieses Skript verbessert dein JKLM-Erlebnis. <br><br>Menü schließen mit <strong>ESC</strong>.',
-            dictHeader: '📚 Wörterbuch',
-            msgLabel: 'Nachricht schreiben',
-            msgPlaceholder: 'Deine Nachricht...',
-            msgSend: 'Senden',
-            dictResultPrefix: 'Es gibt {count} passende Wörter:',
-            dictNoResults: 'Keine Wörter gefunden.',
-            dictSearchModeLabel: 'Suchmodus:',
-            dictWordTypeLabel: 'Worttyp:',
-            dictSelectLabel: 'Wörterbuch wählen:',
-            historyHeader: '📜 Verlauf',
-            historyEmpty: 'Noch keine Wörter in dieser Runde.',
-            adminHeader: '✨ UI & Einstellungen',
-            adminVisualHeader: '🎨 UI & Design',
-            adminMiniModeLabel: 'Mini-Modus UI',
-            adminFontLabel: 'Schriftart:',
-            adminThemeLabel: 'Themenfarbe:',
-            adminBgLabel: 'Hintergrundfarbe:',
-            adminPresetsLabel: '🎨 Themen-Vorlagen:',
-            adminCppHeader: '🖼️ Eigenes Profilbild',
-            adminCppDesc: 'Datei-Uploader nutzen:',
-            adminCppBtn: 'Als Profilbild nutzen',
-            adminCppError: 'Datei zu groß (>10Kb).',
-            adminCppSuccess: 'Erfolgreich.',
-            adminSidebarWidthLabel: 'Sidebar Breite (Pixel):',
-            adminMinLabel: 'Minimale Breite: 180.',
-            adminLoginHeader: '🛡️ Admin Login',
-            adminUserPlaceholder: 'Benutzername...',
-            adminPassPlaceholder: 'Password...',
-            adminLoginBtn: 'Login',
-            adminLogoutBtn: 'Logout',
-            adminLoginError: 'Ungültige Daten!',
-            adminGlassLabel: 'Glas-Transparenz:',
-            adminRadiusLabel: 'Ecken-Radius:',
-            adminClockLabel: 'Digitale Uhr',
-            adminThemeAnimLabel: 'Themen-Farben animieren',
-            adminBgImageLabel: 'Hintergrundbild (URL):',
-            adminAnimLabel: 'Öffnen-Animation:',
-            dictCustomUpload: 'Eigenes Wörterbuch',
-            dictUploadDesc: 'Datei hochladen oder Wörter einfügen (eins pro Zeile):',
-            dictUploadBtn: 'Wortliste speichern',
-            dictPlaceholder: 'Wörter hier einfügen...',
-            dictFoundWords: '{count} Wörter gefunden:',
-            dictNoResultsShort: 'Keine Ergebnisse.',
-            german: 'Deutsch',
-            english: 'Englisch',
-            notesHeader: '📝 Notizen',
-            notesDesc: 'Halte deine Gedanken und Strategien fest',
-            addNote: 'Notiz hinzufügen',
-            notePlaceholder: 'Notiz schreiben...',
-            saveNote: 'Speichern',
-            noNotes: 'Noch keine Notizen.',
-            toggleKeyLabel: 'Panel Hotkey'
         }
     };
 
@@ -1211,17 +1147,6 @@
                             <span>System & UI</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <div class="settings-row" id="toggle-language">
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700; font-size: 15px;">Interface Language</span>
-                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Currently using ${getLanguage()}</span>
-                                </div>
-                                <select id="admin-language-select" class="modern-input" style="width: 140px; padding: 10px 15px; font-size: 13px; font-weight: 800; appearance: none; cursor: pointer; text-align: center;">
-                                    <option value="English" ${getLanguage() === 'English' ? 'selected' : ''}>English</option>
-                                    <option value="German" ${getLanguage() === 'German' ? 'selected' : ''}>Deutsch</option>
-                                </select>
-                            </div>
-
                             <div class="settings-row" id="toggle-clock">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
                                     <span style="font-weight: 700; font-size: 15px;">System Clock</span>
@@ -1459,8 +1384,7 @@
 
                                     // Fallback to Wiktionary (Very reliable, supports many languages)
                                     try {
-                                        const lang = currentDict.includes('german') ? 'de' : 'en';
-                                        const response = await fetch(`https://${lang}.wiktionary.org/api/rest_v1/page/summary/${encodeURIComponent(w)}`);
+                                        const response = await fetch(`https://en.wiktionary.org/api/rest_v1/page/summary/${encodeURIComponent(w)}`);
                                         if (response.ok) {
                                             const data = await response.json();
                                             if (data.extract) return data.extract;
@@ -1645,11 +1569,6 @@
             });
 
             adminPage.addEventListener('change', (e) => {
-                if (e.target.id === 'admin-language-select') {
-                    setLanguage(e.target.value);
-                    updateDictContent();
-                    updateAdminContent();
-                }
                 if (e.target.id === 'admin-animation-type') {
                     setAnimationType(e.target.value);
                     updateThemeStyles();
