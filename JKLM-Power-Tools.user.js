@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      6.6
-// @description  Advanced JKLM Power Tools - Root Edition with Network Resilience (v1)
+// @version      6.7
+// @description  Advanced JKLM Power Tools - Root Edition with Audio Autoplay Fix
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -28,6 +28,33 @@
             if (typeof win.chatUnreadHighlightCount === 'undefined') {
                 win.chatUnreadHighlightCount = 0;
             }
+
+            // --- Audio Autoplay Resilience ---
+            // Fixes "AudioContext was not allowed to start" error
+            const resumeAudio = () => {
+                const contexts = [win.AudioContext, win.webkitAudioContext];
+                contexts.forEach(Ctx => {
+                    if (Ctx && Ctx.prototype) {
+                        const originalResume = Ctx.prototype.resume;
+                        // We don't necessarily need to wrap it, but we can proactively try to resume
+                    }
+                });
+
+                const triggerResume = () => {
+                    const audioCtxs = [win.audioContext, win.AudioContext, win.webkitAudioContext];
+                    audioCtxs.forEach(ctx => {
+                        if (ctx && typeof ctx === 'object' && ctx.state === 'suspended') {
+                            ctx.resume().catch(() => {});
+                        }
+                    });
+                };
+
+                // Resume on first user interaction
+                ['click', 'keydown', 'touchstart', 'mousedown'].forEach(evt => {
+                    win.addEventListener(evt, triggerResume, { once: true, capture: true });
+                });
+            };
+            resumeAudio();
 
             // --- Network Resilience Patch (CSS Fallbacks) ---
             const injectFallbackCSS = () => {
