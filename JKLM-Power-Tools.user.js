@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      10.0
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.0)
+// @version      10.1
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.1)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '10.0';
+    const SCRIPT_VERSION = '10.1';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1030,14 +1030,18 @@
             color: #000 !important;
             font-weight: 800 !important;
             font-size: 1em !important;
-            display: inline-block;
+            display: inline-block !important;
             opacity: 1 !important;
             visibility: visible !important;
+            position: relative !important;
+            z-index: 1000 !important;
             text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff !important;
             background: none !important;
             -webkit-background-clip: initial !important;
             -webkit-text-fill-color: initial !important;
             margin: 10px 0 !important;
+            filter: none !important;
+            pointer-events: auto !important;
         }
 
         .home .playerCount b {
