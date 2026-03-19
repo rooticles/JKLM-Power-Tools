@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      5.2
-// @description  Advanced JKLM Power Tools - Ultra Smooth Edition
+// @version      5.3
+// @description  Advanced JKLM Power Tools - Ultra Smooth Edition with API Key Support
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -70,7 +70,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '5.2';
+    const SCRIPT_VERSION = '5.3';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -140,6 +140,8 @@
     const setMinWordLength = (val) => GM_setValue('minWordLength', val);
     const getMaxWordLength = () => GM_getValue('maxWordLength', 30);
     const setMaxWordLength = (val) => GM_setValue('maxWordLength', val);
+    const getNinjaApiKey = () => GM_getValue('ninjaApiKey', '');
+    const setNinjaApiKey = (val) => GM_setValue('ninjaApiKey', val);
 
     // --- Chat & Macro Helpers ---
     const sendToChat = (msg) => {
@@ -216,7 +218,8 @@
             notePlaceholder: 'Write your note here...',
             saveNote: 'Save Note',
             noNotes: 'No notes yet. Start writing!',
-            toggleKeyLabel: 'Panel Toggle Hotkey'
+            toggleKeyLabel: 'Panel Toggle Hotkey',
+            ninjaApiKeyLabel: 'Ninja API Key (Dictionary)'
         }
     };
 
@@ -1182,6 +1185,12 @@
                                 </div>
                                 <input type="text" id="admin-toggle-key" class="modern-input" value="${getToggleKey()}" style="width: 80px; text-align: center; font-weight: 900; padding: 10px; border-radius: 12px; background: rgba(var(--theme-color-rgb), 0.1); color: var(--theme-color); border-color: rgba(var(--theme-color-rgb), 0.2);">
                             </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 10px; padding: 10px 0;">
+                                <div style="font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Ninja API Key (Definitions)</div>
+                                <input type="password" id="admin-ninja-key" class="modern-input" value="${getNinjaApiKey()}" placeholder="Enter your Ninja API Key...">
+                                <span style="font-size: 11px; color: var(--text-muted); opacity: 0.7;">Get your free key at <a href="https://api-ninjas.com/api/dictionary" target="_blank" style="color: var(--theme-color); text-decoration: underline;">api-ninjas.com</a></span>
+                            </div>
                         </div>
                     </div>
 
@@ -1391,7 +1400,7 @@
                                 }
 
                                 const fetchDefinition = async (w) => {
-                                    // Try Free Dictionary API first (Fastest)
+                                    // 1. Try Free Dictionary API first (Fastest)
                                     try {
                                         const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${w}`);
                                         if (response.ok) {
@@ -1402,7 +1411,30 @@
                                         }
                                     } catch (e) {}
 
-                                    // Fallback to Wiktionary (Very reliable, supports many languages)
+                                    // 2. Fallback to Ninja APIs (If Key is provided)
+                                    const ninjaKey = getNinjaApiKey();
+                                    if (ninjaKey) {
+                                        try {
+                                            const def = await new Promise((resolve, reject) => {
+                                                GM_xmlhttpRequest({
+                                                    method: 'GET',
+                                                    url: `https://api.api-ninjas.com/v1/dictionary?word=${encodeURIComponent(w)}`,
+                                                    headers: { 'X-Api-Key': ninjaKey },
+                                                    onload: (res) => {
+                                                        try {
+                                                            const data = JSON.parse(res.responseText);
+                                                            if (data.definition) resolve(data.definition);
+                                                            else resolve(null);
+                                                        } catch(e) { resolve(null); }
+                                                    },
+                                                    onerror: () => resolve(null)
+                                                });
+                                            });
+                                            if (def) return def;
+                                        } catch (e) {}
+                                    }
+
+                                    // 3. Fallback to Wiktionary (Very reliable)
                                     try {
                                         const response = await fetch(`https://en.wiktionary.org/api/rest_v1/page/summary/${encodeURIComponent(w)}`);
                                         if (response.ok) {
@@ -1625,6 +1657,9 @@
                 if (e.target.id === 'admin-bg-image-url') {
                     setBgImageUrl(e.target.value.trim());
                     updateThemeStyles();
+                }
+                if (e.target.id === 'admin-ninja-key') {
+                    setNinjaApiKey(e.target.value.trim());
                 }
             });
 
