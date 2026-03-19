@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      3.2
+// @version      3.4
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -18,6 +18,8 @@
 
 (function () {
     'use strict';
+
+    const SCRIPT_VERSION = '3.4';
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
@@ -1192,7 +1194,7 @@
                             JKLM POWER TOOLS
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="padding: 5px 12px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 10px; font-weight: 800; color: var(--text-muted); border: 1px solid var(--glass-border);">VERSION 3.2</span>
+                            <span style="padding: 5px 12px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 10px; font-weight: 800; color: var(--text-muted); border: 1px solid var(--glass-border);">VERSION ${SCRIPT_VERSION}</span>
                             <span style="padding: 5px 12px; background: rgba(var(--theme-color-rgb), 0.1); border-radius: 8px; font-size: 10px; font-weight: 800; color: var(--theme-color); border: 1px solid rgba(var(--theme-color-rgb), 0.2);">ROOT EDITION</span>
                         </div>
                     </div>
