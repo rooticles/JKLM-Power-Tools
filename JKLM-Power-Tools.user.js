@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      9.0
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.0)
+// @version      9.1
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.1)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -79,12 +79,14 @@
                         background: #1B1F3B !important;
                         color: #eee !important;
                         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-                        margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column;
+                        margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
+                        overflow-y: auto !important;
                     }
+                    
                     .page.resilience-active:not(:has(link[href*="bombparty.css"])) {
-                        display: flex; flex-direction: column; flex: 1; height: 100vh;
+                        display: flex; flex-direction: column; flex: 1; min-height: 100vh;
                         background: radial-gradient(circle at center, #2a2d45 0%, #1b1f3b 100%) !important;
-                        position: relative; overflow: hidden;
+                        position: relative;
                     }
 
                     .top.resilience-active:not(:has(link[href*="bombparty.css"])) {
@@ -287,7 +289,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '9.0';
+    const SCRIPT_VERSION = '9.1';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1527,7 +1529,7 @@
             };
             updateSidebarWidths(getSidebarWidth());
 
-            const pages = document.querySelector('.pages') || main;
+            const pages = document.querySelector('.pages') || document.querySelector('.main') || document.querySelector('main');
             if (pages && pages !== document.body) pages.style.backgroundColor = '#1a1a1a';
             allCustomPages.forEach(p => document.body.appendChild(p));
 
