@@ -438,8 +438,18 @@
             z-index: 9999;
             font-family: var(--font-main);
             transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            border-left: 1px solid var(--glass-border);
+        }
+
+        .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left {
+            left: 0;
             border-right: 1px solid var(--glass-border);
+            border-left: none;
+        }
+
+        .custom-kb-page.pos-right, .custom-dict-page.pos-right, .custom-admin-page.pos-right {
+            right: 0;
+            border-left: 1px solid var(--glass-border);
+            border-right: none;
         }
 
         .custom-kb-page.active, .custom-dict-page.active, .custom-admin-page.active {
@@ -782,7 +792,10 @@
         document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
             p.classList.remove('pos-left', 'pos-right');
             p.classList.add(`pos-${panelPosition}`);
-            p.style.animation = `${animationType}${panelPosition === 'left' ? 'Left' : 'Right'} 0.6s cubic-bezier(0.16, 1, 0.3, 1)`;
+            
+            const animName = animationType === 'slideIn' ? `slideInPanel${panelPosition.charAt(0).toUpperCase() + panelPosition.slice(1)}` : animationType;
+            p.style.animation = `${animName} 0.6s cubic-bezier(0.16, 1, 0.3, 1)`;
+            
             p.style.backgroundImage = bgImageUrl ? `linear-gradient(rgba(${bgRgb}, ${glassOpacity}), rgba(${bgRgb}, ${glassOpacity})), url(${bgImageUrl})` : 'none';
             p.style.backgroundSize = 'cover';
             p.style.backgroundPosition = 'center';
@@ -971,21 +984,7 @@
                 <div class="custom-page-content">
                     <div class="feature-card">
                         <div class="feature-header">
-                            <div class="feature-icon">📝</div>
-                            <span>${t.notesHeader}</span>
-                        </div>
-                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                            <input type="text" id="new-note-input" class="modern-input" placeholder="${t.notePlaceholder}" style="flex: 1;">
-                            <button class="modern-button" id="add-note-btn" style="min-width: 60px; padding: 0;">+</button>
-                        </div>
-                        <div id="notes-list" style="display: flex; flex-direction: column;">
-                            ${notesHtml}
-                        </div>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">🔍</div>
+                            <div class="feature-icon"></div>
                             <span>Word Search</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -1036,6 +1035,20 @@
                             ${options}
                             <option value="Custom" ${dictLang === 'Custom' ? 'selected' : ''}>${t.dictCustomUpload}</option>
                         </select>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">📝</div>
+                            <span>${t.notesHeader}</span>
+                        </div>
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                            <input type="text" id="new-note-input" class="modern-input" placeholder="${t.notePlaceholder}" style="flex: 1;">
+                            <button class="modern-button" id="add-note-btn" style="min-width: 60px; padding: 0;">+</button>
+                        </div>
+                        <div id="notes-list" style="display: flex; flex-direction: column;">
+                            ${notesHtml}
+                        </div>
                     </div>
 
                     <div id="custom-dict-upload-area" style="display: ${dictLang === 'Custom' ? 'block' : 'none'}; margin-bottom: 24px; padding: 28px; background: rgba(var(--theme-color-rgb), 0.08); border-radius: 24px; border: 2px dashed rgba(var(--theme-color-rgb), 0.3); backdrop-filter: blur(10px);">
