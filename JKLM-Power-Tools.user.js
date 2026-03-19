@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      5.6
-// @description  Advanced JKLM Power Tools - Ultra Smooth Edition with Full German Dictionary
+// @version      5.8
+// @description  Advanced JKLM Power Tools - Ultra Smooth Edition with Fixed German Dictionary URL
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -70,7 +70,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '5.6';
+    const SCRIPT_VERSION = '5.8';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -140,8 +140,6 @@
     const setMinWordLength = (val) => GM_setValue('minWordLength', val);
     const getMaxWordLength = () => GM_getValue('maxWordLength', 30);
     const setMaxWordLength = (val) => GM_setValue('maxWordLength', val);
-    const getNinjaApiKey = () => GM_getValue('ninjaApiKey', '');
-    const setNinjaApiKey = (val) => GM_setValue('ninjaApiKey', val);
 
     // --- Chat & Macro Helpers ---
     const sendToChat = (msg) => {
@@ -219,8 +217,7 @@
             notePlaceholder: 'Write your note here...',
             saveNote: 'Save Note',
             noNotes: 'No notes yet. Start writing!',
-            toggleKeyLabel: 'Panel Toggle Hotkey',
-            ninjaApiKeyLabel: 'Ninja API Key (Dictionary)'
+            toggleKeyLabel: 'Panel Toggle Hotkey'
         }
     };
 
@@ -236,7 +233,7 @@
     // --- Local Music Player ---
     const dictionaryUrls = {
         'English': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/121bf1a601ed822553c2e68c38a4cdcd7737d352/words.txt',
-        'German': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/master/german.txt'
+        'German': 'https://raw.githubusercontent.com/MarvinJWendt/2f4f4154b8ae218600eb091a5706b5f4/raw/all_german_words.txt'
     };
 
     const loadGermanReference = async () => {
@@ -1206,12 +1203,6 @@
                                 </div>
                                 <input type="text" id="admin-toggle-key" class="modern-input" value="${getToggleKey()}" style="width: 80px; text-align: center; font-weight: 900; padding: 10px; border-radius: 12px; background: rgba(var(--theme-color-rgb), 0.1); color: var(--theme-color); border-color: rgba(var(--theme-color-rgb), 0.2);">
                             </div>
-
-                            <div style="display: flex; flex-direction: column; gap: 10px; padding: 10px 0;">
-                                <div style="font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Ninja API Key (Definitions)</div>
-                                <input type="password" id="admin-ninja-key" class="modern-input" value="${getNinjaApiKey()}" placeholder="Enter your Ninja API Key...">
-                                <span style="font-size: 11px; color: var(--text-muted); opacity: 0.7;">Get your free key at <a href="https://api-ninjas.com/api/dictionary" target="_blank" style="color: var(--theme-color); text-decoration: underline;">api-ninjas.com</a></span>
-                            </div>
                         </div>
                     </div>
 
@@ -1240,12 +1231,6 @@
             const pages = document.querySelector('.pages') || main;
             if (pages && pages !== document.body) pages.style.backgroundColor = '#1a1a1a';
             allCustomPages.forEach(p => document.body.appendChild(p));
-
-            // Tooltip Element
-            const tooltip = document.createElement('div');
-            tooltip.id = 'word-definition-tooltip';
-            tooltip.className = 'word-tooltip';
-            document.body.appendChild(tooltip);
 
             window.closeCustomTabs = () => {
                 [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
@@ -1420,89 +1405,6 @@
                         resultList.innerHTML = sorted.map(w => {
                             return `<span class="clickable-word" title="Click to copy" data-word="${w.toUpperCase()}">${w.toUpperCase()}</span>`;
                         }).join(' – ');
-
-                        // Re-attach tooltip listeners
-                        const tooltip = document.getElementById('word-definition-tooltip');
-                        const definitionCache = new Map();
-
-                        document.querySelectorAll('.clickable-word').forEach(el => {
-                            el.addEventListener('mouseenter', async (e) => {
-                                const word = e.target.getAttribute('data-word').toLowerCase();
-                                const currentDict = getDictLanguage().toLowerCase();
-                                tooltip.style.display = 'block';
-                                tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br><span style="opacity: 0.7;">Searching definition...</span>`;
-                                
-                                if (definitionCache.has(word)) {
-                                    tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>${definitionCache.get(word)}`;
-                                    return;
-                                }
-
-                                const fetchDefinition = async (w) => {
-                                    // 1. Try Free Dictionary API first (Fastest)
-                                    try {
-                                        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${w}`);
-                                        if (response.ok) {
-                                            const data = await response.json();
-                                            if (data?.[0]?.meanings?.[0]?.definitions?.[0]) {
-                                                return data[0].meanings[0].definitions[0].definition;
-                                            }
-                                        }
-                                    } catch (e) {}
-
-                                    // 2. Fallback to Ninja APIs (If Key is provided)
-                                    const ninjaKey = getNinjaApiKey();
-                                    if (ninjaKey) {
-                                        try {
-                                            const def = await new Promise((resolve, reject) => {
-                                                GM_xmlhttpRequest({
-                                                    method: 'GET',
-                                                    url: `https://api.api-ninjas.com/v1/dictionary?word=${encodeURIComponent(w)}`,
-                                                    headers: { 'X-Api-Key': ninjaKey },
-                                                    onload: (res) => {
-                                                        try {
-                                                            const data = JSON.parse(res.responseText);
-                                                            if (data.definition) resolve(data.definition);
-                                                            else resolve(null);
-                                                        } catch(e) { resolve(null); }
-                                                    },
-                                                    onerror: () => resolve(null)
-                                                });
-                                            });
-                                            if (def) return def;
-                                        } catch (e) {}
-                                    }
-
-                                    // 3. Fallback to Wiktionary (Very reliable)
-                                    try {
-                                        const response = await fetch(`https://en.wiktionary.org/api/rest_v1/page/summary/${encodeURIComponent(w)}`);
-                                        if (response.ok) {
-                                            const data = await response.json();
-                                            if (data.extract) return data.extract;
-                                        }
-                                    } catch (e) {}
-
-                                    return null;
-                                };
-
-                                const def = await fetchDefinition(word);
-                                if (def) {
-                                    definitionCache.set(word, def);
-                                    tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>${def}`;
-                                } else {
-                                    const googleLink = `https://www.google.com/search?q=definition+${word}`;
-                                    const errorMsg = `No precise definition found. <a href="${googleLink}" target="_blank" style="color: var(--theme-color); text-decoration: underline;">Search on Google</a>`;
-                                    definitionCache.set(word, errorMsg);
-                                    tooltip.innerHTML = `<strong>${word.toUpperCase()}</strong><br>${errorMsg}`;
-                                }
-                            });
-                            el.addEventListener('mousemove', (e) => {
-                                tooltip.style.left = (e.clientX + 15) + 'px';
-                                tooltip.style.top = (e.clientY + 15) + 'px';
-                            });
-                            el.addEventListener('mouseleave', () => {
-                                tooltip.style.display = 'none';
-                            });
-                        });
                     } else {
                         resultHeader.innerText = t.dictNoResults;
                         resultList.innerHTML = '';
@@ -1695,9 +1597,6 @@
                 if (e.target.id === 'admin-bg-image-url') {
                     setBgImageUrl(e.target.value.trim());
                     updateThemeStyles();
-                }
-                if (e.target.id === 'admin-ninja-key') {
-                    setNinjaApiKey(e.target.value.trim());
                 }
             });
 
