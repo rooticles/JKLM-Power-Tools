@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      9.5
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.5)
+// @version      9.6
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.6)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '9.5';
+    const SCRIPT_VERSION = '9.6';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1072,21 +1072,26 @@
         // Apply Global Backgrounds
         const lobbyBg = getLobbyBgUrl();
         const roomBg = getRoomBgUrl();
-        const isLobby = document.querySelector('.home');
-        const isRoom = document.querySelector('.room');
+        const isLobby = document.body.classList.contains('home') || !!document.querySelector('.home');
+        const isRoom = document.body.classList.contains('room') || !!document.querySelector('.room');
 
         if (isLobby && lobbyBg) {
-            document.body.style.backgroundImage = `url("${lobbyBg}")`;
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center';
-            document.body.style.backgroundAttachment = 'fixed';
+            document.body.style.setProperty('background-image', `url("${lobbyBg}")`, 'important');
+            document.body.style.setProperty('background-size', 'cover', 'important');
+            document.body.style.setProperty('background-position', 'center', 'important');
+            document.body.style.setProperty('background-attachment', 'fixed', 'important');
         } else if (isRoom && roomBg) {
-            document.body.style.backgroundImage = `url("${roomBg}")`;
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center';
-            document.body.style.backgroundAttachment = 'fixed';
-        } else {
-            document.body.style.backgroundImage = '';
+            document.body.style.setProperty('background-image', `url("${roomBg}")`, 'important');
+            document.body.style.setProperty('background-size', 'cover', 'important');
+            document.body.style.setProperty('background-position', 'center', 'important');
+            document.body.style.setProperty('background-attachment', 'fixed', 'important');
+        } else if (lobbyBg || roomBg) {
+            // If we have a URL but classes aren't yet detected, try to apply anyway to avoid flicker
+            const bgToApply = lobbyBg || roomBg;
+            document.body.style.setProperty('background-image', `url("${bgToApply}")`, 'important');
+            document.body.style.setProperty('background-size', 'cover', 'important');
+            document.body.style.setProperty('background-position', 'center', 'important');
+            document.body.style.setProperty('background-attachment', 'fixed', 'important');
         }
 
         document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
@@ -1963,6 +1968,7 @@
                 // Update lobby filters on mutation
                 setupLobbyFilters();
                 filterLobbies();
+                updateThemeStyles();
 
                 const isSelfTurn = !!document.querySelector('.selfTurn');
                 window.lastTurnState = isSelfTurn;
