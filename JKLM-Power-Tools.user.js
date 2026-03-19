@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      4.1
+// @version      4.3
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -19,7 +19,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '4.1';
+    const SCRIPT_VERSION = '4.3';
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
@@ -819,15 +819,11 @@
     const init = () => {
         if (isInitialized) return;
         try {
-            console.log('[JKLM Power Tools] Initializing...');
-            const nav = document.querySelector('.navigation') || document.querySelector('.tabs') || document.querySelector('.room .bottom');
-            const main = document.querySelector('main') || document.body;
-            if (!nav) {
-                console.warn('[JKLM Power Tools] Navigation not found, retrying...');
-                return;
-            }
+            const nav = document.querySelector('.navigation') || document.querySelector('.tabs') || document.querySelector('.room .bottom') || document.querySelector('.room .navigation');
+            if (!nav) return;
 
             isInitialized = true;
+            console.log(`[JKLM Power Tools] v${SCRIPT_VERSION} Initialized successfully.`);
             if (checkInit) checkInit.disconnect();
 
             let customRow = document.getElementById('custom-nav-row');
@@ -1700,15 +1696,15 @@
     }, true);
 
             const checkInit = new MutationObserver(() => {
-                const nav = document.querySelector('.navigation, .tabs, .room .bottom');
-                if (nav) {
-                    init();
-                }
+                const nav = document.querySelector('.navigation, .tabs, .room .bottom, .room .navigation');
+                if (nav) init();
             });
-    checkInit.observe(document.body, { childList: true, subtree: true });
+    checkInit.observe(document.documentElement, { childList: true, subtree: true });
 
-    // Fallback: Try to init after 2 seconds regardless of observer
-    setTimeout(init, 2000);
-    // Extra Fallback for slower connections
-    setTimeout(init, 5000);
+    // Initial check
+    init();
+    // Fallbacks
+    setTimeout(init, 1000);
+    setTimeout(init, 3000);
+    setTimeout(init, 6000);
 })();
