@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      9.9
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.9)
+// @version      10.0
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.0)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '9.9';
+    const SCRIPT_VERSION = '10.0';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -548,14 +548,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(27, 31, 59, 0.4);
+            background: #1b1f3b;
             height: 60px;
             width: 100%;
             border-bottom: 1px solid var(--glass-border);
             position: relative;
             z-index: 10001;
-            backdrop-filter: blur(12px) saturate(180%);
-            -webkit-backdrop-filter: blur(12px) saturate(180%);
             gap: 15px;
             padding: 0 25px;
             box-sizing: border-box;
@@ -975,11 +973,10 @@
             justify-content: center;
             margin: 20px auto;
             padding: 15px;
-            background: rgba(0,0,0,0.3);
+            background: #1a1a1a;
             border-radius: 20px;
             max-width: 900px;
-            border: 1px solid rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .lobby-filter-btn {
             padding: 10px 20px;
