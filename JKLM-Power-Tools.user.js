@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      10.2
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.2)
+// @version      10.3
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.3)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '10.2';
+    const SCRIPT_VERSION = '10.3';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1026,7 +1026,7 @@
         }
 
         /* Player Count & Stats Visibility */
-        .playerCount {
+        div.playerCount, .playerCount {
             color: #000 !important;
             font-weight: 800 !important;
             font-size: 1em !important;
@@ -1034,7 +1034,7 @@
             opacity: 1 !important;
             visibility: visible !important;
             position: relative !important;
-            z-index: 1000 !important;
+            z-index: 9999 !important;
             text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff !important;
             background: none !important;
             -webkit-background-clip: initial !important;
@@ -1044,9 +1044,12 @@
             pointer-events: auto !important;
         }
 
-        .playerCount b {
+        .playerCount b, div.playerCount b {
             color: var(--theme-color) !important;
             text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff !important;
+            display: inline !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
         .home {
@@ -2017,6 +2020,15 @@
                 // Update lobby filters on mutation
                 setupLobbyFilters();
                 filterLobbies();
+                
+                // Force visibility immediately on mutation
+                const pc = document.querySelector('.playerCount');
+                if (pc) {
+                    pc.style.setProperty('display', 'inline-block', 'important');
+                    pc.style.setProperty('visibility', 'visible', 'important');
+                    pc.style.setProperty('opacity', '1', 'important');
+                }
+
                 updateThemeStyles();
 
                 const isSelfTurn = !!document.querySelector('.selfTurn');
