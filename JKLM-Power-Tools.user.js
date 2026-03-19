@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      8.7
-// @description  Advanced JKLM Power Tools - Ultimate Edition (100% English v8.7)
+// @version      8.8
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v8.8)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -81,24 +81,15 @@
                         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
                         margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column;
                     }
-                    /* Golden Glow Support in Fallback */
-                    body.resilience-active.golden-glow-theme:not(:has(link[href*="base.css"])) {
-                        background: radial-gradient(circle at center, #2a2005 0%, #1a1400 100%) !important;
-                    }
-                    
                     .page.resilience-active:not(:has(link[href*="bombparty.css"])) {
                         display: flex; flex-direction: column; flex: 1; height: 100vh;
                         background: radial-gradient(circle at center, #2a2d45 0%, #1b1f3b 100%) !important;
                         position: relative; overflow: hidden;
                     }
-                    .golden-glow-theme .page.resilience-active:not(:has(link[href*="bombparty.css"])) {
-                        background: radial-gradient(circle at center, #3d3000 0%, #1a1400 100%) !important;
-                    }
 
                     .top.resilience-active:not(:has(link[href*="bombparty.css"])) {
                         height: 60px; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(255,255,255,0.1);
                     }
-                    .golden-glow-theme .top.resilience-active { border-bottom-color: #ffd700 !important; }
 
                     .middle.resilience-active:not(:has(link[href*="bombparty.css"])) {
                         flex: 1; display: flex; flex-direction: column; position: relative; align-items: center; justify-content: center;
@@ -106,21 +97,18 @@
                     .bottom.resilience-active:not(:has(link[href*="bombparty.css"])) {
                         height: 100px; background: rgba(0,0,0,0.5); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;
                     }
-                    .golden-glow-theme .bottom.resilience-active { border-top-color: #ffd700 !important; }
 
                     .chat.resilience-active:not(:has(link[href*="base.css"])) {
                         position: fixed; right: 0; bottom: 100px; top: 60px; width: 320px;
                         background: rgba(0,0,0,0.7) !important; border-left: 1px solid rgba(255,255,255,0.1) !important;
                         display: flex; flex-direction: column; backdrop-filter: blur(15px); z-index: 1000;
                     }
-                    .golden-glow-theme .chat.resilience-active { border-left-color: #ffd700 !important; background: rgba(20,15,0,0.8) !important; }
 
                     .navigation.resilience-active:not(:has(link[href*="base.css"])) {
                         position: fixed; top: 0; left: 0; right: 0; height: 60px;
                         background: rgba(0,0,0,0.6) !important; display: flex; align-items: center; padding: 0 20px;
                         border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 1001;
                     }
-                    .golden-glow-theme .navigation.resilience-active { border-bottom-color: #ffd700 !important; }
 
                     .canvasArea.resilience-active:not(:has(link[href*="bombparty.css"])) {
                         flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;
@@ -128,14 +116,12 @@
                     .round.resilience-active:not(:has(link[href*="bombparty.css"])) {
                         font-size: 2em; font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.5);
                     }
-                    .golden-glow-theme .round.resilience-active { color: #ffd700 !important; text-shadow: 0 0 20px rgba(255,215,0,0.4); }
 
                     button.resilience-active:not(.modern-button) {
                         background: #26aa36 !important; color: #fff !important; border: none !important;
                         padding: 12px 24px !important; border-radius: 30px !important; font-weight: 800 !important;
                         cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
                     }
-                    .golden-glow-theme button.resilience-active:not(.modern-button) { background: #ffd700 !important; color: #000 !important; }
                     
                     /* Guardian Pulse Animation */
                     @keyframes guardian-pulse {
@@ -301,7 +287,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '8.6';
+    const SCRIPT_VERSION = '8.8';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -372,8 +358,6 @@
     const getMaxWordLength = () => GM_getValue('maxWordLength', 30);
     const setMaxWordLength = (val) => GM_setValue('maxWordLength', val);
 
-    const getProfileStyle = () => GM_getValue('profileStyle', 'none');
-    const setProfileStyle = (val) => GM_setValue('profileStyle', val);
     const getAnimatedTheme = () => GM_getValue('animatedTheme', 'none');
     const setAnimatedTheme = (val) => GM_setValue('animatedTheme', val);
 
@@ -1025,58 +1009,6 @@
             from { background-position: 0% -100%; }
             to { background-position: 0% 100%; }
         }
-
-        /* Profile Styles */
-        .profile-style-gold {
-            border: 3px solid #ffd700 !important;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6) !important;
-            animation: pulseGold 2s infinite alternate;
-        }
-        @keyframes pulseGold {
-            from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.4); }
-            to { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
-        }
-
-        .profile-style-neon {
-            border: 3px solid #00d2ff !important;
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.6) !important;
-            animation: pulseNeon 1.5s infinite alternate;
-        }
-        @keyframes pulseNeon {
-            from { filter: hue-rotate(0deg) brightness(1); }
-            to { filter: hue-rotate(45deg) brightness(1.3); }
-        }
-
-        /* Golden Glow Global UI Theme */
-        body.golden-glow-theme .navigation,
-        body.golden-glow-theme .navigation .tab,
-        body.golden-glow-theme .chat,
-        body.golden-glow-theme .chat .top,
-        body.golden-glow-theme .chat .bottom,
-        body.golden-glow-theme .chat input,
-        body.golden-glow-theme .chat textarea,
-        body.golden-glow-theme .sidebar,
-        body.golden-glow-theme button:not(.modern-button),
-        body.golden-glow-theme .roundRules {
-            background-color: rgba(218, 165, 32, 0.15) !important;
-            border-color: #ffd700 !important;
-            color: #ffffff !important;
-        }
-
-        body.golden-glow-theme .navigation .tab.active {
-            background: linear-gradient(180deg, rgba(255, 215, 0, 0.3), rgba(218, 165, 32, 0.1)) !important;
-            box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.2);
-        }
-
-        body.golden-glow-theme ::placeholder { color: rgba(255, 255, 255, 0.5) !important; }
-
-        /* Ultimate Resilience Support for Golden Glow */
-        body.golden-glow-theme .page,
-        body.golden-glow-theme .middle,
-        body.golden-glow-theme .bottom,
-        body.golden-glow-theme .top {
-            border-color: rgba(255, 215, 0, 0.3) !important;
-        }
     `;
     document.head.appendChild(style);
 
@@ -1121,24 +1053,6 @@
         });
     };
     updateThemeStyles();
-
-    const updateProfileStyles = () => {
-        const profileStyle = getProfileStyle();
-        // Target common avatar selectors in JKLM
-        const avatarSelectors = '.player .avatar, .self .avatar, .avatar, .userIcon';
-        document.querySelectorAll(avatarSelectors).forEach(avatar => {
-            avatar.classList.remove('profile-style-gold', 'profile-style-neon');
-            if (profileStyle === 'gold') avatar.classList.add('profile-style-gold');
-            if (profileStyle === 'neon') avatar.classList.add('profile-style-neon');
-        });
-
-        // Apply Golden Glow Theme to the entire JKLM UI if "gold" is selected
-        if (profileStyle === 'gold') {
-            document.body.classList.add('golden-glow-theme');
-        } else {
-            document.body.classList.remove('golden-glow-theme');
-        }
-    };
 
     let lastDetectedSyllable = '';
     let isGameRunning = false;
@@ -1423,7 +1337,6 @@
                 const clockEnabled = getClockEnabled();
                 const bgImageUrl = getBgImageUrl();
                 const panelPosition = getPanelPosition();
-                const profileStyle = getProfileStyle();
                 const animatedTheme = getAnimatedTheme();
                 adminTab.title = t.adminHeader;
 
@@ -1466,22 +1379,7 @@
 
                     <div class="feature-card">
                         <div class="feature-header">
-                            <div class="feature-icon">💎</div>
-                            <span>Profile Effects</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 15px;">
-                            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">Enable exclusive visual effects for your avatar (visible to you only).</div>
-                            <select class="modern-input" id="admin-profile-style">
-                                <option value="none" ${profileStyle === 'none' ? 'selected' : ''}>None</option>
-                                <option value="gold" ${profileStyle === 'gold' ? 'selected' : ''}>Golden Glow (Legendary)</option>
-                                <option value="neon" ${profileStyle === 'neon' ? 'selected' : ''}>Neon Pulse (Root)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">🛠️</div>
+                            <div class="feature-icon">️</div>
                             <span>System & Interface</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -1856,10 +1754,6 @@
                     setAnimationType(e.target.value);
                     updateThemeStyles();
                 }
-                if (e.target.id === 'admin-profile-style') {
-                    setProfileStyle(e.target.value);
-                    updateProfileStyles();
-                }
             });
 
             adminPage.addEventListener('input', (e) => {
@@ -1902,9 +1796,6 @@
                 const isSelfTurn = !!document.querySelector('.selfTurn');
                 window.lastTurnState = isSelfTurn;
                 
-                // Update profile styles on mutation to catch new avatars
-                updateProfileStyles();
-
                 const gameVisible = !!document.querySelector('.canvasArea') || !!document.querySelector('.syllable');
                 if (gameVisible && !isGameRunning) {
                     isGameRunning = true;
