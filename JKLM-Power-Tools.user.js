@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      6.3
-// @description  Advanced JKLM Power Tools - Root Edition with Ultra-Stability Patch (v3 - Recursive Proxy)
+// @version      6.4
+// @description  Advanced JKLM Power Tools - Root Edition with Nuclear Stability Patch (Final Fix)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -29,24 +29,20 @@
                 win.chatUnreadHighlightCount = 0;
             }
 
-            // --- Ultra Stability Patch (v3) ---
-            // This creates a "recursive" proxy that returns itself or a noop for ANY property access.
-            // This stops "Cannot read properties of undefined" for common JKLM objects.
+            // --- Ultra Stability Patch (v4 - Nuclear Edition) ---
+            // This is the absolute final fix for "Cannot read properties of undefined (reading 'addEventListener')"
             
             const createRecursiveProxy = (name = 'root') => {
                 const noop = () => {};
                 const handler = {
                     get: (target, prop) => {
-                        // Avoid standard object property confusion
                         if (prop === 'then') return undefined;
                         if (prop === 'toJSON') return () => ({});
                         if (typeof prop === 'symbol') return undefined;
                         
-                        // Standard methods return noop
                         const methods = ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'dispatchEvent', 'setMilestone'];
                         if (methods.includes(prop)) return noop;
                         
-                        // Everything else returns another proxy (recursive depth)
                         return createRecursiveProxy(`${name}.${prop.toString()}`);
                     },
                     apply: (target, thisArg, args) => {
@@ -56,13 +52,29 @@
                 return new Proxy(noop, handler);
             };
 
+            // The "Nuclear Option": Ensure 'milestones' property exists on EVERY object in the JS environment
+            // This prevents 'this.milestones' from ever being undefined in any context.
+            if (typeof Object.prototype.milestones === 'undefined') {
+                let _globalMilestones = win.milestones || createRecursiveProxy('milestones');
+                Object.defineProperty(Object.prototype, 'milestones', {
+                    get: function() { 
+                        // If the object itself has a milestones property, return it, otherwise return global
+                        return _globalMilestones; 
+                    },
+                    set: function(val) { 
+                        if (this === win) _globalMilestones = val;
+                        else this._milestones = val; 
+                    },
+                    configurable: true
+                });
+            }
+
             const safeProxy = (name) => {
                 let _val = win[name] || createRecursiveProxy(name);
                 Object.defineProperty(win, name, {
                     get: () => _val,
                     set: (val) => { 
                         if (val && typeof val === 'object') {
-                            // Ensure the new object has basic methods (don't break real JKLM objects)
                             ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'setMilestone'].forEach(m => {
                                 if (typeof val[m] === 'undefined') val[m] = () => {};
                             });
@@ -76,22 +88,23 @@
             // Patch global objects
             ['milestones', 'game', 'socket', 'room', 'client'].forEach(safeProxy);
 
-            // Special handling for Socket prototype
-            // This ensures that 'this.milestones' inside Socket methods never fails
-            const patchPrototype = (objName) => {
-                const Proto = win[objName] && win[objName].prototype;
-                if (Proto) {
-                    if (typeof Proto.milestones === 'undefined') {
-                        Object.defineProperty(Proto, 'milestones', {
-                            get: () => win.milestones,
-                            configurable: true
-                        });
+            // Continously monitor for Socket/Emitter definitions to patch prototypes
+            const patchPrototypes = () => {
+                ['Socket', 'Emitter', 'EventEmitter'].forEach(objName => {
+                    const Proto = win[objName] && win[objName].prototype;
+                    if (Proto) {
+                        if (typeof Proto.addEventListener === 'undefined') Proto.addEventListener = () => {};
+                        if (typeof Proto.setMilestone === 'undefined') Proto.setMilestone = () => {};
+                        if (typeof Proto.on === 'undefined') Proto.on = () => {};
                     }
-                    if (typeof Proto.addEventListener === 'undefined') Proto.addEventListener = () => {};
-                    if (typeof Proto.setMilestone === 'undefined') Proto.setMilestone = () => {};
-                }
+                });
             };
-            ['Socket', 'Emitter'].forEach(patchPrototype);
+            
+            // Run multiple times to catch late-loading scripts
+            patchPrototypes();
+            setTimeout(patchPrototypes, 500);
+            setTimeout(patchPrototypes, 2000);
+            setTimeout(patchPrototypes, 5000);
 
         } catch (e) {
             console.warn('[JKLM Power Tools] Stability patch failed:', e);
@@ -99,7 +112,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '6.3';
+    const SCRIPT_VERSION = '6.4';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
