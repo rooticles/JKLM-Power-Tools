@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      10.8
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.8)
+// @version      10.9
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.9)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '10.8';
+    const SCRIPT_VERSION = '10.9';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1054,6 +1054,33 @@
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
+        }
+
+        /* Homepage Full Transparency when BG is active */
+        body:has(.home) .home,
+        body:has(.home) .pages,
+        body:has(.home) .main,
+        body:has(.home) .home .top,
+        body:has(.home) .home .bottom,
+        body:has(.home) .home .setup,
+        body:has(.home) .home .join,
+        body:has(.home) .home .lobbies {
+            background: transparent !important;
+            background-color: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* Keep text/emojis/inputs visible */
+        body:has(.home) .home .playerCount,
+        body:has(.home) .home .playerCount *,
+        body:has(.home) .home b,
+        body:has(.home) .home span,
+        body:has(.home) .home input,
+        body:has(.home) .home button,
+        body:has(.home) .home .room * {
+            opacity: 1 !important;
+            visibility: visible !important;
         }
 
         /* Custom Room Card Background & Bubble */
