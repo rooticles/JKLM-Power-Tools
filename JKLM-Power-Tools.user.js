@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      10.3
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.3)
+// @version      10.4
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.4)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '10.3';
+    const SCRIPT_VERSION = '10.4';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1116,25 +1116,24 @@
         const lobbyBg = getLobbyBgUrl();
         const roomBg = getRoomBgUrl();
         const isLobby = document.body.classList.contains('home') || !!document.querySelector('.home');
-        const isRoom = document.body.classList.contains('room') || !!document.querySelector('.room');
+        const isRoom = document.body.classList.contains('room') || !!document.querySelector('.room') || !!document.querySelector('.game');
 
         if (isLobby && lobbyBg) {
             document.body.style.setProperty('background-image', `url("${lobbyBg}")`, 'important');
             document.body.style.setProperty('background-size', 'cover', 'important');
             document.body.style.setProperty('background-position', 'center', 'important');
             document.body.style.setProperty('background-attachment', 'fixed', 'important');
-        } else if (isRoom && roomBg) {
-            document.body.style.setProperty('background-image', `url("${roomBg}")`, 'important');
-            document.body.style.setProperty('background-size', 'cover', 'important');
-            document.body.style.setProperty('background-position', 'center', 'important');
-            document.body.style.setProperty('background-attachment', 'fixed', 'important');
-        } else if (lobbyBg || roomBg) {
-            // If we have a URL but classes aren't yet detected, try to apply anyway to avoid flicker
-            const bgToApply = lobbyBg || roomBg;
-            document.body.style.setProperty('background-image', `url("${bgToApply}")`, 'important');
-            document.body.style.setProperty('background-size', 'cover', 'important');
-            document.body.style.setProperty('background-position', 'center', 'important');
-            document.body.style.setProperty('background-attachment', 'fixed', 'important');
+        } else if ((isRoom || !isLobby) && roomBg) {
+            // Apply to body and specific room/game containers to ensure visibility
+            const targets = [document.body, document.querySelector('.room'), document.querySelector('.game'), document.querySelector('.main')];
+            targets.forEach(t => {
+                if (t) {
+                    t.style.setProperty('background-image', `url("${roomBg}")`, 'important');
+                    t.style.setProperty('background-size', 'cover', 'important');
+                    t.style.setProperty('background-position', 'center', 'important');
+                    t.style.setProperty('background-attachment', 'fixed', 'important');
+                }
+            });
         }
 
         // Apply Room Background to Lobby Cards (The rooms shown on home page)
