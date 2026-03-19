@@ -1174,8 +1174,8 @@
                             </div>
 
                             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; opacity: 0.9; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                                <div style="width: 32px; height: 32px; border-radius: 10px; border: 2px solid var(--theme-color); overflow: hidden; background: rgba(var(--theme-color-rgb), 0.1); box-shadow: var(--glow-effect);">
-                                    <img src="https://jklm.fun/images/avatars/0.png" style="width: 100%; height: 100%; object-fit: cover;" id="kb-idea-author-img">
+                                <div style="width: 32px; height: 32px; border-radius: 10px; border: 2px solid var(--theme-color); overflow: hidden; background: rgba(var(--theme-color-rgb), 0.1); box-shadow: var(--glow-effect); display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--theme-color); font-size: 14px;">
+                                    <img src="https://robohash.org/meow?set=set4" style="width: 100%; height: 100%; object-fit: cover;" id="kb-idea-author-img" onerror="this.style.display='none'; this.parentElement.innerText='M'">
                                 </div>
                                 <div style="display: flex; flex-direction: column; gap: 2px;">
                                     <span style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">${t.ideaBy}</span>
