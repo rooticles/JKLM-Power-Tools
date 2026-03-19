@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      6.0
-// @description  Advanced JKLM Power Tools - Ultra Smooth Edition - Full Notes Display
+// @version      6.1
+// @description  Advanced JKLM Power Tools - Root Edition with Profile Styles & Animated Themes
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -70,7 +70,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '6.0';
+    const SCRIPT_VERSION = '6.1';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -140,6 +140,11 @@
     const setMinWordLength = (val) => GM_setValue('minWordLength', val);
     const getMaxWordLength = () => GM_getValue('maxWordLength', 30);
     const setMaxWordLength = (val) => GM_setValue('maxWordLength', val);
+
+    const getProfileStyle = () => GM_getValue('profileStyle', 'none');
+    const setProfileStyle = (val) => GM_setValue('profileStyle', val);
+    const getAnimatedTheme = () => GM_getValue('animatedTheme', 'none');
+    const setAnimatedTheme = (val) => GM_setValue('animatedTheme', val);
 
     // --- Chat & Macro Helpers ---
     const sendToChat = (msg) => {
@@ -764,6 +769,49 @@
             from { transform: translateX(-100%) scale(0.96); opacity: 0; filter: blur(10px); }
             to { transform: translateX(0) scale(1); opacity: 1; filter: blur(0); }
         }
+
+        /* Animated Themes */
+        .animated-mesh {
+            background: linear-gradient(45deg, #1B1F3B, #2a1f4d, #1b3b3b, #1B1F3B);
+            background-size: 400% 400%;
+            animation: meshGradient 15s ease infinite;
+        }
+        @keyframes meshGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .animated-matrix {
+            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,210,255,0.05) 50%, rgba(0,0,0,0) 100%);
+            background-size: 100% 200%;
+            animation: matrixFlow 4s linear infinite;
+        }
+        @keyframes matrixFlow {
+            from { background-position: 0% -100%; }
+            to { background-position: 0% 100%; }
+        }
+
+        /* Profile Styles */
+        .profile-style-gold {
+            border: 3px solid #ffd700 !important;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6) !important;
+            animation: pulseGold 2s infinite alternate;
+        }
+        @keyframes pulseGold {
+            from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.4); }
+            to { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+        }
+
+        .profile-style-neon {
+            border: 3px solid #00d2ff !important;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.6) !important;
+            animation: pulseNeon 1.5s infinite alternate;
+        }
+        @keyframes pulseNeon {
+            from { filter: hue-rotate(0deg) brightness(1); }
+            to { filter: hue-rotate(45deg) brightness(1.3); }
+        }
     `;
     document.head.appendChild(style);
 
@@ -778,6 +826,7 @@
         const bgImageUrl = getBgImageUrl();
         const animationType = getAnimationType();
         const panelPosition = getPanelPosition();
+        const animatedTheme = getAnimatedTheme();
 
         const themeRgb = themeColor.match(/[A-Za-z0-9]{2}/g).map(x => parseInt(x, 16)).join(',');
         const bgRgb = bgColor.match(/[A-Za-z0-9]{2}/g).map(x => parseInt(x, 16)).join(',');
@@ -809,11 +858,13 @@
         document.documentElement.style.setProperty('--glass-border', glassBorder);
 
         document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
-            p.classList.remove('pos-left', 'pos-right');
+            p.classList.remove('pos-left', 'pos-right', 'animated-mesh', 'animated-matrix');
             p.classList.add(`pos-${panelPosition}`);
+            if (animatedTheme === 'mesh') p.classList.add('animated-mesh');
+            if (animatedTheme === 'matrix') p.classList.add('animated-matrix');
             
             const animName = animationType === 'slideIn' ? `slideInPanel${panelPosition.charAt(0).toUpperCase() + panelPosition.slice(1)}` : animationType;
-            p.style.animation = `${animName} 0.6s cubic-bezier(0.16, 1, 0.3, 1)`;
+            p.style.animation = `${animName} 0.6s cubic-bezier(0.16, 1, 0.3, 1)${animatedTheme !== 'none' ? `, ${animatedTheme === 'mesh' ? 'meshGradient 15s ease infinite' : 'matrixFlow 4s linear infinite'}` : ''}`;
             
             p.style.backgroundImage = bgImageUrl ? `linear-gradient(rgba(${bgRgb}, ${glassOpacity}), rgba(${bgRgb}, ${glassOpacity})), url(${bgImageUrl})` : 'none';
             p.style.backgroundSize = 'cover';
@@ -821,6 +872,17 @@
         });
     };
     updateThemeStyles();
+
+    const updateProfileStyles = () => {
+        const profileStyle = getProfileStyle();
+        // Target common avatar selectors in JKLM
+        const avatarSelectors = '.player .avatar, .self .avatar, .avatar, .userIcon';
+        document.querySelectorAll(avatarSelectors).forEach(avatar => {
+            avatar.classList.remove('profile-style-gold', 'profile-style-neon');
+            if (profileStyle === 'gold') avatar.classList.add('profile-style-gold');
+            if (profileStyle === 'neon') avatar.classList.add('profile-style-neon');
+        });
+    };
 
     let lastDetectedSyllable = '';
     let isGameRunning = false;
@@ -1105,6 +1167,8 @@
                 const clockEnabled = getClockEnabled();
                 const bgImageUrl = getBgImageUrl();
                 const panelPosition = getPanelPosition();
+                const profileStyle = getProfileStyle();
+                const animatedTheme = getAnimatedTheme();
                 adminTab.title = t.adminHeader;
 
                 adminPage.innerHTML = `
@@ -1125,6 +1189,15 @@
                                     <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase;">BACKDROP</span>
                                     <input type="color" class="custom-theme-picker" id="admin-bg-picker" value="${bgColor}" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,0.1); cursor: pointer;">
                                 </div>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <div style="font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Animated Themes</div>
+                                <select class="modern-input" id="admin-animated-theme">
+                                    <option value="none" ${animatedTheme === 'none' ? 'selected' : ''}>Static (Classic)</option>
+                                    <option value="mesh" ${animatedTheme === 'mesh' ? 'selected' : ''}>Mesh Gradient (Smooth)</option>
+                                    <option value="matrix" ${animatedTheme === 'matrix' ? 'selected' : ''}>Neon Flow (Matrix)</option>
+                                </select>
                             </div>
 
                             <div class="settings-row" id="toggle-panel-pos" style="padding: 16px 20px;">
@@ -1158,6 +1231,21 @@
                                 <div style="font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Custom Wallpaper URL</div>
                                 <input type="text" id="admin-bg-image-url" class="modern-input" value="${bgImageUrl}" placeholder="https://images.unsplash.com/...">
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">👑</div>
+                            <span>Profile Styles</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">Apply exclusive visual effects to your avatar (local only).</div>
+                            <select class="modern-input" id="admin-profile-style">
+                                <option value="none" ${profileStyle === 'none' ? 'selected' : ''}>None</option>
+                                <option value="gold" ${profileStyle === 'gold' ? 'selected' : ''}>Golden Glow (Legendary)</option>
+                                <option value="neon" ${profileStyle === 'neon' ? 'selected' : ''}>Neon Pulse (Root)</option>
+                            </select>
                         </div>
                     </div>
 
@@ -1538,6 +1626,14 @@
                     setAnimationType(e.target.value);
                     updateThemeStyles();
                 }
+                if (e.target.id === 'admin-animated-theme') {
+                    setAnimatedTheme(e.target.value);
+                    updateThemeStyles();
+                }
+                if (e.target.id === 'admin-profile-style') {
+                    setProfileStyle(e.target.value);
+                    updateProfileStyles();
+                }
             });
 
             adminPage.addEventListener('input', (e) => {
@@ -1594,6 +1690,10 @@
 
                 const isSelfTurn = !!document.querySelector('.selfTurn');
                 window.lastTurnState = isSelfTurn;
+                
+                // Update profile styles on mutation to catch new avatars
+                updateProfileStyles();
+
                 const gameVisible = !!document.querySelector('.canvasArea') || !!document.querySelector('.syllable');
                 if (gameVisible && !isGameRunning) {
                     isGameRunning = true;
