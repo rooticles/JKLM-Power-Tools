@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      10.6
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.6)
+// @version      10.7
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.7)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '10.6';
+    const SCRIPT_VERSION = '10.7';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -305,8 +305,6 @@
     const setBgImageUrl = (val) => GM_setValue('bgImageUrl', val);
     const getLobbyBgUrl = () => GM_getValue('lobbyBgUrl', '');
     const setLobbyBgUrl = (val) => GM_setValue('lobbyBgUrl', val);
-    const getCustomCursorUrl = () => GM_getValue('customCursorUrl', '');
-    const setCustomCursorUrl = (val) => GM_setValue('customCursorUrl', val);
     const getAnimationType = () => GM_getValue('animationType', 'slideIn');
     const setAnimationType = (val) => GM_setValue('animationType', val);
 
@@ -399,7 +397,6 @@
             adminClockLabel: 'System Clock',
             adminThemeAnimLabel: 'Animated Accents',
             adminBgImageLabel: 'Background Image (URL):',
-            adminCursorLabel: 'Custom Cursor (URL):',
             adminAnimLabel: 'Open Animation:',
             dictCustomUpload: 'Custom Dictionary',
             dictUploadDesc: 'Upload a .txt file or paste words manually:',
@@ -1093,7 +1090,6 @@
         const clockEnabled = getClockEnabled();
         const animationType = getAnimationType();
         const panelPosition = getPanelPosition();
-        const cursorUrl = getCustomCursorUrl();
 
         const themeRgb = themeColor.match(/[A-Za-z0-9]{2}/g).map(x => parseInt(x, 16)).join(',');
 
@@ -1105,29 +1101,6 @@
         document.documentElement.style.setProperty('--border-radius', `${borderRadius}px`);
         document.documentElement.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${themeColor}, #FF69B4)`);
         document.documentElement.style.setProperty('--glow-effect', `0 0 20px rgba(${themeRgb}, 0.4)`);
-
-        // Apply Custom Cursor
-        if (cursorUrl) {
-            const cursorStyle = `url("${cursorUrl}"), auto`;
-            document.body.style.setProperty('cursor', cursorStyle, 'important');
-            // Also apply to interactive elements
-            const styleId = 'jklm-custom-cursor-style';
-            let styleEl = document.getElementById(styleId);
-            if (!styleEl) {
-                styleEl = document.createElement('style');
-                styleEl.id = styleId;
-                document.head.appendChild(styleEl);
-            }
-            styleEl.textContent = `
-                *, button, input, select, textarea, a, [role="button"], .custom-tab, .settings-row, .lobby-filter-btn {
-                    cursor: ${cursorStyle} !important;
-                }
-            `;
-        } else {
-            document.body.style.cursor = '';
-            const styleEl = document.getElementById('jklm-custom-cursor-style');
-            if (styleEl) styleEl.remove();
-        }
 
         const textColor = '#ffffff';
         const textMuted = '#A0A0A0';
@@ -1538,7 +1511,6 @@
                 const clockEnabled = getClockEnabled();
                 const bgImageUrl = getBgImageUrl();
                 const lobbyBgUrl = getLobbyBgUrl();
-                const cursorUrl = getCustomCursorUrl();
                 const panelPosition = getPanelPosition();
                 const animatedTheme = getAnimatedTheme();
                 adminTab.title = t.adminHeader;
@@ -1549,16 +1521,12 @@
                     <div class="feature-card">
                         <div class="feature-header">
                             <div class="feature-icon">🖼️</div>
-                            <span>Background & Cursor</span>
+                            <span>Background Customizer</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 15px;">
                             <div style="display: flex; flex-direction: column; gap: 4px;">
                                 <span style="font-weight: 700; font-size: 14px;">Lobby Background (URL)</span>
                                 <input type="text" id="admin-lobby-bg" class="modern-input" value="${lobbyBgUrl}" placeholder="https://...">
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span style="font-weight: 700; font-size: 14px;">${t.adminCursorLabel}</span>
-                                <input type="text" id="admin-custom-cursor" class="modern-input" value="${cursorUrl}" placeholder="https://...">
                             </div>
                         </div>
                     </div>
@@ -1992,10 +1960,6 @@
                     setLobbyBgUrl(e.target.value);
                     updateThemeStyles();
                 }
-                if (e.target.id === 'admin-custom-cursor') {
-                    setCustomCursorUrl(e.target.value);
-                    updateThemeStyles();
-                }
             });
 
             adminPage.addEventListener('keydown', (e) => {
@@ -2071,7 +2035,6 @@
             GM_addValueChangeListener('themeColor', () => updateThemeStyles());
             GM_addValueChangeListener('bgColor', () => updateThemeStyles());
             GM_addValueChangeListener('lobbyBgUrl', () => updateThemeStyles());
-            GM_addValueChangeListener('customCursorUrl', () => updateThemeStyles());
 
             window.addEventListener('keydown', (e) => {
                 if (e.key === getToggleKey()) {
