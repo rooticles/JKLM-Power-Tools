@@ -436,7 +436,8 @@
             notePlaceholder: 'Your note here...',
             saveNote: 'Save',
             noNotes: 'No notes available yet.',
-            toggleKeyLabel: 'Panel Fast-Access (Key)'
+            toggleKeyLabel: 'Panel Fast-Access (Key)',
+            ideaBy: 'Idea by'
         }
     };
 
@@ -1170,6 +1171,16 @@
                                     <span style="color: var(--text-muted); font-size: 13px; line-height: 1.4;">${isChatEnabled ? t.chatDesc : t.chatOffDesc}</span>
                                 </div>
                                 <div class="toggle-switch ${isChatEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
+                            </div>
+
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; opacity: 0.9; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+                                <div style="width: 32px; height: 32px; border-radius: 10px; border: 2px solid var(--theme-color); overflow: hidden; background: rgba(var(--theme-color-rgb), 0.1); box-shadow: var(--glow-effect);">
+                                    <img src="https://jklm.fun/images/avatars/0.png" style="width: 100%; height: 100%; object-fit: cover;" id="kb-idea-author-img">
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 2px;">
+                                    <span style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">${t.ideaBy}</span>
+                                    <span style="font-size: 13px; font-weight: 800; color: #fff; text-shadow: 0 0 10px rgba(var(--theme-color-rgb), 0.5);">meow meow</span>
+                                </div>
                             </div>
                         </div>
                     </div>
