@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      4.6
+// @version      4.7
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -49,7 +49,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '4.6';
+    const SCRIPT_VERSION = '4.7';
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
@@ -347,9 +347,7 @@
             --glass-border: rgba(255, 255, 255, 0.12);
             --card-bg: rgba(255, 255, 255, 0.05);
             --card-border: rgba(255, 255, 255, 0.1);
-            --border-radius-lg: 24px;
-            --border-radius-md: 16px;
-            --border-radius-sm: 12px;
+            --border-radius: 20px;
             --text-color: #f8fafc;
             --text-muted: #94a3b8;
             --panel-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
@@ -470,18 +468,23 @@
             z-index: 9999;
             font-family: var(--font-main);
             transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: var(--border-radius);
         }
 
         .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left {
             left: 0;
             border-right: 1px solid var(--glass-border);
             border-left: none;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
         }
 
         .custom-kb-page.pos-right, .custom-dict-page.pos-right, .custom-admin-page.pos-right {
             right: 0;
             border-left: 1px solid var(--glass-border);
             border-right: none;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
         }
 
         .custom-kb-page.active, .custom-dict-page.active, .custom-admin-page.active {
@@ -521,7 +524,7 @@
         .feature-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--border-radius-md);
+            border-radius: var(--border-radius);
             padding: 24px;
             margin-bottom: 20px;
             transition: var(--transition);
@@ -578,7 +581,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-color);
             padding: 14px 20px;
-            border-radius: 14px;
+            border-radius: var(--border-radius);
             font-size: 15px;
             font-family: var(--font-main);
             transition: var(--transition);
@@ -606,7 +609,7 @@
             color: #1B1F3B;
             border: none;
             padding: 14px 28px;
-            border-radius: 14px;
+            border-radius: var(--border-radius);
             cursor: pointer;
             font-weight: 700;
             font-size: 15px;
@@ -1052,7 +1055,7 @@
                             <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
                                 <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
                                     <span>Word Length</span>
-                                    <span style="color: var(--theme-color);">${minLen} - ${maxLen} chars</span>
+                                    <span style="color: var(--theme-color);"><span id="val-dict-min-len">${minLen}</span> - <span id="val-dict-max-len">${maxLen}</span> chars</span>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 16px;">
                                     <input type="range" id="dict-min-len" min="2" max="30" value="${minLen}" style="flex: 1; accent-color: var(--theme-color); cursor: pointer;">
@@ -1161,7 +1164,7 @@
                             <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
                                 <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
                                     <span>Glass Transparency</span>
-                                    <span style="color: var(--theme-color);">${Math.round(glassOpacity * 100)}%</span>
+                                    <span style="color: var(--theme-color);"><span id="val-admin-glass-opacity">${Math.round(glassOpacity * 100)}</span>%</span>
                                 </div>
                                 <input type="range" id="admin-glass-opacity" min="0" max="1" step="0.05" value="${glassOpacity}" style="width: 100%; accent-color: var(--theme-color); cursor: pointer;">
                             </div>
@@ -1169,7 +1172,7 @@
                             <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
                                 <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
                                     <span>Corner Softness</span>
-                                    <span style="color: var(--theme-color);">${borderRadius}px</span>
+                                    <span style="color: var(--theme-color);"><span id="val-admin-border-radius">${borderRadius}</span>px</span>
                                 </div>
                                 <input type="range" id="admin-border-radius" min="0" max="40" step="1" value="${borderRadius}" style="width: 100%; accent-color: var(--theme-color); cursor: pointer;">
                             </div>
@@ -1558,13 +1561,17 @@
                     updateSuggestions();
                 }
                 if (e.target.id === 'dict-min-len') {
-                    setMinWordLength(parseInt(e.target.value));
-                    updateDictContent();
+                    const val = parseInt(e.target.value);
+                    setMinWordLength(val);
+                    const span = document.getElementById('val-dict-min-len');
+                    if (span) span.innerText = val;
                     updateSuggestions();
                 }
                 if (e.target.id === 'dict-max-len') {
-                    setMaxWordLength(parseInt(e.target.value));
-                    updateDictContent();
+                    const val = parseInt(e.target.value);
+                    setMaxWordLength(val);
+                    const span = document.getElementById('val-dict-max-len');
+                    if (span) span.innerText = val;
                     updateSuggestions();
                 }
             });
@@ -1619,14 +1626,18 @@
                     updateThemeStyles();
                 }
                 if (e.target.id === 'admin-glass-opacity') {
-                    setGlassOpacity(parseFloat(e.target.value));
+                    const val = parseFloat(e.target.value);
+                    setGlassOpacity(val);
+                    const span = document.getElementById('val-admin-glass-opacity');
+                    if (span) span.innerText = Math.round(val * 100);
                     updateThemeStyles();
-                    updateAdminContent();
                 }
                 if (e.target.id === 'admin-border-radius') {
-                    setBorderRadius(parseInt(e.target.value, 10));
+                    const val = parseInt(e.target.value, 10);
+                    setBorderRadius(val);
+                    const span = document.getElementById('val-admin-border-radius');
+                    if (span) span.innerText = val;
                     updateThemeStyles();
-                    updateAdminContent();
                 }
                 if (e.target.id === 'admin-bg-image-url') {
                     setBgImageUrl(e.target.value.trim());
