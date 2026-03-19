@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      9.2
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.2)
+// @version      9.3
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.3)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -289,7 +289,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '9.2';
+    const SCRIPT_VERSION = '9.3';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1050,6 +1050,25 @@
         @keyframes matrixFlow {
             from { background-position: 0% -100%; }
             to { background-position: 0% 100%; }
+        }
+
+        /* Rainbow Stats Animation */
+        .home .playerCount {
+            background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 400% 400%;
+            animation: rainbowStats 8s ease infinite;
+            font-weight: 900 !important;
+            font-size: 1.2em !important;
+            display: inline-block;
+            text-shadow: 0 0 10px rgba(255,255,255,0.1);
+        }
+
+        @keyframes rainbowStats {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
     `;
     document.head.appendChild(style);
