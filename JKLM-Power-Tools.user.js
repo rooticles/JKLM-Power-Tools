@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      9.3
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.3)
+// @version      9.4
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v9.4)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -147,45 +147,17 @@
                 // Add class to body to activate fallbacks
                 document.body.classList.add('resilience-active');
                 
-                // UI Notification with Auto-Recovery Status
+                // UI Notification with Auto-Recovery Status (Disabled per user request)
+                /*
                 const notify = document.createElement('div');
-                notify.id = 'jklm-resilience-notice';
-                notify.style = 'position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #ff4444; color: white; padding: 12px 40px 12px 24px; border-radius: 12px; font-weight: 900; z-index: 1000000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: sans-serif; display: flex; align-items: center; gap: 10px; transition: 0.5s;';
-                notify.innerHTML = `
-                    <span id="resilience-text"><span class="guardian-icon">🛡️</span> Guardian Active: Emergency UI Patch Applied.</span>
-                    <span id="close-resilience-notice" style="position: absolute; right: 12px; cursor: pointer; font-size: 18px; opacity: 0.8; hover: opacity: 1;">✕</span>
-                `;
-                document.body.appendChild(notify);
-                
-                document.getElementById('close-resilience-notice').onclick = () => {
-                    notify.style.opacity = '0';
-                    setTimeout(() => notify.remove(), 500);
-                };
-
-                // Auto-remove after 1 second (Stealth Mode)
-                setTimeout(() => {
-                    if (document.getElementById('jklm-resilience-notice')) {
-                        notify.style.opacity = '0';
-                        setTimeout(() => notify.remove(), 500);
-                    }
-                }, 1000);
+                ...
+                */
             };
 
             const removeFallbackCSS = () => {
                 const style = document.getElementById('jklm-power-tools-resilience');
                 if (style) style.remove();
                 document.body.classList.remove('resilience-active');
-                
-                const notify = document.getElementById('jklm-resilience-notice');
-                if (notify) {
-                    const text = document.getElementById('resilience-text');
-                    if (text) text.innerHTML = '✅ JKLM Servers Recovered! UI Restored.';
-                    notify.style.background = '#26aa36';
-                    setTimeout(() => {
-                        notify.style.opacity = '0';
-                        setTimeout(() => notify.remove(), 500);
-                    }, 5000);
-                }
             };
 
             // Auto-Recovery Polling (Every 15s)
@@ -289,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '9.3';
+    const SCRIPT_VERSION = '9.4';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -331,6 +303,10 @@
     const setClockEnabled = (val) => GM_setValue('clockEnabled', val);
     const getBgImageUrl = () => GM_getValue('bgImageUrl', '');
     const setBgImageUrl = (val) => GM_setValue('bgImageUrl', val);
+    const getLobbyBgUrl = () => GM_getValue('lobbyBgUrl', '');
+    const setLobbyBgUrl = (val) => GM_setValue('lobbyBgUrl', val);
+    const getRoomBgUrl = () => GM_getValue('roomBgUrl', '');
+    const setRoomBgUrl = (val) => GM_setValue('roomBgUrl', val);
     const getAnimationType = () => GM_getValue('animationType', 'slideIn');
     const setAnimationType = (val) => GM_setValue('animationType', val);
 
@@ -1054,21 +1030,14 @@
 
         /* Rainbow Stats Animation */
         .home .playerCount {
-            background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 400% 400%;
-            animation: rainbowStats 8s ease infinite;
+            color: #333 !important;
             font-weight: 900 !important;
-            font-size: 1.2em !important;
+            font-size: 1.1em !important;
             display: inline-block;
-            text-shadow: 0 0 10px rgba(255,255,255,0.1);
         }
 
-        @keyframes rainbowStats {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        .home .playerCount b {
+            color: var(--theme-color) !important;
         }
     `;
     document.head.appendChild(style);
@@ -1099,6 +1068,26 @@
         document.documentElement.style.setProperty('--text-color', textColor);
         document.documentElement.style.setProperty('--text-muted', textMuted);
         document.documentElement.style.setProperty('--glass-border', glassBorder);
+
+        // Apply Global Backgrounds
+        const lobbyBg = getLobbyBgUrl();
+        const roomBg = getRoomBgUrl();
+        const isLobby = document.querySelector('.home');
+        const isRoom = document.querySelector('.room');
+
+        if (isLobby && lobbyBg) {
+            document.body.style.backgroundImage = `url("${lobbyBg}")`;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+            document.body.style.backgroundAttachment = 'fixed';
+        } else if (isRoom && roomBg) {
+            document.body.style.backgroundImage = `url("${roomBg}")`;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+            document.body.style.backgroundAttachment = 'fixed';
+        } else {
+            document.body.style.backgroundImage = '';
+        }
 
         document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
             p.classList.remove('pos-left', 'pos-right', 'animated-mesh', 'animated-matrix');
@@ -1221,12 +1210,30 @@
             clock.id = 'custom-clock';
             clock.className = 'custom-clock';
             clock.style.marginLeft = 'auto';
+            clock.style.display = 'flex';
+            clock.style.alignItems = 'center';
+            clock.style.gap = '8px';
             customRow.appendChild(clock);
 
             const updateClock = () => {
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                if (clock) clock.innerText = timeStr;
+                const clockEnabled = getClockEnabled();
+                
+                let content = clockEnabled ? `<span>${timeStr}</span>` : '';
+                
+                // Add Player Count Badge (The ball)
+                const playerCountEl = document.querySelector('.home .playerCount');
+                if (playerCountEl) {
+                    const match = playerCountEl.innerText.match(/(\d+)/);
+                    if (match) {
+                        content += `<span style="background: var(--theme-color); color: white; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; box-shadow: 0 0 10px rgba(var(--theme-color-rgb), 0.5);">${match[1]}</span>`;
+                    }
+                }
+                
+                clock.innerHTML = content;
+                clock.style.display = (clockEnabled || content.includes('background')) ? 'flex' : 'none';
+
                 document.querySelectorAll('.panel-clock').forEach(el => {
                     el.innerText = timeStr;
                 });
@@ -1469,6 +1476,8 @@
                 const borderRadius = getBorderRadius();
                 const clockEnabled = getClockEnabled();
                 const bgImageUrl = getBgImageUrl();
+                const lobbyBgUrl = getLobbyBgUrl();
+                const roomBgUrl = getRoomBgUrl();
                 const panelPosition = getPanelPosition();
                 const animatedTheme = getAnimatedTheme();
                 adminTab.title = t.adminHeader;
@@ -1476,6 +1485,23 @@
                 adminPage.innerHTML = `
                 ${getPanelNav('admin-btn', t.adminHeader)}
                 <div class="custom-page-content">
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">🖼️</div>
+                            <span>Background Customizer</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-weight: 700; font-size: 14px;">Lobby Background (URL)</span>
+                                <input type="text" id="admin-lobby-bg" class="modern-input" value="${lobbyBgUrl}" placeholder="https://...">
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-weight: 700; font-size: 14px;">Room Background (URL)</span>
+                                <input type="text" id="admin-room-bg" class="modern-input" value="${roomBgUrl}" placeholder="https://...">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="feature-card">
                         <div class="feature-header">
                             <div class="feature-icon">🎨</div>
@@ -1899,6 +1925,14 @@
                     setBorderRadius(val);
                     const span = document.getElementById('val-admin-border-radius');
                     if (span) span.innerText = val;
+                    updateThemeStyles();
+                }
+                if (e.target.id === 'admin-lobby-bg') {
+                    setLobbyBgUrl(e.target.value);
+                    updateThemeStyles();
+                }
+                if (e.target.id === 'admin-room-bg') {
+                    setRoomBgUrl(e.target.value);
                     updateThemeStyles();
                 }
             });
