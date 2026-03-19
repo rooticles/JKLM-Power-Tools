@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      5.3
-// @description  Advanced JKLM Power Tools - Ultra Smooth Edition with API Key Support
+// @version      5.4
+// @description  Advanced JKLM Power Tools - Ultra Smooth Edition with German Dictionary Support
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -70,7 +70,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '5.3';
+    const SCRIPT_VERSION = '5.4';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -211,6 +211,7 @@
             dictFoundWords: 'Found {count} words:',
             dictNoResultsShort: 'No results.',
             english: 'English',
+            german: 'All German Words',
             // Features
             notesHeader: '📝 Notes',
             notesDesc: 'Keep track of your thoughts and strategies',
@@ -231,7 +232,8 @@
 
     // --- Local Music Player ---
     const dictionaryUrls = {
-        'English': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/121bf1a601ed822553c2e68c38a4cdcd7737d352/words.txt'
+        'English': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/121bf1a601ed822553c2e68c38a4cdcd7737d352/words.txt',
+        'German': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/master/german.txt'
     };
 
     const loadDictionary = async (force = false) => {
@@ -1023,6 +1025,7 @@
                                 </select>
                                 <select class="modern-input" id="dict-word-type" style="flex: 1; padding: 14px 20px; font-weight: 700; appearance: none; cursor: pointer;">
                                     <option value="All" ${wordType === 'All' ? 'selected' : ''}>All Words</option>
+                                    <option value="German" ${wordType === 'German' ? 'selected' : ''}>All German Words</option>
                                     <option value="Hyphen" ${wordType === 'Hyphen' ? 'selected' : ''}>Hyphen Only</option>
                                     <option value="Long" ${wordType === 'Long' ? 'selected' : ''}>Long Words</option>
                                     <option value="Casual" ${wordType === 'Casual' ? 'selected' : ''}>Casual</option>
@@ -1335,7 +1338,17 @@
                     }
                 }
 
-                loadDictionary().then(() => {
+                const ensureDictionary = async () => {
+                    if (wordType === 'German' && getDictLanguage() !== 'German') {
+                        setDictLanguage('German');
+                        await loadDictionary(true);
+                        updateDictContent(); // Re-render to update the dropdowns
+                    } else {
+                        await loadDictionary();
+                    }
+                };
+
+                ensureDictionary().then(() => {
                     let words = [...dictionary];
                     const minLen = getMinWordLength();
                     const maxLen = getMaxWordLength();
