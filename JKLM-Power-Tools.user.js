@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      6.2
-// @description  Advanced JKLM Power Tools - Root Edition with Ultra-Stability Patch (v2)
+// @version      6.3
+// @description  Advanced JKLM Power Tools - Root Edition with Ultra-Stability Patch (v3 - Recursive Proxy)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -29,25 +29,41 @@
                 win.chatUnreadHighlightCount = 0;
             }
 
-            // --- Ultra Stability Patch for external Overlays (PartyPlus etc.) ---
-            const createDummyEmitter = () => ({
-                addEventListener: () => {},
-                removeEventListener: () => {},
-                dispatchEvent: () => true,
-                on: () => {},
-                off: () => {},
-                emit: () => {},
-                setMilestone: () => {} // Specific to some overlay bugs
-            });
+            // --- Ultra Stability Patch (v3) ---
+            // This creates a "recursive" proxy that returns itself or a noop for ANY property access.
+            // This stops "Cannot read properties of undefined" for common JKLM objects.
+            
+            const createRecursiveProxy = (name = 'root') => {
+                const noop = () => {};
+                const handler = {
+                    get: (target, prop) => {
+                        // Avoid standard object property confusion
+                        if (prop === 'then') return undefined;
+                        if (prop === 'toJSON') return () => ({});
+                        if (typeof prop === 'symbol') return undefined;
+                        
+                        // Standard methods return noop
+                        const methods = ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'dispatchEvent', 'setMilestone'];
+                        if (methods.includes(prop)) return noop;
+                        
+                        // Everything else returns another proxy (recursive depth)
+                        return createRecursiveProxy(`${name}.${prop.toString()}`);
+                    },
+                    apply: (target, thisArg, args) => {
+                        return createRecursiveProxy(`${name}()`);
+                    }
+                };
+                return new Proxy(noop, handler);
+            };
 
             const safeProxy = (name) => {
-                let _val = win[name] || createDummyEmitter();
+                let _val = win[name] || createRecursiveProxy(name);
                 Object.defineProperty(win, name, {
                     get: () => _val,
                     set: (val) => { 
                         if (val && typeof val === 'object') {
-                            // Ensure the new object has basic emitter methods
-                            ['addEventListener', 'removeEventListener', 'on', 'off', 'emit'].forEach(m => {
+                            // Ensure the new object has basic methods (don't break real JKLM objects)
+                            ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'setMilestone'].forEach(m => {
                                 if (typeof val[m] === 'undefined') val[m] = () => {};
                             });
                             _val = val; 
@@ -57,14 +73,25 @@
                 });
             };
 
-            // Patch all common objects that scripts like PartyPlus access
+            // Patch global objects
             ['milestones', 'game', 'socket', 'room', 'client'].forEach(safeProxy);
 
-            // Special handling for Socket prototype to prevent overlay.js errors
-            if (win.Socket && win.Socket.prototype) {
-                if (!win.Socket.prototype.addEventListener) win.Socket.prototype.addEventListener = () => {};
-                if (!win.Socket.prototype.setMilestone) win.Socket.prototype.setMilestone = () => {};
-            }
+            // Special handling for Socket prototype
+            // This ensures that 'this.milestones' inside Socket methods never fails
+            const patchPrototype = (objName) => {
+                const Proto = win[objName] && win[objName].prototype;
+                if (Proto) {
+                    if (typeof Proto.milestones === 'undefined') {
+                        Object.defineProperty(Proto, 'milestones', {
+                            get: () => win.milestones,
+                            configurable: true
+                        });
+                    }
+                    if (typeof Proto.addEventListener === 'undefined') Proto.addEventListener = () => {};
+                    if (typeof Proto.setMilestone === 'undefined') Proto.setMilestone = () => {};
+                }
+            };
+            ['Socket', 'Emitter'].forEach(patchPrototype);
 
         } catch (e) {
             console.warn('[JKLM Power Tools] Stability patch failed:', e);
@@ -72,7 +99,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '6.2';
+    const SCRIPT_VERSION = '6.3';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
