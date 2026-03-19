@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      4.3
+// @version      4.4
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -19,7 +19,22 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '4.3';
+    // --- Global Patch for JKLM & Overlay Bugs ---
+    const patchGlobalBugs = () => {
+        try {
+            // Fix JKLM 'chatUnreadHighlightCount' ReferenceError
+            if (typeof unsafeWindow !== 'undefined') {
+                if (typeof unsafeWindow.chatUnreadHighlightCount === 'undefined') {
+                    unsafeWindow.chatUnreadHighlightCount = 0;
+                }
+            } else if (typeof window.chatUnreadHighlightCount === 'undefined') {
+                window.chatUnreadHighlightCount = 0;
+            }
+        } catch (e) {}
+    };
+    patchGlobalBugs();
+
+    const SCRIPT_VERSION = '4.4';
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
