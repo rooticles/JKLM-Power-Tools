@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      3.7
+// @version      3.8
 // @description  Advanced JKLM Power Tools with Dictionary, Notes and UI Customization
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -19,7 +19,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '3.7';
+    const SCRIPT_VERSION = '3.8';
 
     // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
@@ -1006,21 +1006,7 @@
 
                     <div class="feature-card">
                         <div class="feature-header">
-                            <div class="feature-icon">📝</div>
-                            <span>${t.notesHeader}</span>
-                        </div>
-                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                            <input type="text" id="new-note-input" class="modern-input" placeholder="${t.notePlaceholder}" style="flex: 1;">
-                            <button class="modern-button" id="add-note-btn" style="min-width: 60px; padding: 0;">+</button>
-                        </div>
-                        <div id="notes-list" style="display: flex; flex-direction: column;">
-                            ${notesHtml}
-                        </div>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">🔍</div>
+                            <div class="feature-icon"></div>
                             <span>Word Search</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -1057,6 +1043,20 @@
                                     <input type="range" id="dict-max-len" min="2" max="30" value="${maxLen}" style="flex: 1; accent-color: var(--theme-color); cursor: pointer;">
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">📝</div>
+                            <span>${t.notesHeader}</span>
+                        </div>
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                            <input type="text" id="new-note-input" class="modern-input" placeholder="${t.notePlaceholder}" style="flex: 1;">
+                            <button class="modern-button" id="add-note-btn" style="min-width: 60px; padding: 0;">+</button>
+                        </div>
+                        <div id="notes-list" style="display: flex; flex-direction: column;">
+                            ${notesHtml}
                         </div>
                     </div>
 
