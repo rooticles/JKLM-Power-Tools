@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      12.6
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.6)
+// @version      12.7
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.7)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -275,7 +275,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '12.6';
+    const SCRIPT_VERSION = '12.7';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -498,23 +498,23 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
         :root {
-            --theme-color: #8A2BE2; /* Blue Violet */
-            --theme-color-rgb: 138, 43, 226;
-            --bg-color: #1A1A2E; /* Dark Blue */
-            --bg-rgb: 26, 26, 46;
-            --glass-bg: rgba(26, 26, 46, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --border-radius: 16px;
-            --text-color: #E0E0E0; /* Light Gray */
-            --text-muted: #A0A0A0; /* Gray */
-            --panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            --transition: 0.3s ease;
-            --font-main: 'Inter', sans-serif;
-            --font-mono: 'Fira Code', monospace;
-            --accent-gradient: linear-gradient(135deg, var(--theme-color), #FF69B4); /* Hot Pink */
-            --glow-effect: 0 0 20px rgba(var(--theme-color-rgb), 0.4);
+            --pt-theme-color: #8A2BE2; /* Blue Violet */
+            --pt-theme-color-rgb: 138, 43, 226;
+            --pt-bg-color: #1A1A2E; /* Dark Blue */
+            --pt-bg-rgb: 26, 26, 46;
+            --pt-glass-bg: rgba(26, 26, 46, 0.75);
+            --pt-glass-border: rgba(255, 255, 255, 0.1);
+            --pt-card-bg: rgba(255, 255, 255, 0.05);
+            --pt-card-border: rgba(255, 255, 255, 0.1);
+            --pt-border-radius: 16px;
+            --pt-text-color: #E0E0E0; /* Light Gray */
+            --pt-text-muted: #A0A0A0; /* Gray */
+            --pt-panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --pt-transition: 0.3s ease;
+            --pt-font-main: 'Inter', sans-serif;
+            --pt-font-mono: 'Fira Code', monospace;
+            --pt-accent-gradient: linear-gradient(135deg, var(--pt-theme-color), #FF69B4); /* Hot Pink */
+            --pt-glow-effect: 0 0 20px rgba(var(--pt-theme-color-rgb), 0.4);
         }
 
         /* Glassmorphism Scrollbar (Panel only) */
@@ -526,7 +526,7 @@
             border: 2px solid transparent;
             background-clip: content-box;
         }
-        .custom-kb-page::-webkit-scrollbar-thumb:hover, .custom-dict-page::-webkit-scrollbar-thumb:hover, .custom-admin-page::-webkit-scrollbar-thumb:hover { background: rgba(var(--theme-color-rgb), 0.5); }
+        .custom-kb-page::-webkit-scrollbar-thumb:hover, .custom-dict-page::-webkit-scrollbar-thumb:hover, .custom-admin-page::-webkit-scrollbar-thumb:hover { background: rgba(var(--pt-theme-color-rgb), 0.5); }
 
         .custom-nav-row {
             display: flex;
@@ -535,7 +535,7 @@
             background: #1b1f3b;
             height: 60px;
             width: 100%;
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--pt-glass-border);
             position: relative;
             z-index: 10001;
             gap: 15px;
@@ -556,13 +556,13 @@
             z-index: 100;
             background: rgba(27, 31, 59, 0.4);
             backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--pt-glass-border);
         }
 
         .panel-title {
             font-weight: 700;
             font-size: 22px;
-            color: var(--text-color);
+            color: var(--pt-text-color);
             display: flex;
             align-items: center;
             gap: 20px;
@@ -575,7 +575,7 @@
             background: rgba(255, 255, 255, 0.05);
             padding: 5px;
             border-radius: 14px;
-            border: 1px solid var(--glass-border);
+            border: 1px solid var(--pt-glass-border);
             gap: 5px;
         }
 
@@ -588,29 +588,29 @@
             height: 40px;
             border-radius: 10px;
             font-size: 18px;
-            transition: var(--transition);
-            color: var(--text-muted);
+            transition: var(--pt-transition);
+            color: var(--pt-text-muted);
             position: relative;
         }
 
         .custom-tab:hover {
-            color: var(--text-color);
+            color: var(--pt-text-color);
             background: rgba(255, 255, 255, 0.1);
             transform: scale(1.05);
-            box-shadow: var(--glow-effect);
+            box-shadow: var(--pt-glow-effect);
         }
 
         .custom-tab.active {
             color: white;
-            background: var(--theme-color);
-            box-shadow: 0 0 20px rgba(var(--theme-color-rgb), 0.5);
+            background: var(--pt-theme-color);
+            box-shadow: 0 0 20px rgba(var(--pt-theme-color-rgb), 0.5);
             transform: scale(1.1);
         }
 
         .custom-kb-page, .custom-dict-page, .custom-admin-page {
             display: none;
             padding: 20px;
-            color: var(--text-color);
+            color: var(--pt-text-color);
             background: rgba(26, 26, 46, 0.95);
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
@@ -619,20 +619,20 @@
             overflow-x: hidden;
             box-sizing: border-box;
             width: 650px;
-            box-shadow: var(--panel-shadow);
+            box-shadow: var(--pt-panel-shadow);
             position: fixed;
             top: 0;
             z-index: 9999;
-            font-family: var(--font-main);
+            font-family: var(--pt-font-main);
             transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            border-radius: var(--border-radius);
+            border-radius: var(--pt-border-radius);
             will-change: transform, opacity;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); /* Text shadow for high readability */
         }
 
         .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left {
             left: 0;
-            border-right: 1px solid var(--glass-border);
+            border-right: 1px solid var(--pt-glass-border);
             border-left: none;
             border-top-left-radius: 0;
             border-bottom-left-radius: 0;
@@ -640,7 +640,7 @@
 
         .custom-kb-page.pos-right, .custom-dict-page.pos-right, .custom-admin-page.pos-right {
             right: 0;
-            border-left: 1px solid var(--glass-border);
+            border-left: 1px solid var(--pt-glass-border);
             border-right: none;
             border-top-right-radius: 0;
             border-bottom-right-radius: 0;
@@ -665,9 +665,9 @@
             justify-content: center;
             border-radius: 12px;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            color: var(--text-muted);
-            transition: var(--transition);
+            border: 1px solid var(--pt-glass-border);
+            color: var(--pt-text-muted);
+            transition: var(--pt-transition);
             margin-left: 15px;
         }
 
@@ -683,10 +683,10 @@
         .feature-card {
             background: rgba(0, 0, 0, 0.45) !important; /* Darker for high readability */
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--border-radius);
+            border-radius: var(--pt-border-radius);
             padding: 24px;
             margin-bottom: 20px;
-            transition: var(--transition);
+            transition: var(--pt-transition);
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(12px); /* Stronger blur for text isolation */
@@ -694,9 +694,9 @@
 
         .feature-card:hover {
             background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(var(--theme-color-rgb), 0.4);
+            border-color: rgba(var(--pt-theme-color-rgb), 0.4);
             transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2), var(--glow-effect);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2), var(--pt-glow-effect);
         }
 
         .feature-card::before {
@@ -706,7 +706,7 @@
             left: 0;
             width: 100%;
             height: 2px;
-            background: var(--accent-gradient);
+            background: var(--pt-accent-gradient);
             opacity: 0.3;
         }
 
@@ -717,20 +717,20 @@
             display: flex;
             align-items: center;
             gap: 14px;
-            color: var(--text-color);
+            color: var(--pt-text-color);
         }
 
         .feature-icon {
             width: 38px;
             height: 38px;
-            background: rgba(var(--theme-color-rgb), 0.1);
+            background: rgba(var(--pt-theme-color-rgb), 0.1);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--theme-color);
+            color: var(--pt-theme-color);
             font-size: 20px;
-            box-shadow: inset 0 0 10px rgba(var(--theme-color-rgb), 0.2);
+            box-shadow: inset 0 0 10px rgba(var(--pt-theme-color-rgb), 0.2);
         }
 
         /* Glass Inputs */
@@ -740,10 +740,10 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #ffffff !important;
             padding: 14px 20px;
-            border-radius: var(--border-radius);
+            border-radius: var(--pt-border-radius);
             font-size: 15px;
-            font-family: var(--font-main);
-            transition: var(--transition);
+            font-family: var(--pt-font-main);
+            transition: var(--pt-transition);
             outline: none;
             box-sizing: border-box;
             backdrop-filter: blur(4px);
@@ -758,45 +758,45 @@
         }
 
         .modern-input:focus {
-            border-color: var(--theme-color);
+            border-color: var(--pt-theme-color);
             background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 4px rgba(var(--theme-color-rgb), 0.1), var(--glow-effect);
+            box-shadow: 0 0 0 4px rgba(var(--pt-theme-color-rgb), 0.1), var(--pt-glow-effect);
             transform: scale(1.02);
         }
 
         .modern-button {
-            background: var(--accent-gradient);
+            background: var(--pt-accent-gradient);
             color: #1B1F3B;
             border: none;
             padding: 14px 28px;
-            border-radius: var(--border-radius);
+            border-radius: var(--pt-border-radius);
             cursor: pointer;
             font-weight: 700;
             font-size: 15px;
-            transition: var(--transition);
+            transition: var(--pt-transition);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            box-shadow: 0 8px 16px rgba(var(--theme-color-rgb), 0.3);
+            box-shadow: 0 8px 16px rgba(var(--pt-theme-color-rgb), 0.3);
         }
 
         .modern-button:hover {
             transform: translateY(-2px) scale(1.03);
-            box-shadow: 0 12px 24px rgba(var(--theme-color-rgb), 0.5), var(--glow-effect);
+            box-shadow: 0 12px 24px rgba(var(--pt-theme-color-rgb), 0.5), var(--pt-glow-effect);
             filter: brightness(1.1);
         }
 
         .settings-row {
             padding: 16px 20px;
             background: rgba(255, 255, 255, 0.02);
-            border-radius: var(--border-radius-sm);
+            border-radius: 12px;
             margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            transition: var(--transition);
+            transition: var(--pt-transition);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
@@ -813,13 +813,13 @@
             border-radius: 50px;
             position: relative;
             cursor: pointer;
-            transition: var(--transition);
-            border: 1px solid var(--glass-border);
+            transition: var(--pt-transition);
+            border: 1px solid var(--pt-glass-border);
         }
 
         .toggle-switch.on {
-            background: var(--theme-color);
-            box-shadow: var(--glow-effect);
+            background: var(--pt-theme-color);
+            box-shadow: var(--pt-glow-effect);
         }
 
         .toggle-knob {
@@ -830,7 +830,7 @@
             position: absolute;
             top: 2px;
             left: 2px;
-            transition: var(--transition);
+            transition: var(--pt-transition);
         }
 
         .toggle-switch.on .toggle-knob {
@@ -845,7 +845,7 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 10px;
             cursor: pointer;
-            transition: var(--transition);
+            transition: var(--pt-transition);
             font-weight: 700; /* Bolder */
             font-size: 14px;
             color: #ffffff !important;
@@ -854,31 +854,31 @@
         }
 
         .clickable-word:hover {
-            background: var(--theme-color);
+            background: var(--pt-theme-color);
             color: #1B1F3B;
             transform: translateY(-3px) scale(1.1);
-            box-shadow: var(--glow-effect);
+            box-shadow: var(--pt-glow-effect);
         }
 
         .custom-clock {
-            font-family: var(--font-mono);
+            font-family: var(--pt-font-mono);
             font-size: 14px;
             font-weight: 600;
-            color: var(--theme-color);
-            background: rgba(var(--theme-color-rgb), 0.1);
+            color: var(--pt-theme-color);
+            background: rgba(var(--pt-theme-color-rgb), 0.1);
             padding: 6px 14px;
             border-radius: 10px;
-            border: 1px solid rgba(var(--theme-color-rgb), 0.2);
-            box-shadow: var(--glow-effect);
+            border: 1px solid rgba(var(--pt-theme-color-rgb), 0.2);
+            box-shadow: var(--pt-glow-effect);
         }
 
         .note-item {
             background: rgba(0, 0, 0, 0.5) !important; /* Darker for readability */
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius-md);
+            border: 1px solid var(--pt-glass-border);
+            border-radius: 12px;
             padding: 24px;
             margin-bottom: 16px;
-            transition: var(--transition);
+            transition: var(--pt-transition);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -888,16 +888,16 @@
 
         .note-item:hover {
             background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(var(--theme-color-rgb), 0.4);
+            border-color: rgba(var(--pt-theme-color-rgb), 0.4);
             transform: translateX(10px) translateY(-2px);
             box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
         }
 
         .word-tooltip {
             position: fixed;
-            background: rgba(var(--bg-rgb), 0.96);
+            background: rgba(var(--pt-bg-rgb), 0.96);
             backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid var(--theme-color);
+            border: 1px solid var(--pt-theme-color);
             padding: 20px;
             border-radius: 22px;
             z-index: 10002;
@@ -906,7 +906,7 @@
             box-shadow: 0 30px 60px rgba(0,0,0,0.7);
             pointer-events: none;
             display: none;
-            color: var(--text-color);
+            color: var(--pt-text-color);
             line-height: 1.6;
             animation: tooltipFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -927,7 +927,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: var(--transition);
+            transition: var(--pt-transition);
             font-size: 16px;
         }
 
@@ -982,22 +982,22 @@
 
         const themeRgb = themeColor.match(/[A-Za-z0-9]{2}/g).map(x => parseInt(x, 16)).join(',');
 
-        document.documentElement.style.setProperty('--theme-color', themeColor);
-        document.documentElement.style.setProperty('--theme-color-rgb', themeRgb);
-        document.documentElement.style.setProperty('--bg-color', '#1A1A2E');
-        document.documentElement.style.setProperty('--bg-rgb', '26, 26, 46');
-        document.documentElement.style.setProperty('--glass-bg', 'rgba(26, 26, 46, 0.75)');
-        document.documentElement.style.setProperty('--border-radius', `${borderRadius}px`);
-        document.documentElement.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${themeColor}, #FF69B4)`);
-        document.documentElement.style.setProperty('--glow-effect', `0 0 20px rgba(${themeRgb}, 0.4)`);
+        document.documentElement.style.setProperty('--pt-theme-color', themeColor);
+        document.documentElement.style.setProperty('--pt-theme-color-rgb', themeRgb);
+        document.documentElement.style.setProperty('--pt-bg-color', '#1A1A2E');
+        document.documentElement.style.setProperty('--pt-bg-rgb', '26, 26, 46');
+        document.documentElement.style.setProperty('--pt-glass-bg', 'rgba(26, 26, 46, 0.75)');
+        document.documentElement.style.setProperty('--pt-border-radius', `${borderRadius}px`);
+        document.documentElement.style.setProperty('--pt-accent-gradient', `linear-gradient(135deg, ${themeColor}, #FF69B4)`);
+        document.documentElement.style.setProperty('--pt-glow-effect', `0 0 20px rgba(${themeRgb}, 0.4)`);
 
         const textColor = '#ffffff';
         const textMuted = '#A0A0A0';
         const glassBorder = 'rgba(255, 255, 255, 0.1)';
 
-        document.documentElement.style.setProperty('--text-color', textColor);
-        document.documentElement.style.setProperty('--text-muted', textMuted);
-        document.documentElement.style.setProperty('--glass-border', glassBorder);
+        document.documentElement.style.setProperty('--pt-text-color', textColor);
+        document.documentElement.style.setProperty('--pt-text-muted', textMuted);
+        document.documentElement.style.setProperty('--pt-glass-border', glassBorder);
 
         document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
             p.classList.remove('pos-left', 'pos-right', 'animated-mesh', 'animated-matrix');
@@ -1104,7 +1104,7 @@
                 return `
                 <div class="panel-nav">
                     <div class="panel-title">
-                        <span style="background: linear-gradient(to right, var(--theme-color), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(var(--theme-color-rgb), 0.3));">${title}</span>
+                        <span style="background: linear-gradient(to right, var(--pt-theme-color), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(var(--pt-theme-color-rgb), 0.3));">${title}</span>
                         <div class="custom-tab-group">
                             <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn">🚀</div>
                             <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn">📖</div>
@@ -1135,7 +1135,7 @@
                             <div class="settings-row" id="toggle-space-hyphen">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
                                     <span style="font-weight: 700; font-size: 16px;">${t.toggleLabel}</span>
-                                    <span style="color: var(--text-muted); font-size: 13px; line-height: 1.4;">${isEnabled ? t.onDesc : t.offDesc}</span>
+                                    <span style="color: var(--pt-text-muted); font-size: 13px; line-height: 1.4;">${isEnabled ? t.onDesc : t.offDesc}</span>
                                 </div>
                                 <div class="toggle-switch ${isEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
                             </div>
@@ -1143,18 +1143,18 @@
                             <div class="settings-row" id="toggle-chat-hyphen">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
                                     <span style="font-weight: 700; font-size: 16px;">${t.chatToggleLabel}</span>
-                                    <span style="color: var(--text-muted); font-size: 13px; line-height: 1.4;">${isChatEnabled ? t.chatDesc : t.chatOffDesc}</span>
+                                    <span style="color: var(--pt-text-muted); font-size: 13px; line-height: 1.4;">${isChatEnabled ? t.chatDesc : t.chatOffDesc}</span>
                                 </div>
                                 <div class="toggle-switch ${isChatEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
                             </div>
 
                             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; opacity: 0.9; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                                <div style="width: 32px; height: 32px; border-radius: 10px; border: 2px solid var(--theme-color); overflow: hidden; background: rgba(var(--theme-color-rgb), 0.1); box-shadow: var(--glow-effect); display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--theme-color); font-size: 14px;">
+                                <div style="width: 32px; height: 32px; border-radius: 10px; border: 2px solid var(--pt-theme-color); overflow: hidden; background: rgba(var(--pt-theme-color-rgb), 0.1); box-shadow: var(--pt-glow-effect); display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--pt-theme-color); font-size: 14px;">
                                     <img src="https://media.discordapp.net/attachments/1362588131966062736/1484245858982564163/download.jfif?ex=69bd872c&is=69bc35ac&hm=c8fb790d9047f95f9158952dec974f5ad608d504c98c959901e41b6421c14923&=&format=webp&width=32&height=32" style="width: 100%; height: 100%; object-fit: cover;" id="kb-idea-author-img" onerror="this.style.display='none'; this.parentElement.innerText='M'">
                                 </div>
                                 <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <span style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">${t.ideaBy}</span>
-                                    <span style="font-size: 13px; font-weight: 800; color: #fff; text-shadow: 0 0 10px rgba(var(--theme-color-rgb), 0.5);">meow meow</span>
+                                    <span style="font-size: 10px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; letter-spacing: 1px;">${t.ideaBy}</span>
+                                    <span style="font-size: 13px; font-weight: 800; color: #fff; text-shadow: 0 0 10px rgba(var(--pt-theme-color-rgb), 0.5);">meow meow</span>
                                     <a href="https://discord.com/channels/@me/1446308212709265582" target="_blank" style="display: flex; align-items: center; gap: 4px; color: #5865F2; text-decoration: none; font-size: 10px; font-weight: 700; margin-top: 2px; opacity: 0.8; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.078 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
                                         <span>eliplay24</span>
@@ -1164,12 +1164,12 @@
                         </div>
                     </div>
 
-                    <div class="feature-card" style="background: rgba(var(--theme-color-rgb), 0.05); border-color: rgba(var(--theme-color-rgb), 0.2);">
-                        <div class="feature-header" style="color: var(--theme-color);">
-                            <div class="feature-icon" style="background: rgba(var(--theme-color-rgb), 0.15); box-shadow: var(--glow-effect);">💡</div>
+                    <div class="feature-card" style="background: rgba(var(--pt-theme-color-rgb), 0.05); border-color: rgba(var(--pt-theme-color-rgb), 0.2);">
+                        <div class="feature-header" style="color: var(--pt-theme-color);">
+                            <div class="feature-icon" style="background: rgba(var(--pt-theme-color-rgb), 0.15); box-shadow: var(--pt-glow-effect);">💡</div>
                             <span>Tip</span>
                         </div>
-                        <div style="color: var(--text-color); opacity: 0.8; font-size: 14px; line-height: 1.7; margin-bottom: 12px;">
+                        <div style="color: var(--pt-text-color); opacity: 0.8; font-size: 14px; line-height: 1.7; margin-bottom: 12px;">
                             ${t.closeInfo}
                         </div>
                         <a href="https://discord.com/channels/@me/1147633255345037352" target="_blank" style="display: flex; align-items: center; gap: 8px; background: #5865F2; color: white; padding: 8px 16px; border-radius: 10px; text-decoration: none; font-weight: 800; font-size: 12px; transition: 0.3s; width: fit-content; box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(88, 101, 242, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(88, 101, 242, 0.3)'">
@@ -1198,12 +1198,12 @@
 
                 const historyHtml = history.length > 0 ? `
                 <div style="margin-top: 15px; padding: 20px; background: rgba(255, 255, 255, 0.02); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(4px);">
-                    <div style="font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1.5px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 12px; font-weight: 800; color: var(--pt-text-muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1.5px; display: flex; justify-content: space-between; align-items: center;">
                         <span>📜 Recent</span>
                         <span id="clear-history" style="cursor: pointer; color: #ff4444; font-size: 10px; background: rgba(255, 68, 68, 0.1); padding: 5px 10px; border-radius: 8px; transition: 0.3s; font-weight: 700; border: 1px solid rgba(255,68,68,0.2);">CLEAR</span>
                     </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        ${history.map(h => `<span class="history-chip" style="padding: 6px 12px; background: rgba(var(--theme-color-rgb), 0.08); border-radius: 10px; font-size: 12px; cursor: pointer; border: 1px solid rgba(var(--theme-color-rgb), 0.15); font-weight: 700; transition: 0.3s; color: var(--text-color);">${h}</span>`).join('')}
+                        ${history.map(h => `<span class="history-chip" style="padding: 6px 12px; background: rgba(var(--pt-theme-color-rgb), 0.08); border-radius: 10px; font-size: 12px; cursor: pointer; border: 1px solid rgba(var(--pt-theme-color-rgb), 0.15); font-weight: 700; transition: 0.3s; color: var(--pt-text-color);">${h}</span>`).join('')}
                     </div>
                 </div>
             ` : '';
@@ -1211,12 +1211,12 @@
                 const notesHtml = notes.length > 0 ? notes.map((note, index) => `
                     <div class="note-item">
                         <div style="flex: 1;">
-                            <div class="note-content" style="font-size: 14px; line-height: 1.5; color: var(--text-color); font-weight: 500;">${note.content}</div>
+                            <div class="note-content" style="font-size: 14px; line-height: 1.5; color: var(--pt-text-color); font-weight: 500;">${note.content}</div>
                             <div class="note-timestamp" style="font-size: 11px; opacity: 0.5; margin-top: 8px; font-weight: 600;">${new Date(note.timestamp).toLocaleString()}</div>
                         </div>
                         <button class="note-delete" data-index="${index}">✕</button>
                     </div>
-                `).join('') : `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 14px; font-weight: 600;">${t.noNotes}</div>`;
+                `).join('') : `<div style="text-align: center; color: var(--pt-text-muted); padding: 30px; font-size: 14px; font-weight: 600;">${t.noNotes}</div>`;
 
                 const minLen = getMinWordLength();
                 const maxLen = getMaxWordLength();
@@ -1255,21 +1255,21 @@
                                 </select>
                             </div>
 
-                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
+                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
                                     <span>Word Length</span>
-                                    <span style="color: var(--theme-color);"><span id="val-dict-min-len">${minLen}</span> - <span id="val-dict-max-len">${maxLen}</span> chars</span>
+                                    <span style="color: var(--pt-theme-color);"><span id="val-dict-min-len">${minLen}</span> - <span id="val-dict-max-len">${maxLen}</span> chars</span>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 16px;">
-                                    <input type="range" id="dict-min-len" min="2" max="30" value="${minLen}" style="flex: 1; accent-color: var(--theme-color); cursor: pointer;">
-                                    <input type="range" id="dict-max-len" min="2" max="30" value="${maxLen}" style="flex: 1; accent-color: var(--theme-color); cursor: pointer;">
+                                    <input type="range" id="dict-min-len" min="2" max="30" value="${minLen}" style="flex: 1; accent-color: var(--pt-theme-color); cursor: pointer;">
+                                    <input type="range" id="dict-max-len" min="2" max="30" value="${maxLen}" style="flex: 1; accent-color: var(--pt-theme-color); cursor: pointer;">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="feature-card" id="dict-results-container" style="background: rgba(0,0,0,0.3); border-color: var(--glass-border); padding: 28px;">
-                        <div class="custom-dict-result-header" id="dict-result-header" style="font-size: 16px; font-weight: 800; color: var(--theme-color); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;"></div>
+                    <div class="feature-card" id="dict-results-container" style="background: rgba(0,0,0,0.3); border-color: var(--pt-glass-border); padding: 28px;">
+                        <div class="custom-dict-result-header" id="dict-result-header" style="font-size: 16px; font-weight: 800; color: var(--pt-theme-color); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;"></div>
                         <div class="custom-dict-result-list" id="dict-result-list" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
                     </div>
 
@@ -1284,12 +1284,12 @@
                         </select>
                     </div>
 
-                    <div id="custom-dict-upload-area" style="display: ${dictLang === 'Custom' ? 'block' : 'none'}; margin-bottom: 24px; padding: 28px; background: rgba(var(--theme-color-rgb), 0.08); border-radius: 24px; border: 2px dashed rgba(var(--theme-color-rgb), 0.3); backdrop-filter: blur(10px);">
-                        <div style="font-size: 15px; color: var(--text-color); font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                    <div id="custom-dict-upload-area" style="display: ${dictLang === 'Custom' ? 'block' : 'none'}; margin-bottom: 24px; padding: 28px; background: rgba(var(--pt-theme-color-rgb), 0.08); border-radius: 24px; border: 2px dashed rgba(var(--pt-theme-color-rgb), 0.3); backdrop-filter: blur(10px);">
+                        <div style="font-size: 15px; color: var(--pt-text-color); font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
                             <span>📁</span> ${t.dictUploadDesc}
                         </div>
                         <input type="file" id="dict-file-upload" class="modern-input" accept=".txt" style="margin-bottom: 16px; border-style: solid;">
-                        <textarea id="dict-manual-input" class="modern-input" style="min-height: 150px; font-size: 14px; margin-bottom: 16px; font-family: var(--font-mono); line-height: 1.6;" placeholder="${t.dictPlaceholder}">${(getCustomDictionary() || []).join('\n')}</textarea>
+                        <textarea id="dict-manual-input" class="modern-input" style="min-height: 150px; font-size: 14px; margin-bottom: 16px; font-family: var(--pt-font-mono); line-height: 1.6;" placeholder="${t.dictPlaceholder}">${(getCustomDictionary() || []).join('\n')}</textarea>
                         <button class="modern-button" id="dict-file-confirm" style="width: 100%;">
                             <span>💾</span> ${t.dictUploadBtn}
                         </button>
@@ -1309,12 +1309,12 @@
                         </div>
                     </div>
 
-                    <div class="feature-card" style="background: rgba(var(--theme-color-rgb), 0.05); border-color: rgba(var(--theme-color-rgb), 0.2);">
-                        <div class="feature-header" style="color: var(--theme-color);">
-                            <div class="feature-icon" style="background: rgba(var(--theme-color-rgb), 0.15); box-shadow: var(--glow-effect);">💡</div>
+                    <div class="feature-card" style="background: rgba(var(--pt-theme-color-rgb), 0.05); border-color: rgba(var(--pt-theme-color-rgb), 0.2);">
+                        <div class="feature-header" style="color: var(--pt-theme-color);">
+                            <div class="feature-icon" style="background: rgba(var(--pt-theme-color-rgb), 0.15); box-shadow: var(--pt-glow-effect);">💡</div>
                             <span>Pro-Tip</span>
                         </div>
-                        <div style="color: var(--text-color); opacity: 0.8; font-size: 14px; line-height: 1.7;">
+                        <div style="color: var(--pt-text-color); opacity: 0.8; font-size: 14px; line-height: 1.7;">
                             Click on any word to copy it instantly. Use the filters to find the best words for your round!
                         </div>
                     </div>
@@ -1340,8 +1340,8 @@
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 20px;">
                             <div style="display: flex; gap: 15px;">
-                                <div style="flex: 1; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 20px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; align-items: center; gap: 12px; transition: 0.3s;" class="color-picker-container">
-                                    <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase;">ACCENT COLOR</span>
+                                <div style="flex: 1; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 20px; border: 1px solid var(--pt-glass-border); display: flex; flex-direction: column; align-items: center; gap: 12px; transition: 0.3s;" class="color-picker-container">
+                                    <span style="font-size: 11px; font-weight: 800; color: var(--pt-text-muted); letter-spacing: 2px; text-transform: uppercase;">ACCENT COLOR</span>
                                     <input type="color" class="custom-theme-picker" id="admin-theme-picker" value="${themeColor}" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,0.1); cursor: pointer;">
                                 </div>
                             </div>
@@ -1349,20 +1349,20 @@
                             <div class="settings-row" id="toggle-panel-pos" style="padding: 16px 20px;">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
                                     <span style="font-weight: 700; font-size: 15px;">Panel Side</span>
-                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Currently on the ${panelPosition.toUpperCase()} side</span>
+                                    <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Currently on the ${panelPosition.toUpperCase()} side</span>
                                 </div>
-                                <div style="display: flex; background: rgba(0,0,0,0.3); border-radius: 14px; padding: 5px; border: 1px solid var(--glass-border);">
-                                    <div id="pos-left-btn" style="padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.3s; ${panelPosition === 'left' ? 'background: var(--theme-color); color: white; box-shadow: 0 4px 12px rgba(var(--theme-color-rgb), 0.3);' : 'color: var(--text-muted);'}">LEFT</div>
-                                    <div id="pos-right-btn" style="padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.3s; ${panelPosition === 'right' ? 'background: var(--theme-color); color: white; box-shadow: 0 4px 12px rgba(var(--theme-color-rgb), 0.3);' : 'color: var(--text-muted);'}">RIGHT</div>
+                                <div style="display: flex; background: rgba(0,0,0,0.3); border-radius: 14px; padding: 5px; border: 1px solid var(--pt-glass-border);">
+                                    <div id="pos-left-btn" style="padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.3s; ${panelPosition === 'left' ? 'background: var(--pt-theme-color); color: white; box-shadow: 0 4px 12px rgba(var(--pt-theme-color-rgb), 0.3);' : 'color: var(--pt-text-muted);'}">LEFT</div>
+                                    <div id="pos-right-btn" style="padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.3s; ${panelPosition === 'right' ? 'background: var(--pt-theme-color); color: white; box-shadow: 0 4px 12px rgba(var(--pt-theme-color-rgb), 0.3);' : 'color: var(--pt-text-muted);'}">RIGHT</div>
                                 </div>
                             </div>
 
-                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
+                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
                                     <span>${t.adminRadiusLabel}</span>
-                                    <span style="color: var(--theme-color);"><span id="val-admin-border-radius">${borderRadius}</span>px</span>
+                                    <span style="color: var(--pt-theme-color);"><span id="val-admin-border-radius">${borderRadius}</span>px</span>
                                 </div>
-                                <input type="range" id="admin-border-radius" min="0" max="40" step="1" value="${borderRadius}" style="width: 100%; accent-color: var(--theme-color); cursor: pointer;">
+                                <input type="range" id="admin-border-radius" min="0" max="40" step="1" value="${borderRadius}" style="width: 100%; accent-color: var(--pt-theme-color); cursor: pointer;">
                             </div>
                         </div>
                     </div>
@@ -1376,7 +1376,7 @@
                             <div class="settings-row" id="toggle-clock">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
                                     <span style="font-weight: 700; font-size: 15px;">System Clock</span>
-                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Displays the current time in the navigation bar.</span>
+                                    <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Displays the current time in the navigation bar.</span>
                                 </div>
                                 <div class="toggle-switch ${clockEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
                             </div>
@@ -1384,20 +1384,20 @@
                             <div class="settings-row" style="cursor: default;">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
                                     <span style="font-weight: 700; font-size: 15px;">Fast-Access Key</span>
-                                    <span style="color: var(--text-muted); font-size: 12px; font-weight: 600;">Key to quickly open/close the panel.</span>
+                                    <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Key to quickly open/close the panel.</span>
                                 </div>
-                                <input type="text" id="admin-toggle-key" class="modern-input" value="${getToggleKey()}" style="width: 80px; text-align: center; font-weight: 900; padding: 10px; border-radius: 12px; background: rgba(var(--theme-color-rgb), 0.1); color: var(--theme-color); border-color: rgba(var(--theme-color-rgb), 0.2);">
+                                <input type="text" id="admin-toggle-key" class="modern-input" value="${getToggleKey()}" style="width: 80px; text-align: center; font-weight: 900; padding: 10px; border-radius: 12px; background: rgba(var(--pt-theme-color-rgb), 0.1); color: var(--pt-theme-color); border-color: rgba(var(--pt-theme-color-rgb), 0.2);">
                             </div>
                         </div>
                     </div>
 
                     <div style="display: flex; flex-direction: column; align-items: center; padding: 40px 20px; gap: 15px;">
-                        <div style="font-size: 11px; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; color: var(--theme-color); opacity: 0.8; text-shadow: 0 0 15px rgba(var(--theme-color-rgb), 0.4);">
+                        <div style="font-size: 11px; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; color: var(--pt-theme-color); opacity: 0.8; text-shadow: 0 0 15px rgba(var(--pt-theme-color-rgb), 0.4);">
                             JKLM POWER TOOLS
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="padding: 5px 12px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 10px; font-weight: 800; color: var(--text-muted); border: 1px solid var(--glass-border);">VERSION ${SCRIPT_VERSION}</span>
-                            <span style="padding: 5px 12px; background: rgba(var(--theme-color-rgb), 0.1); border-radius: 8px; font-size: 10px; font-weight: 800; color: var(--theme-color); border: 1px solid rgba(var(--theme-color-rgb), 0.2);">ROOT EDITION</span>
+                            <span style="padding: 5px 12px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 10px; font-weight: 800; color: var(--pt-text-muted); border: 1px solid var(--pt-glass-border);">VERSION ${SCRIPT_VERSION}</span>
+                            <span style="padding: 5px 12px; background: rgba(var(--pt-theme-color-rgb), 0.1); border-radius: 8px; font-size: 10px; font-weight: 800; color: var(--pt-theme-color); border: 1px solid rgba(var(--pt-theme-color-rgb), 0.2);">ROOT EDITION</span>
                         </div>
                     </div>
                 </div>
@@ -1661,7 +1661,7 @@
                     
                     navigator.clipboard.writeText(word).then(() => {
                         const originalColor = e.target.style.color;
-                        e.target.style.color = 'var(--theme-color)';
+                        e.target.style.color = 'var(--pt-theme-color)';
                         setTimeout(() => e.target.style.color = originalColor, 500);
                     });
                 }
