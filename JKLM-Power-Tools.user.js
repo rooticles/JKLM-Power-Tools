@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      12.8
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.8)
+// @version      13.5
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v13.5)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -275,7 +275,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '12.8';
+    const SCRIPT_VERSION = '13.5';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -531,9 +531,9 @@
         .custom-nav-row {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end; /* Align to the right under the chat icon */
             background: transparent;
-            height: 60px;
+            height: 40px;
             width: 100%;
             border-bottom: none;
             position: relative;
@@ -541,6 +541,7 @@
             gap: 15px;
             padding: 0 25px;
             box-sizing: border-box;
+            margin-top: -5px;
         }
 
         .panel-nav {
@@ -1065,7 +1066,6 @@
             const clock = document.createElement('div');
             clock.id = 'custom-clock';
             clock.className = 'custom-clock';
-            clock.style.marginLeft = 'auto';
             clock.style.display = 'flex';
             clock.style.alignItems = 'center';
             clock.style.gap = '8px';
