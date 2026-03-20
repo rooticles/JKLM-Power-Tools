@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      10.9
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v10.9)
+// @version      11.0
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v11.0)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '10.9';
+    const SCRIPT_VERSION = '11.0';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -963,44 +963,6 @@
             to { transform: translateX(0) scale(1); opacity: 1; filter: blur(0); }
         }
 
-        /* Lobby Filters */
-        .lobby-filter-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin: 20px auto;
-            padding: 15px;
-            background: #1a1a1a;
-            border-radius: 20px;
-            max-width: 900px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .lobby-filter-btn {
-            padding: 10px 20px;
-            background: #26aa36;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-weight: 800;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 4px 12px rgba(38, 170, 54, 0.2);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .lobby-filter-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 20px rgba(38, 170, 54, 0.4);
-            filter: brightness(1.1);
-        }
-        .lobby-filter-btn.active {
-            background: #fff;
-            color: #26aa36;
-            box-shadow: 0 0 20px rgba(255,255,255,0.3);
-        }
-
         /* Animated Themes */
         .animated-mesh {
             background: linear-gradient(45deg, #1B1F3B, #2a1f4d, #1b3b3b, #1B1F3B);
@@ -1021,91 +983,6 @@
         @keyframes matrixFlow {
             from { background-position: 0% -100%; }
             to { background-position: 0% 100%; }
-        }
-
-        /* Player Count & Stats Visibility */
-        div.playerCount, .playerCount {
-            color: #000 !important;
-            font-weight: 800 !important;
-            font-size: 1em !important;
-            display: inline-block !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-            position: relative !important;
-            z-index: 9999 !important;
-            text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff !important;
-            background: none !important;
-            -webkit-background-clip: initial !important;
-            -webkit-text-fill-color: initial !important;
-            margin: 10px 0 !important;
-            filter: none !important;
-            pointer-events: auto !important;
-        }
-
-        .playerCount b, div.playerCount b {
-            color: #000 !important;
-            text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff !important;
-            display: inline !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-
-        .home {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-
-        /* Homepage Full Transparency when BG is active */
-        body:has(.home) .home,
-        body:has(.home) .pages,
-        body:has(.home) .main,
-        body:has(.home) .home .top,
-        body:has(.home) .home .bottom,
-        body:has(.home) .home .setup,
-        body:has(.home) .home .join,
-        body:has(.home) .home .lobbies {
-            background: transparent !important;
-            background-color: transparent !important;
-            border-color: transparent !important;
-            box-shadow: none !important;
-        }
-
-        /* Keep text/emojis/inputs visible */
-        body:has(.home) .home .playerCount,
-        body:has(.home) .home .playerCount *,
-        body:has(.home) .home b,
-        body:has(.home) .home span,
-        body:has(.home) .home input,
-        body:has(.home) .home button,
-        body:has(.home) .home .room * {
-            opacity: 1 !important;
-            visibility: visible !important;
-        }
-
-        /* Custom Room Card Background & Bubble */
-        .lobbies .room {
-            background-size: cover !important;
-            background-position: center !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        }
-
-        .lobbies .room:hover {
-            transform: translateY(-5px) scale(1.02) !important;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3) !important;
-        }
-
-        .lobbies .room .userCount {
-            font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif !important;
-            font-weight: 800 !important;
-            color: #fff !important;
-            background: var(--accent-gradient) !important;
-            padding: 4px 14px !important;
-            border-radius: 50px !important;
-            box-shadow: 0 4px 15px rgba(var(--theme-color-rgb), 0.4) !important;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
-            border: 1px solid rgba(255,255,255,0.2) !important;
         }
     `;
     document.head.appendChild(style);
@@ -1173,60 +1050,6 @@
     };
     updateThemeStyles();
 
-    let currentLobbyFilter = 'All';
-    const setupLobbyFilters = () => {
-        const playerCountEl = document.querySelector('.home .playerCount');
-        if (!playerCountEl || document.getElementById('lobby-filter-container')) return;
-
-        const container = document.createElement('div');
-        container.id = 'lobby-filter-container';
-        container.className = 'lobby-filter-container';
-
-        const filters = [
-            'All', 'English', 'French', 'Spanish', 'Brazilian Portuguese', 
-            'German', 'Breton', 'Nahuatl', 'Basque', 'Bombparty', 'Popsauce'
-        ];
-
-        filters.forEach(filter => {
-            const btn = document.createElement('button');
-            btn.className = 'lobby-filter-btn';
-            if (filter === currentLobbyFilter) btn.classList.add('active');
-            btn.innerText = filter;
-            btn.onclick = () => {
-                currentLobbyFilter = filter;
-                document.querySelectorAll('.lobby-filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                filterLobbies();
-            };
-            container.appendChild(btn);
-        });
-
-        playerCountEl.after(container);
-    };
-
-    const filterLobbies = () => {
-        const rooms = document.querySelectorAll('.lobbies .room');
-        if (rooms.length === 0) return;
-
-        rooms.forEach(room => {
-            if (currentLobbyFilter === 'All') {
-                room.style.display = '';
-                return;
-            }
-
-            const text = room.innerText.toLowerCase();
-            const filterLower = currentLobbyFilter.toLowerCase();
-            
-            // Special handling for Bombparty/Popsauce to avoid partial matches if needed, 
-            // but innerText should contain the full game name.
-            if (text.includes(filterLower)) {
-                room.style.display = '';
-            } else {
-                room.style.display = 'none';
-            }
-        });
-    };
-
     let lastDetectedSyllable = '';
     let isGameRunning = false;
 
@@ -1281,19 +1104,8 @@
                 const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 const clockEnabled = getClockEnabled();
                 
-                let content = clockEnabled ? `<span>${timeStr}</span>` : '';
-                
-                // Add Player Count Badge (The ball)
-                const playerCountEl = document.querySelector('.home .playerCount');
-                if (playerCountEl) {
-                    const match = playerCountEl.innerText.match(/(\d+)/);
-                    if (match) {
-                        content += `<span style="background: var(--theme-color); color: white; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; box-shadow: 0 0 10px rgba(var(--theme-color-rgb), 0.5);">${match[1]}</span>`;
-                    }
-                }
-                
-                clock.innerHTML = content;
-                clock.style.display = (clockEnabled || content.includes('background')) ? 'flex' : 'none';
+                clock.innerHTML = clockEnabled ? `<span>${timeStr}</span>` : '';
+                clock.style.display = clockEnabled ? 'flex' : 'none';
 
                 document.querySelectorAll('.panel-clock').forEach(el => {
                     el.innerText = timeStr;
@@ -2012,18 +1824,6 @@
                     }
                 }
 
-                // Update lobby filters on mutation
-                setupLobbyFilters();
-                filterLobbies();
-                
-                // Force visibility immediately on mutation
-                const pc = document.querySelector('.playerCount');
-                if (pc) {
-                    pc.style.setProperty('display', 'inline-block', 'important');
-                    pc.style.setProperty('visibility', 'visible', 'important');
-                    pc.style.setProperty('opacity', '1', 'important');
-                }
-
                 updateThemeStyles();
 
                 const isSelfTurn = !!document.querySelector('.selfTurn');
@@ -2037,23 +1837,6 @@
                 }
             });
             gameObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
-
-            // Hard-enforce visibility for the "Play with..." text (v10.2)
-             setInterval(() => {
-                 const pc = document.querySelector('.playerCount');
-                 if (pc) {
-                     pc.style.setProperty('display', 'inline-block', 'important');
-                     pc.style.setProperty('visibility', 'visible', 'important');
-                     pc.style.setProperty('opacity', '1', 'important');
-                 }
-                 const h = document.querySelector('.home');
-                 if (h) {
-                     h.style.setProperty('display', 'block', 'important');
-                     h.style.setProperty('visibility', 'visible', 'important');
-                     h.style.setProperty('opacity', '1', 'important');
-                 }
-                 updateThemeStyles();
-             }, 1000);
 
             GM_addValueChangeListener('spaceToHyphenEnabled', () => updateKbContent());
             GM_addValueChangeListener('spaceToHyphenChatEnabled', () => updateKbContent());
