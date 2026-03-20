@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      12.7
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.7)
+// @version      12.8
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.8)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -275,7 +275,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '12.7';
+    const SCRIPT_VERSION = '12.8';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -532,10 +532,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #1b1f3b;
+            background: transparent;
             height: 60px;
             width: 100%;
-            border-bottom: 1px solid var(--pt-glass-border);
+            border-bottom: none;
             position: relative;
             z-index: 10001;
             gap: 15px;
