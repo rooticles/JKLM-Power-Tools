@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      12.4
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.4)
+// @version      12.2
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.2)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -37,6 +37,19 @@
                     event.preventDefault();
                 }
             }, true);
+
+            // --- Service Worker Suppression (Performance Patch) ---
+            // Prevents no-op fetch handlers from bringing overhead during navigation
+            if (win.navigator.serviceWorker) {
+                win.navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+                win.navigator.serviceWorker.register = () => {
+                    return new Promise(() => {}); // Do nothing
+                };
+            }
 
             // Fix JKLM 'chatUnreadHighlightCount' ReferenceError
             if (typeof win.chatUnreadHighlightCount === 'undefined') {
@@ -262,7 +275,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '12.4';
+    const SCRIPT_VERSION = '12.2';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -547,33 +560,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100%;
-            margin-left: 20px;
-            gap: 15px;
+            background: #1b1f3b;
+            height: 60px;
+            width: 100%;
+            border-bottom: 1px solid var(--glass-border);
+            position: relative;
             z-index: 10001;
-        }
-
-        /* Homepage Normalization */
-        .pages {
-            background: transparent !important;
-        }
-        .home {
-            background: transparent !important;
-        }
-        .home .roomList, .home .news, .home .about, .home .createRoom {
-            background: #1A1A2E !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
-            border-radius: 12px !important;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-        }
-
-        /* Ensure Navigation stays solid */
-        .navigation {
-            background: #1B1F3B !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-            z-index: 10001 !important;
+            gap: 15px;
+            padding: 0 25px;
+            box-sizing: border-box;
         }
 
         .panel-nav {
@@ -1088,8 +1083,7 @@
                 customRow = document.createElement('div');
                 customRow.id = 'custom-nav-row';
                 customRow.className = 'custom-nav-row';
-                // Place it inside the nav to prevent layout shifts on the homepage
-                nav.appendChild(customRow);
+                nav.after(customRow);
             }
 
             if (document.getElementById('cat-btn')) return;
@@ -1480,9 +1474,7 @@
             updateSidebarWidths(getSidebarWidth());
 
             const pages = document.querySelector('.pages') || document.querySelector('.main') || document.querySelector('main');
-            if (pages && pages !== document.body) {
-                // Background is handled via CSS normalization now
-            }
+            if (pages && pages !== document.body) pages.style.backgroundColor = '#1a1a1a';
             allCustomPages.forEach(p => document.body.appendChild(p));
 
             window.closeCustomTabs = () => {
