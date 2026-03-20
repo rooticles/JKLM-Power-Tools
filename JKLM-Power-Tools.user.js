@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      12.3
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.3)
+// @version      12.4
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.4)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -37,19 +37,6 @@
                     event.preventDefault();
                 }
             }, true);
-
-            // --- Service Worker Suppression (Performance Patch) ---
-            // Prevents no-op fetch handlers from bringing overhead during navigation
-            if (win.navigator.serviceWorker) {
-                win.navigator.serviceWorker.getRegistrations().then(registrations => {
-                    for (let registration of registrations) {
-                        registration.unregister();
-                    }
-                });
-                win.navigator.serviceWorker.register = () => {
-                    return new Promise(() => {}); // Do nothing
-                };
-            }
 
             // Fix JKLM 'chatUnreadHighlightCount' ReferenceError
             if (typeof win.chatUnreadHighlightCount === 'undefined') {
@@ -275,7 +262,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '12.3';
+    const SCRIPT_VERSION = '12.4';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
