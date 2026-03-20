@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      12.5
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.5)
+// @version      12.6
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.6)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -25,7 +25,7 @@
      * Created by Root
      */
 
-    const SCRIPT_VERSION = '12.5';
+    const SCRIPT_VERSION = '12.6';
     const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 
     // --- 1. CORE STABILITY & PROTECTION ---
@@ -47,27 +47,6 @@
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
         };
         ['click', 'keydown', 'touchstart'].forEach(type => win.addEventListener(type, resumeAudio, { once: true, capture: true }));
-
-        // Network Resilience Patch (Guardian Edition v8.0)
-        const injectFallbackCSS = () => {
-            if (document.getElementById('jklm-power-tools-resilience')) return;
-            const style = document.createElement('style');
-            style.id = 'jklm-power-tools-resilience';
-            style.textContent = `
-                body.resilience-active:not(:has(link[href*="base.css"])) { background: #1B1F3B !important; color: #eee !important; }
-                .page.resilience-active:not(:has(link[href*="bombparty.css"])) { background: radial-gradient(circle at center, #2a2d45 0%, #1b1f3b 100%) !important; }
-            `;
-            document.documentElement.appendChild(style);
-            document.body.classList.add('resilience-active');
-        };
-
-        const checkStyles = () => {
-            const critical = ['base.css', 'game.css', 'bombparty.css'];
-            const loaded = Array.from(document.styleSheets).map(s => s.href || '');
-            if (critical.filter(cs => !loaded.some(ls => ls.includes(cs))).length >= 2) injectFallbackCSS();
-            setTimeout(checkStyles, 15000);
-        };
-        setTimeout(checkStyles, 3000);
     };
 
     // --- 2. CONFIGURATION & STORAGE ---
