@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      11.0
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v11.0)
+// @version      11.1
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v11.1)
 // @author       Root
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -261,7 +261,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '11.0';
+    const SCRIPT_VERSION = '11.1';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1848,12 +1848,9 @@
 
             window.addEventListener('keydown', (e) => {
                 if (e.key === getToggleKey()) {
-                    const isPanelVisible = allCustomPages.some(p => p.classList.contains('active'));
-                    if (isPanelVisible) {
-                        // Toggle visibility of ALL panels instead of closing
-                        allCustomPages.forEach(p => {
-                            p.classList.toggle('selective-hidden');
-                        });
+                    const anyActive = allCustomPages.some(p => p.classList.contains('active'));
+                    if (anyActive) {
+                        window.closeCustomTabs();
                     } else {
                         toggleTab(adminTab, adminPage);
                     }
