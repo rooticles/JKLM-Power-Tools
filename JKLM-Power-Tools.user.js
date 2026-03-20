@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      12.6
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.6)
+// @version      12.7
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.7)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -25,7 +25,7 @@
      * Created by Root
      */
 
-    const SCRIPT_VERSION = '12.6';
+    const SCRIPT_VERSION = '12.7';
     const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
 
     // --- 1. CORE STABILITY & PROTECTION ---
@@ -81,9 +81,9 @@
         const style = document.createElement('style');
         style.innerHTML = `
         :root { --theme-color: #8A2BE2; --bg-color: #1A1A2E; --text-color: #E0E0E0; }
-        .custom-nav-row { display: flex; align-items: center; justify-content: center; background: #1b1f3b; height: 60px; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); gap: 15px; }
+        .custom-nav-row { display: flex; align-items: center; justify-content: center; background: transparent; height: 60px; width: 100%; border-bottom: none; gap: 15px; }
         .custom-tab { cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 18px; color: #A0A0A0; }
-        .custom-tab.active { background: var(--theme-color); color: white; }
+        .custom-tab.active { color: white; }
         .custom-kb-page, .custom-dict-page, .custom-admin-page { display: none; position: fixed; top: 0; right: 0; width: 650px; height: 100vh; background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(16px); color: white; padding: 20px; z-index: 9999; }
         .custom-kb-page.active, .custom-dict-page.active, .custom-admin-page.active { display: block; }
         `;
