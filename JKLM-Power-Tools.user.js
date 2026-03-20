@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      12.8
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.8)
+// @version      12.9
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v12.9)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -82,116 +82,6 @@
                 });
             };
             resumeAudio();
-
-            // --- Network Resilience Patch (Guardian Edition v8.0) ---
-            const injectFallbackCSS = () => {
-                if (document.getElementById('jklm-power-tools-resilience')) return;
-
-                const fallbackStyles = `
-                    /* Ultimate Edition: Comprehensive UI Fallback (v8.0) */
-                    body.resilience-active:not(:has(link[href*="base.css"])) {
-                        background: #1B1F3B !important;
-                        color: #eee !important;
-                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-                        margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
-                        overflow-y: auto !important;
-                    }
-                    
-                    .page.resilience-active:not(:has(link[href*="bombparty.css"])) {
-                        display: flex; flex-direction: column; flex: 1; min-height: 100vh;
-                        background: radial-gradient(circle at center, #2a2d45 0%, #1b1f3b 100%) !important;
-                        position: relative;
-                    }
-
-                    .top.resilience-active:not(:has(link[href*="bombparty.css"])) {
-                        height: 60px; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(255,255,255,0.1);
-                    }
-
-                    .middle.resilience-active:not(:has(link[href*="bombparty.css"])) {
-                        flex: 1; display: flex; flex-direction: column; position: relative; align-items: center; justify-content: center;
-                    }
-                    .bottom.resilience-active:not(:has(link[href*="bombparty.css"])) {
-                        height: 100px; background: rgba(0,0,0,0.5); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;
-                    }
-
-                    .chat.resilience-active:not(:has(link[href*="base.css"])) {
-                        position: fixed; right: 0; bottom: 100px; top: 60px; width: 320px;
-                        background: rgba(0,0,0,0.7) !important; border-left: 1px solid rgba(255,255,255,0.1) !important;
-                        display: flex; flex-direction: column; backdrop-filter: blur(15px); z-index: 1000;
-                    }
-
-                    .navigation.resilience-active:not(:has(link[href*="base.css"])) {
-                        position: fixed; top: 0; left: 0; right: 0; height: 60px;
-                        background: rgba(0,0,0,0.6) !important; display: flex; align-items: center; padding: 0 20px;
-                        border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 1001;
-                    }
-
-                    .canvasArea.resilience-active:not(:has(link[href*="bombparty.css"])) {
-                        flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;
-                    }
-                    .round.resilience-active:not(:has(link[href*="bombparty.css"])) {
-                        font-size: 2em; font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.5);
-                    }
-
-                    button.resilience-active:not(.modern-button) {
-                        background: #26aa36 !important; color: #fff !important; border: none !important;
-                        padding: 12px 24px !important; border-radius: 30px !important; font-weight: 800 !important;
-                        cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-                    }
-                    
-                    /* Guardian Pulse Animation */
-                    @keyframes guardian-pulse {
-                        0% { transform: scale(1); filter: drop-shadow(0 0 0px #ff4444); }
-                        50% { transform: scale(1.1); filter: drop-shadow(0 0 10px #ff4444); }
-                        100% { transform: scale(1); filter: drop-shadow(0 0 0px #ff4444); }
-                    }
-                    .guardian-icon { display: inline-block; animation: guardian-pulse 2s infinite ease-in-out; }
-                    
-                    /* Fix Power Tools Panel Position in Fallback */
-                    .resilience-active .custom-kb-page, .resilience-active .custom-dict-page, .resilience-active .custom-admin-page {
-                        z-index: 999999 !important;
-                        bottom: 10px !important;
-                    }
-                `;
-                const style = document.createElement('style');
-                style.id = 'jklm-power-tools-resilience';
-                style.textContent = fallbackStyles;
-                document.documentElement.appendChild(style);
-                
-                // Add class to body to activate fallbacks
-                document.body.classList.add('resilience-active');
-                
-                // UI Notification with Auto-Recovery Status (Disabled per user request)
-                /*
-                const notify = document.createElement('div');
-                ...
-                */
-            };
-
-            const removeFallbackCSS = () => {
-                const style = document.getElementById('jklm-power-tools-resilience');
-                if (style) style.remove();
-                document.body.classList.remove('resilience-active');
-            };
-
-            // Auto-Recovery Polling (Every 15s)
-            const checkStyles = () => {
-                const criticalStyles = ['base.css', 'game.css', 'bombparty.css'];
-                const loadedStyles = Array.from(document.styleSheets).map(s => s.href || '');
-                const missingCount = criticalStyles.filter(cs => !loadedStyles.some(ls => ls.includes(cs))).length;
-                
-                if (missingCount >= 2) {
-                    injectFallbackCSS();
-                } else if (document.body.classList.contains('resilience-active')) {
-                    removeFallbackCSS();
-                }
-                
-                // Recursive poll
-                setTimeout(checkStyles, 15000);
-            };
-            
-            // Initial check with delay
-            setTimeout(checkStyles, 3000);
 
             // --- Ultra Stability Patch (v5 - Ultimate Edition) ---
             // This is the absolute final fix for "Cannot read properties of undefined (reading 'addEventListener')"
@@ -275,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '12.8';
+    const SCRIPT_VERSION = '12.9';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
