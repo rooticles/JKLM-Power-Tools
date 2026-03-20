@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      11.2
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v11.2)
+// @version      11.4
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v11.4)
 // @author       Root
+// @icon         https://media.discordapp.net/attachments/1362588131966062736/1484245858982564163/download.jfif?ex=69bd872c&is=69bc35ac&hm=c8fb790d9047f95f9158952dec974f5ad608d504c98c959901e41b6421c14923&=&format=webp&width=136&height=136
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @match        *://*.jklm.fun/*
@@ -261,7 +262,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '11.2';
+    const SCRIPT_VERSION = '11.4';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1129,19 +1130,10 @@
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 
-                // Get Player Count for "Overlay Users" display
-                const pcEl = document.querySelector('.playerCount');
-                const match = pcEl ? pcEl.innerText.match(/(\d+)/) : null;
-                const userCount = match ? match[1] : '700+';
-
                 return `
                 <div class="panel-nav">
-                    <div class="panel-title" style="display: flex; align-items: center; gap: 10px;">
+                    <div class="panel-title">
                         <span style="background: linear-gradient(to right, var(--theme-color), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(var(--theme-color-rgb), 0.3));">${title}</span>
-                        <span style="font-size: 10px; background: rgba(var(--theme-color-rgb), 0.15); color: var(--theme-color); padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(var(--theme-color-rgb), 0.3); font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">
-                            <span style="width: 5px; height: 5px; background: var(--theme-color); border-radius: 50%; box-shadow: 0 0 5px var(--theme-color);"></span>
-                            ${userCount} USERS
-                        </span>
                         <div class="custom-tab-group">
                             <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn">🚀</div>
                             <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn">📖</div>
