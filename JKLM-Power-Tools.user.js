@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      11.4
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v11.4)
+// @version      11.5
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v11.5)
 // @author       Root
-// @icon         https://media.discordapp.net/attachments/1362588131966062736/1484245858982564163/download.jfif?ex=69bd872c&is=69bc35ac&hm=c8fb790d9047f95f9158952dec974f5ad608d504c98c959901e41b6421c14923&=&format=webp&width=136&height=136
+// @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @match        *://*.jklm.fun/*
@@ -262,7 +262,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '11.4';
+    const SCRIPT_VERSION = '11.5';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
