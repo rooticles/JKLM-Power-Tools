@@ -38,6 +38,19 @@
                 }
             }, true);
 
+            // --- Service Worker Suppression (Performance Patch) ---
+            // Prevents no-op fetch handlers from bringing overhead during navigation
+            if (win.navigator.serviceWorker) {
+                win.navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+                win.navigator.serviceWorker.register = () => {
+                    return new Promise(() => {}); // Do nothing
+                };
+            }
+
             // Fix JKLM 'chatUnreadHighlightCount' ReferenceError
             if (typeof win.chatUnreadHighlightCount === 'undefined') {
                 win.chatUnreadHighlightCount = 0;
