@@ -1,8 +1,9 @@
+
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      16.7
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v16.7)
+// @version      17.0
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v17.0)
 // @author       Root
 // @icon         https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTJbeFZgV0zcGPsl6DlZo3cGrxKIEsWPIcJw&s
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -190,7 +191,132 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '16.7';
+    const SCRIPT_VERSION = '17.0';
+
+    // --- Category Constants ---
+    const FISH_KEYWORDS = [
+        'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
+        'pike', 'perch', 'snapper', 'grouper', 'marlin', 'swordfish', 'stingray', 'ray', 
+        'flounder', 'halibut', 'sole', 'mullet', 'sardine', 'anchovy', 'herring', 'barracuda', 
+        'piranha', 'tilapia', 'catfish', 'guppy', 'goldfish', 'clownfish', 'angelfish', 
+        'betta', 'tetra', 'molly', 'platy', 'danio', 'loach', 'discus', 'gourami', 'oscar', 
+        'cichlid', 'sturgeon', 'gar', 'bowfin', 'lungfish', 'lamprey', 'hagfish', 'coelacanth',
+        'mahimahi', 'wahoo', 'walleye', 'muskellunge', 'bluegill', 'crappie', 'sunfish', 'shad', 
+        'minnow', 'dace', 'roach', 'tench', 'bream', 'chub', 'barbel', 'grayling', 'char', 
+        'whitefish', 'smelt', 'capelin', 'hake', 'pollock', 'haddock', 'whiting', 'ling', 
+        'burbot', 'angler', 'monkfish', 'batfish', 'frogfish', 'needlefish', 'flyingfish', 
+        'seahorse', 'pipefish', 'stickleback', 'sculpin', 'lionfish', 'rockfish', 'tilefish', 
+        'remora', 'jack', 'pompano', 'dorado', 'porgy', 'drum', 'croaker', 'surmullet', 
+        'goatfish', 'archerfish', 'leaffish', 'snakehead', 'turbot', 'plaice', 'dab', 'puffer', 
+        'boxfish', 'triggerfish', 'filefish', 'albacore', 'alewife', 'alfonsino', 'amberjack', 
+        'anemonefish', 'arapaima', 'arowana', 'ayu', 'bangus', 'barracudina', 'barramundi', 
+        'bichir', 'bitterling', 'bleak', 'blenny', 'blobfish', 'blowfish', 'boga', 'bonefish', 
+        'bonito', 'bonytail', 'brill', 'brotula', 'candiru', 'catalufa', 'catla', 'cisco', 
+        'cobia', 'coley', 'cornetfish', 'cusk', 'damselfish', 'dartfish', 'dealfish', 'dhufish', 
+        'dory', 'dottyback', 'dragonet', 'driftfish', 'escolar', 'eulachon', 'fangtooth', 
+        'fierasfer', 'flier', 'garibaldi', 'goldeye', 'grunion', 'grunt', 'grunter', 'gudgeon', 
+        'halosaur', 'hamlet', 'hoki', 'huchen', 'hussar', 'icefish', 'ide', 'ilish', 'inanga', 
+        'inconnu', 'kahawai', 'kaluga', 'kokanee', 'kokopu', 'ladyfish', 'lenok', 'limia', 
+        'louvar', 'luderick', 'lumpsucker', 'mahseer', 'medaka', 'menhaden', 'mojarra', 'mola', 
+        'monchong', 'mooneye', 'moonfish', 'mora', 'morwong', 'mrigal', 'mummichog', 'nase', 
+        'notothen', 'oarfish', 'oldwife', 'opah', 'opaleye', 'orfe', 'panga', 'parore', 
+        'peamouth', 'pearleye', 'pleco', 'poacher', 'pomfret', 'powen', 'quillback', 'quillfish', 
+        'rasbora', 'rohu', 'ronquil', 'roosterfish', 'ruffe', 'sabertooth', 'sablefish', 'scat', 
+        'scup', 'shiner', 'sillago', 'skate', 'skilfish', 'sleeper', 'slickhead', 'slimehead', 
+        'snook', 'sprat', 'squeaker', 'stargazer', 'steelhead', 'stonecat', 'sucker', 'tailor', 
+        'taimen', 'tang', 'tarpon', 'tarwhine', 'tenpounder', 'thornfish', 'threadfin', 'tope', 
+        'torpedo', 'trahira', 'treefish', 'tripletail', 'trumpeter', 'trunkfish', 'uaru', 
+        'vanjaram', 'vendace', 'vimba', 'walu', 'warmouth', 'whiff', 'wobbegong', 'wrasse', 
+        'zander', 'zingel', 'humuhumunukunukuapua\'a'
+    ];
+
+    const PLANT_KEYWORDS = [
+        'flower', 'plant', 'tree', 'orchid', 'dandelion', 'mahogany', 'rose', 'tulip', 'daisy', 'lily',
+        'sunflower', 'oak', 'pine', 'maple', 'birch', 'willow', 'cactus', 'fern', 'moss', 'grass',
+        'bamboo', 'palm', 'ivy', 'clover', 'lavender', 'mint', 'basil', 'thyme', 'sage', 'rosemary',
+        'cedar', 'sequoia', 'redwood', 'spruce', 'fir', 'larch', 'juniper', 'cypress', 'yew'
+    ];
+
+    const SPACE_KEYWORDS = [
+        'space', 'universe', 'supernova', 'galaxy', 'asteroid', 'jupiter', 'mars', 'venus', 'saturn',
+        'neptune', 'uranus', 'pluto', 'mercury', 'earth', 'moon', 'star', 'planet', 'comet', 'meteor',
+        'nebula', 'cosmos', 'orbit', 'gravity', 'rocket', 'shuttle', 'astronaut', 'telescope', 'void'
+    ];
+
+    const ELEMENT_KEYWORDS = [
+        'hydrogen', 'helium', 'lithium', 'beryllium', 'boron', 'carbon', 'nitrogen', 'oxygen', 'fluorine',
+        'neon', 'sodium', 'magnesium', 'aluminum', 'silicon', 'phosphorus', 'sulfur', 'chlorine', 'argon',
+        'potassium', 'calcium', 'scandium', 'titanium', 'vanadium', 'chromium', 'manganese', 'iron',
+        'cobalt', 'nickel', 'copper', 'zinc', 'gallium', 'germanium', 'arsenic', 'selenium', 'bromine',
+        'krypton', 'rubidium', 'strontium', 'yttrium', 'zirconium', 'niobium', 'molybdenum', 'technetium',
+        'ruthenium', 'rhodium', 'palladium', 'silver', 'cadmium', 'indium', 'tin', 'antimony', 'tellurium',
+        'iodine', 'xenon', 'cesium', 'barium', 'lanthanum', 'cerium', 'praseodymium', 'neodymium',
+        'promethium', 'samarium', 'europium', 'gadolinium', 'terbium', 'dysprosium', 'holmium', 'erbium',
+        'thulium', 'ytterbium', 'lutetium', 'hafnium', 'tantalum', 'tungsten', 'rhenium', 'osmium',
+        'iridium', 'platinum', 'gold', 'mercury', 'thallium', 'lead', 'bismuth', 'polonium', 'astatine',
+        'radon', 'francium', 'radium', 'actinium', 'thorium', 'protactinium', 'uranium', 'neptunium',
+        'plutonium', 'americium', 'curium', 'berkelium', 'californium', 'einsteinium', 'fermium',
+        'mendelevium', 'nobelium', 'lawrencium', 'rutherfordium', 'dubnium', 'seaborgium', 'bohrium',
+        'hassium', 'meitnerium', 'darmstadtium', 'roentgenium', 'copernicium', 'nihonium', 'flerovium',
+        'moscovium', 'livermorium', 'tennessine', 'oganesson'
+    ];
+
+    const GEM_KEYWORDS = [
+        'emerald', 'sapphire', 'quartz', 'diamond', 'ruby', 'pearl', 'opal', 'topaz', 'amethyst',
+        'garnet', 'aquamarine', 'peridot', 'citrine', 'turquoise', 'jade', 'amber', 'onyx', 'crystal',
+        'gem', 'jewel', 'mineral', 'stone'
+    ];
+
+    const MYTH_KEYWORDS = [
+        'centaur', 'aphrodite', 'valkyrie', 'zeus', 'hera', 'poseidon', 'demeter', 'athena', 'apollo',
+        'artemis', 'ares', 'hephaestus', 'hermes', 'dionysus', 'hades', 'odin', 'thor', 'loki', 'freya',
+        'dragon', 'phoenix', 'griffin', 'mermaid', 'unicorn', 'titan', 'god', 'goddess', 'hero', 'myth'
+    ];
+
+    const INSTRUMENT_KEYWORDS = [
+        'saxophone', 'harpsichord', 'synthesizer', 'piano', 'guitar', 'violin', 'cello', 'flute',
+        'clarinet', 'trumpet', 'trombone', 'tuba', 'drum', 'harp', 'banjo', 'mandolin', 'organ',
+        'keyboard', 'bass', 'cello', 'viola', 'oboe', 'bassoon', 'recorder', 'xylophone', 'marimba'
+    ];
+
+    const TECH_KEYWORDS = [
+        'javascript', 'algorithm', 'mainframe', 'code', 'program', 'software', 'hardware', 'server',
+        'database', 'network', 'internet', 'web', 'app', 'binary', 'logic', 'compiler', 'hacker',
+        'cyber', 'pixel', 'data', 'cloud', 'security', 'python', 'java', 'html', 'css', 'script'
+    ];
+
+    const FOOD_KEYWORDS = [
+        'pomegranate', 'zucchini', 'artichoke', 'apple', 'banana', 'orange', 'grape', 'strawberry',
+        'potato', 'tomato', 'carrot', 'onion', 'garlic', 'pepper', 'salt', 'spice', 'herb', 'fruit',
+        'vegetable', 'berry', 'cherry', 'lemon', 'lime', 'melon', 'mango', 'peach', 'pear', 'plum'
+    ];
+
+    const SPICE_KEYWORDS = [
+        'coriander', 'turmeric', 'rosemary', 'cinnamon', 'ginger', 'pepper', 'basil', 'thyme', 'sage',
+        'cumin', 'paprika', 'clove', 'nutmeg', 'oregano', 'parsley', 'dill', 'mint', 'chili', 'vanilla'
+    ];
+
+    const matchCategory = (w, keywords) => {
+        const low = w.toLowerCase();
+        return keywords.some(k => {
+            if (low === k) return true;
+            if (low === k + 's') return true;
+            if (low === k + 'es') return true;
+            if (k.endsWith('y') && low === k.slice(0, -1) + 'ies') return true;
+            return false;
+        });
+    };
+
+    const isWordFish = (w) => matchCategory(w, FISH_KEYWORDS);
+    const isWordPlant = (w) => matchCategory(w, PLANT_KEYWORDS);
+    const isWordSpace = (w) => matchCategory(w, SPACE_KEYWORDS);
+    const isWordElement = (w) => matchCategory(w, ELEMENT_KEYWORDS);
+    const isWordGem = (w) => matchCategory(w, GEM_KEYWORDS);
+    const isWordMyth = (w) => matchCategory(w, MYTH_KEYWORDS);
+    const isWordInstrument = (w) => matchCategory(w, INSTRUMENT_KEYWORDS);
+    const isWordTech = (w) => matchCategory(w, TECH_KEYWORDS);
+    const isWordFood = (w) => matchCategory(w, FOOD_KEYWORDS);
+    const isWordSpice = (w) => matchCategory(w, SPICE_KEYWORDS);
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -328,54 +454,6 @@
     let lowercasedDictionary = [];
     let dictionaryLoaded = false;
     let currentDictLang = '';
-
-    const FISH_KEYWORDS = [
-        'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
-        'pike', 'perch', 'snapper', 'grouper', 'marlin', 'swordfish', 'stingray', 'ray', 
-        'flounder', 'halibut', 'sole', 'mullet', 'sardine', 'anchovy', 'herring', 'barracuda', 
-        'piranha', 'tilapia', 'catfish', 'guppy', 'goldfish', 'clownfish', 'angelfish', 
-        'betta', 'tetra', 'molly', 'platy', 'danio', 'loach', 'discus', 'gourami', 'oscar', 
-        'cichlid', 'sturgeon', 'gar', 'bowfin', 'lungfish', 'lamprey', 'hagfish', 'coelacanth',
-        'mahimahi', 'wahoo', 'walleye', 'muskellunge', 'bluegill', 'crappie', 'sunfish', 'shad', 
-        'minnow', 'dace', 'roach', 'tench', 'bream', 'chub', 'barbel', 'grayling', 'char', 
-        'whitefish', 'smelt', 'capelin', 'hake', 'pollock', 'haddock', 'whiting', 'ling', 
-        'burbot', 'angler', 'monkfish', 'batfish', 'frogfish', 'needlefish', 'flyingfish', 
-        'seahorse', 'pipefish', 'stickleback', 'sculpin', 'lionfish', 'rockfish', 'tilefish', 
-        'remora', 'jack', 'pompano', 'dorado', 'porgy', 'drum', 'croaker', 'surmullet', 
-        'goatfish', 'archerfish', 'leaffish', 'snakehead', 'turbot', 'plaice', 'dab', 'puffer', 
-        'boxfish', 'triggerfish', 'filefish', 'albacore', 'alewife', 'alfonsino', 'amberjack', 
-        'anemonefish', 'arapaima', 'arowana', 'ayu', 'bangus', 'barracudina', 'barramundi', 
-        'bichir', 'bitterling', 'bleak', 'blenny', 'blobfish', 'blowfish', 'boga', 'bonefish', 
-        'bonito', 'bonytail', 'brill', 'brotula', 'candiru', 'catalufa', 'catla', 'cisco', 
-        'cobia', 'coley', 'cornetfish', 'cusk', 'damselfish', 'dartfish', 'dealfish', 'dhufish', 
-        'dory', 'dottyback', 'dragonet', 'driftfish', 'escolar', 'eulachon', 'fangtooth', 
-        'fierasfer', 'flier', 'garibaldi', 'goldeye', 'grunion', 'grunt', 'grunter', 'gudgeon', 
-        'halosaur', 'hamlet', 'hoki', 'huchen', 'hussar', 'icefish', 'ide', 'ilish', 'inanga', 
-        'inconnu', 'kahawai', 'kaluga', 'kokanee', 'kokopu', 'ladyfish', 'lenok', 'limia', 
-        'louvar', 'luderick', 'lumpsucker', 'mahseer', 'medaka', 'menhaden', 'mojarra', 'mola', 
-        'monchong', 'mooneye', 'moonfish', 'mora', 'morwong', 'mrigal', 'mummichog', 'nase', 
-        'notothen', 'oarfish', 'oldwife', 'opah', 'opaleye', 'orfe', 'panga', 'parore', 
-        'peamouth', 'pearleye', 'pleco', 'poacher', 'pomfret', 'powen', 'quillback', 'quillfish', 
-        'rasbora', 'rohu', 'ronquil', 'roosterfish', 'ruffe', 'sabertooth', 'sablefish', 'scat', 
-        'scup', 'shiner', 'sillago', 'skate', 'skilfish', 'sleeper', 'slickhead', 'slimehead', 
-        'snook', 'sprat', 'squeaker', 'stargazer', 'steelhead', 'stonecat', 'sucker', 'tailor', 
-        'taimen', 'tang', 'tarpon', 'tarwhine', 'tenpounder', 'thornfish', 'threadfin', 'tope', 
-        'torpedo', 'trahira', 'treefish', 'tripletail', 'trumpeter', 'trunkfish', 'uaru', 
-        'vanjaram', 'vendace', 'vimba', 'walu', 'warmouth', 'whiff', 'wobbegong', 'wrasse', 
-        'zander', 'zingel', 'humuhumunukunukuapua\'a'
-    ];
-
-    const isWordFish = (w) => {
-        const low = w.toLowerCase();
-        return FISH_KEYWORDS.some(fish => {
-            if (low === fish) return true;
-            if (low === fish + 's') return true;
-            if (low === fish + 'es') return true;
-            // Handle fish ending in 'y' -> 'ies'
-            if (fish.endsWith('y') && low === fish.slice(0, -1) + 'ies') return true;
-            return false;
-        });
-    };
 
     // --- Local Music Player ---
     const dictionaryUrls = {
@@ -1242,6 +1320,15 @@
                                     <option value="Phobia" ${wordType === 'Phobia' ? 'selected' : ''}>Phobia</option>
                                     <option value="Apostrophes" ${wordType === 'Apostrophes' ? 'selected' : ''}>Apostrophes</option>
                                     <option value="Fish" ${wordType === 'Fish' ? 'selected' : ''}>Fish</option>
+                                    <option value="Plants" ${wordType === 'Plants' ? 'selected' : ''}>Plants</option>
+                                    <option value="Space" ${wordType === 'Space' ? 'selected' : ''}>Space</option>
+                                    <option value="Elements" ${wordType === 'Elements' ? 'selected' : ''}>Elements</option>
+                                    <option value="Gems" ${wordType === 'Gems' ? 'selected' : ''}>Gems</option>
+                                    <option value="Mythology" ${wordType === 'Mythology' ? 'selected' : ''}>Mythology</option>
+                                    <option value="Instruments" ${wordType === 'Instruments' ? 'selected' : ''}>Instruments</option>
+                                    <option value="IT" ${wordType === 'IT' ? 'selected' : ''}>IT</option>
+                                    <option value="Food" ${wordType === 'Food' ? 'selected' : ''}>Food</option>
+                                    <option value="Spices" ${wordType === 'Spices' ? 'selected' : ''}>Spices</option>
                                 </select>
                             </div>
 
@@ -1535,7 +1622,18 @@
                 };
 
                 ensureDictionary().then(() => {
-                    let words = wordType === 'Fish' ? dictionary.filter(isWordFish) : [...dictionary];
+                    let words;
+                    if (wordType === 'Fish') words = dictionary.filter(isWordFish);
+                    else if (wordType === 'Plants') words = dictionary.filter(isWordPlant);
+                    else if (wordType === 'Space') words = dictionary.filter(isWordSpace);
+                    else if (wordType === 'Elements') words = dictionary.filter(isWordElement);
+                    else if (wordType === 'Gems') words = dictionary.filter(isWordGem);
+                    else if (wordType === 'Mythology') words = dictionary.filter(isWordMyth);
+                    else if (wordType === 'Instruments') words = dictionary.filter(isWordInstrument);
+                    else if (wordType === 'IT') words = dictionary.filter(isWordTech);
+                    else if (wordType === 'Food') words = dictionary.filter(isWordFood);
+                    else if (wordType === 'Spices') words = dictionary.filter(isWordSpice);
+                    else words = [...dictionary];
                     
                     const minLen = getMinWordLength();
                     const maxLen = getMaxWordLength();
