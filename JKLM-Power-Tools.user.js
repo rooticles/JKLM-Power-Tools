@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      15.4
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.4)
+// @version      15.5
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.5)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '15.4';
+    const SCRIPT_VERSION = '15.5';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -201,8 +201,6 @@
     const setBorderRadius = (val) => GM_setValue('borderRadius', val);
     const getClockEnabled = () => GM_getValue('clockEnabled', true);
     const setClockEnabled = (val) => GM_setValue('clockEnabled', val);
-    const getAnimationType = () => GM_getValue('animationType', 'slideIn');
-    const setAnimationType = (val) => GM_setValue('animationType', val);
 
     const getSearchHistory = () => GM_getValue('searchHistory', []);
     const setSearchHistory = (val) => GM_setValue('searchHistory', val);
@@ -273,7 +271,6 @@
             adminGlassLabel: 'Transparency:',
             adminRadiusLabel: 'Corner Softness:',
             adminClockLabel: 'System Clock',
-            adminAnimLabel: 'Open Animation:',
             dictCustomUpload: 'Custom Dictionary',
             dictUploadDesc: 'Upload a .txt file or paste words manually:',
             dictUploadBtn: 'Save Words',
@@ -427,7 +424,7 @@
             width: 100%;
             border-bottom: none;
             position: relative;
-            z-index: 20001; /* Erhöht für bessere Sichtbarkeit */
+            z-index: 19999; /* Lower than pages to prevent overlap */
             gap: 15px;
             padding: 0 25px;
             box-sizing: border-box;
@@ -524,7 +521,7 @@
             box-shadow: var(--pt-panel-shadow);
             position: fixed;
             top: 0;
-            z-index: 20000 !important; /* Über dem Chat-Icon */
+            z-index: 20000 !important; /* Above nav row */
             font-family: var(--pt-font-main);
             transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s ease;
             border-radius: var(--pt-border-radius);
@@ -555,6 +552,14 @@
         .custom-kb-page.active, .custom-dict-page.active, .custom-admin-page.active {
             display: block;
             animation: fadeInGlass 0.2s ease-out;
+        }
+
+        .custom-page-content {
+            position: relative;
+            z-index: 5;
+            pointer-events: auto !important;
+            height: calc(100% - 100px);
+            overflow-y: auto;
         }
 
         @keyframes fadeInGlass {
@@ -598,6 +603,11 @@
             backdrop-filter: blur(12px); /* Stronger blur for text isolation */
             transform: translate3d(0, 0, 0);
             will-change: transform, box-shadow;
+            pointer-events: auto !important; /* Interaktion erzwingen */
+        }
+
+        .feature-card * {
+            pointer-events: auto !important; /* Alle Elemente in der Card klickbar machen */
         }
 
         .feature-card:hover {
@@ -711,6 +721,7 @@
             cursor: pointer;
             transition: var(--pt-transition);
             border: 1px solid rgba(255, 255, 255, 0.05);
+            user-select: none; /* Verhindert Text-Markierung beim Klicken */
         }
 
         .settings-row:hover {
@@ -861,89 +872,12 @@
             from { transform: translate3d(-100%, 0, 0); opacity: 0; }
             to { transform: translate3d(0, 0, 0); opacity: 1; }
         }
-
-        /* Animated Themes */
-        .animated-mesh {
-            background: linear-gradient(45deg, #1B1F3B, #2a1f4d, #1b3b3b, #1B1F3B);
-            background-size: 400% 400%;
-            animation: meshGradient 15s ease infinite;
-        }
-        @keyframes meshGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .animated-matrix {
-            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,210,255,0.05) 50%, rgba(0,0,0,0) 100%);
-            background-size: 100% 200%;
-            animation: matrixFlow 4s linear infinite;
-        }
-        @keyframes matrixFlow {
-            from { background-position: 0% -100%; }
-            to { background-position: 0% 100%; }
-        }
-
-        /* New Background Effects */
-        .effect-stars {
-            background: radial-gradient(circle at 50% 50%, #1B1F3B 0%, #050505 100%);
-            overflow: hidden;
-        }
-        .effect-stars::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: 
-                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
-                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
-                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
-            background-size: 550px 550px, 350px 350px, 250px 250px;
-            background-position: 0 0, 40px 60px, 130px 270px;
-            opacity: 0.3;
-            animation: starsMove 100s linear infinite;
-        }
-        @keyframes starsMove {
-            from { background-position: 0 0, 40px 60px, 130px 270px; }
-            to { background-position: 550px 550px, 390px 410px, 380px 820px; }
-        }
-
-        .effect-waves {
-            background: linear-gradient(180deg, #1B1F3B 0%, #2a1f4d 100%);
-            overflow: hidden;
-        }
-        .effect-waves::after {
-            content: "";
-            position: absolute;
-            bottom: 0; left: 0; width: 200%; height: 100%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.05" d="M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,197.3C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-            background-size: 50% 100px;
-            animation: waveMove 10s linear infinite;
-            opacity: 0.5;
-        }
-        @keyframes waveMove {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-
-        .effect-neon {
-            background: #050505;
-            box-shadow: inset 0 0 100px rgba(var(--pt-theme-color-rgb), 0.2);
-        }
-        .effect-neon::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(var(--pt-theme-color-rgb), 0.03) 40px, rgba(var(--pt-theme-color-rgb), 0.03) 41px);
-            pointer-events: none;
-        }
     `;
     document.head.appendChild(style);
 
     const updateThemeStyles = () => {
         const themeColor = getThemeColor();
         const borderRadius = getBorderRadius();
-        const clockEnabled = getClockEnabled();
-        const animationType = getAnimationType();
         const panelPosition = getPanelPosition();
 
         const themeRgb = themeColor.match(/[A-Za-z0-9]{2}/g).map(x => parseInt(x, 16)).join(',');
@@ -966,36 +900,12 @@
         document.documentElement.style.setProperty('--pt-glass-border', glassBorder);
 
         document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
-            p.classList.remove('pos-left', 'pos-right', 'animated-mesh', 'animated-matrix', 'effect-stars', 'effect-waves', 'effect-neon');
+            p.classList.remove('pos-left', 'pos-right');
             p.classList.add(`pos-${panelPosition}`);
             
-            const animName = animationType === 'slideIn' ? `slideInPanel${panelPosition.charAt(0).toUpperCase() + panelPosition.slice(1)}` : animationType;
-            p.style.animation = `${animName} 0.6s cubic-bezier(0.16, 1, 0.3, 1)`;
-            
-            if (animationType === 'animated-mesh') {
-                p.classList.add('animated-mesh');
-                p.style.background = 'transparent';
-                p.style.backdropFilter = 'none';
-            } else if (animationType === 'animated-matrix') {
-                p.classList.add('animated-matrix');
-                p.style.background = 'rgba(0,0,0,0.9)';
-                p.style.backdropFilter = 'blur(10px)';
-            } else if (animationType === 'effect-stars') {
-                p.classList.add('effect-stars');
-                p.style.background = 'transparent';
-                p.style.backdropFilter = 'none';
-            } else if (animationType === 'effect-waves') {
-                p.classList.add('effect-waves');
-                p.style.background = 'transparent';
-                p.style.backdropFilter = 'none';
-            } else if (animationType === 'effect-neon') {
-                p.classList.add('effect-neon');
-                p.style.background = 'transparent';
-                p.style.backdropFilter = 'none';
-            } else {
-                p.style.background = 'rgba(26, 26, 46, 0.95)';
-                p.style.backdropFilter = 'blur(16px)';
-            }
+            p.style.animation = `slideInPanel${panelPosition.charAt(0).toUpperCase() + panelPosition.slice(1)} 0.6s cubic-bezier(0.16, 1, 0.3, 1)`;
+            p.style.background = 'rgba(26, 26, 46, 0.95)';
+            p.style.backdropFilter = 'blur(16px)';
         });
     };
     updateThemeStyles();
@@ -1307,7 +1217,6 @@
                 const borderRadius = getBorderRadius();
                 const clockEnabled = getClockEnabled();
                 const panelPosition = getPanelPosition();
-                const animationType = getAnimationType();
                 adminTab.title = t.adminHeader;
 
                 adminPage.innerHTML = `
@@ -1324,21 +1233,6 @@
                                     <span style="font-size: 11px; font-weight: 800; color: var(--pt-text-muted); letter-spacing: 2px; text-transform: uppercase;">ACCENT COLOR</span>
                                     <input type="color" class="custom-theme-picker" id="admin-theme-picker" value="${themeColor}" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,0.1); cursor: pointer;">
                                 </div>
-                            </div>
-
-                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border); position: relative;">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
-                                    <span>Background Effect</span>
-                                    <span style="color: var(--pt-theme-color);">SELECT</span>
-                                </div>
-                                <select class="modern-input" id="admin-animation-select" style="font-weight: 700; cursor: pointer; position: relative;">
-                                    <option value="slideIn" ${animationType === 'slideIn' ? 'selected' : ''}>Standard (Glass)</option>
-                                    <option value="animated-mesh" ${animationType === 'animated-mesh' ? 'selected' : ''}>Mesh Gradient</option>
-                                    <option value="animated-matrix" ${animationType === 'animated-matrix' ? 'selected' : ''}>Matrix Rain</option>
-                                    <option value="effect-stars" ${animationType === 'effect-stars' ? 'selected' : ''}>Starry Night</option>
-                                    <option value="effect-waves" ${animationType === 'effect-waves' ? 'selected' : ''}>Ocean Waves</option>
-                                    <option value="effect-neon" ${animationType === 'effect-neon' ? 'selected' : ''}>Neon Grid</option>
-                                </select>
                             </div>
 
                             <div class="settings-row" id="toggle-panel-pos" style="padding: 16px 20px;">
@@ -1722,27 +1616,21 @@
                     setPanelPosition('left');
                     updateThemeStyles();
                     updateAdminContent();
+                    return;
                 }
                 if (e.target.id === 'pos-right-btn') {
                     setPanelPosition('right');
                     updateThemeStyles();
                     updateAdminContent();
+                    return;
                 }
 
-                const row = e.target.closest('.settings-row');
-                if (row) {
-                    if (row.id === 'toggle-clock') {
-                        setClockEnabled(!getClockEnabled());
-                        updateThemeStyles();
-                    }
-                    updateAdminContent();
-                }
-            });
-
-            adminPage.addEventListener('change', (e) => {
-                if (e.target.id === 'admin-animation-type') {
-                    setAnimationType(e.target.value);
+                const toggleClock = e.target.closest('#toggle-clock');
+                if (toggleClock) {
+                    setClockEnabled(!getClockEnabled());
                     updateThemeStyles();
+                    updateAdminContent();
+                    return;
                 }
             });
 
@@ -1751,14 +1639,6 @@
                 if (picker) {
                     setThemeColor(picker.value);
                     updateThemeStyles();
-                }
-
-                const select = e.target.closest('#admin-animation-select');
-                if (select) {
-                    setAnimationType(select.value);
-                    updateThemeStyles();
-                    // Re-render to show active effect immediately
-                    updateAdminContent();
                 }
             });
 
