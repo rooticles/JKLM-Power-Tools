@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      13.9
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v13.9)
+// @version      14.2
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.2)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '13.9';
+    const SCRIPT_VERSION = '14.2';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -949,53 +949,76 @@
     updateThemeStyles();
 
     // --- Homepage Filters Logic ---
-    let currentLobbyFilter = { type: 'all', value: '' };
+    const getStoredLobbyFilter = () => GM_getValue('currentLobbyFilter', { type: 'all', value: '', synonyms: [] });
+    const setStoredLobbyFilter = (val) => GM_setValue('currentLobbyFilter', val);
+
+    let currentLobbyFilter = getStoredLobbyFilter();
 
     const applyLobbyFilter = () => {
-        const lobbiesContainer = document.querySelector('.lobbies') || document.querySelector('.rooms') || document.querySelector('.publicRooms');
-        if (!lobbiesContainer) return;
+        // Find ALL potential lobby elements on the entire page
+        const lobbies = document.querySelectorAll('.lobby, .room, .entry, [class*="lobby"], [class*="room"], .publicRooms > div');
+        
+        if (lobbies.length === 0) return;
 
-        const lobbies = Array.from(lobbiesContainer.children);
         lobbies.forEach(lobby => {
             if (currentLobbyFilter.type === 'all') {
                 lobby.style.setProperty('display', '', 'important');
+                lobby.removeAttribute('data-matched');
             } else {
-                // Get all text content from the lobby element
+                // Get all text and image attributes from the lobby card
                 const fullText = lobby.textContent.toLowerCase();
                 const titleText = lobby.getAttribute('title')?.toLowerCase() || '';
-                const altText = lobby.querySelector('img')?.getAttribute('alt')?.toLowerCase() || '';
-                const searchableText = `${fullText} ${titleText} ${altText}`.replace(/\s+/g, ' ');
+                
+                const images = Array.from(lobby.querySelectorAll('img'));
+                const altTexts = images.map(img => img.getAttribute('alt')?.toLowerCase() || '').join(' ');
+                const srcTexts = images.map(img => img.getAttribute('src')?.toLowerCase() || '').join(' ');
+                
+                const searchableText = `${fullText} ${titleText} ${altTexts} ${srcTexts}`.replace(/\s+/g, ' ');
                 
                 let match = false;
                 if (currentLobbyFilter.type === 'language') {
                     const searchTerms = [currentLobbyFilter.value.toLowerCase(), ...(currentLobbyFilter.synonyms || [])];
-                    // Check if any synonym matches either as a whole word or as part of the text
-                    match = searchTerms.some(term => {
-                        const regex = new RegExp('\\b' + term + '\\b', 'i');
-                        return regex.test(searchableText) || searchableText.includes(term);
-                    });
+                    // Broad matching for language: text, alt tags, or image sources (flag icons)
+                    match = searchTerms.some(term => searchableText.includes(term));
                 } else if (currentLobbyFilter.type === 'game') {
                     const searchTerm = currentLobbyFilter.value.toLowerCase();
-                    // Game names are usually unique enough (Bombparty, Popsauce)
                     match = searchableText.includes(searchTerm);
                 }
                 
                 if (match) {
                     lobby.style.setProperty('display', '', 'important');
+                    lobby.setAttribute('data-matched', 'true');
                 } else {
                     lobby.style.setProperty('display', 'none', 'important');
+                    lobby.setAttribute('data-matched', 'false');
                 }
             }
         });
     };
 
+    GM_addValueChangeListener('currentLobbyFilter', (name, oldVal, newVal) => {
+        currentLobbyFilter = newVal;
+        applyLobbyFilter();
+        // Update active class on buttons if they exist in this context
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            if (btn.innerText === currentLobbyFilter.label || (btn.innerText === 'All' && currentLobbyFilter.type === 'all')) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    });
+
     const initHomepageFilters = () => {
-        if (window.location.pathname !== '/' && !window.location.hostname.includes('jklm.fun')) return;
+        // Run in both main page and iframes to ensure coverage
+        const isLobbyPage = window.location.pathname === '/' || 
+                           window.location.hostname.includes('jklm.fun') ||
+                           document.querySelector('.lobbies, .rooms, .publicRooms');
         
-        let lobbiesContainer = null;
+        if (!isLobbyPage) return;
         
         const lobbyObserver = new MutationObserver(() => {
-            lobbiesContainer = document.querySelector('.lobbies') || document.querySelector('.rooms') || document.querySelector('.publicRooms');
+            const lobbiesContainer = document.querySelector('.lobbies') || document.querySelector('.rooms') || document.querySelector('.publicRooms') || document.querySelector('main .content');
             
             if (lobbiesContainer) {
                 if (!document.querySelector('.homepage-filters')) {
@@ -1004,12 +1027,12 @@
                     
                     const filterOptions = [
                         { label: 'All', type: 'all' },
-                        { label: 'French', type: 'language', value: 'French', synonyms: ['français', 'french', 'fr'] },
-                        { label: 'English', type: 'language', value: 'English', synonyms: ['english', 'en'] },
-                        { label: 'Spanish', type: 'language', value: 'Spanish', synonyms: ['español', 'spanish', 'es'] },
-                        { label: 'German', type: 'language', value: 'German', synonyms: ['deutsch', 'german', 'de'] },
-                        { label: 'Italian', type: 'language', value: 'Italian', synonyms: ['italiano', 'italian', 'it'] },
-                        { label: 'Portuguese', type: 'language', value: 'Portuguese', synonyms: ['português', 'portuguese', 'pt'] },
+                        { label: 'French', type: 'language', value: 'French', synonyms: ['français', 'french', 'fr', '🇫🇷'] },
+                        { label: 'English', type: 'language', value: 'English', synonyms: ['english', 'en', '🇬🇧', '🇺🇸'] },
+                        { label: 'Spanish', type: 'language', value: 'Spanish', synonyms: ['español', 'spanish', 'es', '🇪🇸'] },
+                        { label: 'German', type: 'language', value: 'German', synonyms: ['deutsch', 'german', 'de', '🇩🇪'] },
+                        { label: 'Italian', type: 'language', value: 'Italian', synonyms: ['italiano', 'italian', 'it', '🇮🇹'] },
+                        { label: 'Portuguese', type: 'language', value: 'Portuguese', synonyms: ['português', 'portuguese', 'pt', '🇵🇹', '🇧🇷'] },
                         { label: 'Bombparty', type: 'game', value: 'Bombparty' },
                         { label: 'Popsauce', type: 'game', value: 'Popsauce' }
                     ];
@@ -1018,39 +1041,36 @@
                         const btn = document.createElement('button');
                         btn.className = 'filter-btn';
                         btn.innerText = opt.label;
-                        if (opt.type === 'all') btn.classList.add('active');
                         
-                        btn.onclick = () => {
-                            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        // Set initial active state based on stored filter
+                        if (opt.type === currentLobbyFilter.type && (opt.value === currentLobbyFilter.value || opt.type === 'all')) {
                             btn.classList.add('active');
-                            currentLobbyFilter = { type: opt.type, value: opt.value || '', synonyms: opt.synonyms || [] };
-                            applyLobbyFilter();
+                        }
+                        
+                        btn.onclick = (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const newFilter = { type: opt.type, value: opt.value || '', synonyms: opt.synonyms || [], label: opt.label };
+                            setStoredLobbyFilter(newFilter);
+                            // The listener will trigger applyLobbyFilter
                         };
                         filtersContainer.appendChild(btn);
                     });
                     lobbiesContainer.before(filtersContainer);
                 }
-                // Re-apply filter in case new lobbies were added
                 applyLobbyFilter();
             }
         });
         
-        // Initial observation of the body to find the container
         lobbyObserver.observe(document.body, { childList: true, subtree: true });
         
-        // Try to re-apply if the container changes internally (e.g., dynamic updates)
-        const containerObserver = new MutationObserver(() => {
-            if (currentLobbyFilter.type !== 'all') applyLobbyFilter();
-        });
-        
-        // Periodically check for container to start specific observation
-        const checkContainer = setInterval(() => {
-            const container = document.querySelector('.lobbies') || document.querySelector('.rooms') || document.querySelector('.publicRooms');
-            if (container) {
-                containerObserver.observe(container, { childList: true });
-                clearInterval(checkContainer);
+        setInterval(() => {
+            const container = document.querySelector('.lobbies, .rooms, .publicRooms');
+            if (container && !document.querySelector('.homepage-filters') && window.top === window.self) {
+                 document.body.appendChild(document.createTextNode(' ')); // Trigger observer
             }
-        }, 1000);
+            applyLobbyFilter();
+        }, 1500);
     };
 
     let lastDetectedSyllable = '';
