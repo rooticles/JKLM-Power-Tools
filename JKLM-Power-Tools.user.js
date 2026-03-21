@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      16.6
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v16.6)
+// @version      16.7
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v16.7)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -190,7 +190,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '16.6';
+    const SCRIPT_VERSION = '16.7';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -375,46 +375,6 @@
             if (fish.endsWith('y') && low === fish.slice(0, -1) + 'ies') return true;
             return false;
         });
-    };
-
-    const downloadAllCategories = async () => {
-        await loadDictionary();
-        const fishList = dictionary.filter(isWordFish);
-        const categories = {
-            'All_Words': dictionary,
-            'Hyphenated': dictionary.filter(w => w.includes('-')),
-            'Long_Words': dictionary.filter(w => w.length >= 20),
-            'Short_Words': dictionary.filter(w => w.length >= 2 && w.length <= 4),
-            'Phobias': dictionary.filter(w => { const low = w.toLowerCase(); return low.includes('phobia') || low.includes('phobias') || low.includes('phobic'); }),
-            'Apostrophes': dictionary.filter(w => w.includes("'")),
-            'Casual': dictionary.filter(w => {
-                const rareChars = ['x', 'q', 'z', 'j'];
-                const low = w.toLowerCase();
-                return w.length >= 4 && w.length <= 8 && !rareChars.some(c => low.includes(c));
-            }),
-            'Fish_Species': fishList
-        };
-
-        let content = `JKLM POWER TOOLS - CATEGORY EXPORT (v${SCRIPT_VERSION})\n`;
-        content += `Generated: ${new Date().toLocaleString()}\n`;
-        content += `====================================================\n\n`;
-
-        for (const [name, list] of Object.entries(categories)) {
-            content += `[ CATEGORY: ${name} (${list.length} words) ]\n`;
-            content += `----------------------------------------------------\n`;
-            content += list.join('\n');
-            content += `\n\n`;
-        }
-
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `JKLM-Power-Tools-Categories.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
     };
 
     // --- Local Music Player ---
@@ -1429,25 +1389,6 @@
                         </div>
                     </div>
 
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">🔑</div>
-                            <span>Admin Access</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <div class="settings-row" style="cursor: default; flex-direction: column; align-items: stretch; gap: 15px;">
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700; font-size: 15px;">Admin Password</span>
-                                    <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Enter the admin password to unlock secret features.</span>
-                                </div>
-                                <input type="password" id="admin-password-input" class="modern-input" placeholder="Enter Password..." style="width: 100%; font-weight: 700; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--pt-glass-border);">
-                                <button class="modern-button" id="admin-download-all" style="width: 100%; display: none; background: var(--pt-theme-color); color: white; box-shadow: var(--pt-glow-effect);">
-                                    <span>📥</span> Download All Category Lists
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
                     <div style="display: flex; flex-direction: column; align-items: center; padding: 40px 20px; gap: 15px;">
                         <div style="font-size: 11px; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; color: var(--pt-theme-color); opacity: 0.8; text-shadow: 0 0 15px rgba(var(--pt-theme-color-rgb), 0.4);">
                             JKLM POWER TOOLS
@@ -1806,14 +1747,6 @@
                     updateAdminContent();
                     return;
                 }
-
-                if (e.target.id === 'admin-download-all') {
-                    const pass = document.getElementById('admin-password-input')?.value;
-                    if (pass === 'VnHj]/|MiPuI7oz4JVTGQiq~#Sf7gt9eJq1up0d;(>jkt/1MB') {
-                        downloadAllCategories();
-                    }
-                    return;
-                }
             });
 
             adminPage.addEventListener('change', (e) => {
@@ -1835,16 +1768,6 @@
                     const span = document.getElementById('val-admin-border-radius');
                     if (span) span.innerText = val;
                     updateThemeStyles();
-                }
-                if (e.target.id === 'admin-password-input') {
-                    const downloadBtn = document.getElementById('admin-download-all');
-                    if (downloadBtn) {
-                        if (e.target.value === 'VnHj]/|MiPuI7oz4JVTGQiq~#Sf7gt9eJq1up0d;(>jkt/1MB') {
-                            downloadBtn.style.display = 'block';
-                        } else {
-                            downloadBtn.style.display = 'none';
-                        }
-                    }
                 }
             });
 
