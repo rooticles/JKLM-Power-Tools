@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      14.3
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.3)
+// @version      14.4
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.4)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -20,8 +20,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '14.3';
-    let activeFilter = 'All';
+    const SCRIPT_VERSION = '14.4';
 
     // --- 1. Global Stability Patches ---
     const patchGlobalBugs = () => {
@@ -190,7 +189,7 @@
         }
     };
 
-    // --- 3. Dictionary & Lobby Logic ---
+    // --- 3. Dictionary Logic ---
     let dictionary = [];
     let lowercasedDictionary = [];
     let dictionaryLoaded = false;
@@ -217,54 +216,6 @@
             lowercasedDictionary = dictionary.map(w => w.toLowerCase());
             dictionaryLoaded = true; currentDictLang = lang;
         }
-    };
-
-    const filterLobbies = (filter) => {
-        activeFilter = filter;
-        const rooms = document.querySelectorAll('.publicRooms .entry');
-        if (!rooms.length) return;
-        
-        rooms.forEach(room => {
-            if (activeFilter === 'All') { 
-                room.style.display = 'flex'; 
-                return; 
-            }
-            
-            // Search in room text for language (e.g., "(English)") or game type
-            const text = room.innerText.toLowerCase();
-            const filterLower = activeFilter.toLowerCase();
-            
-            // Special handling for English/EN, German/DE etc.
-            const matches = text.includes(`(${filterLower})`) || text.includes(`[${filterLower}]`) || text.includes(filterLower);
-            
-            room.style.display = matches ? 'flex' : 'none';
-        });
-    };
-
-    const initHomepageFilters = () => {
-        const publicRooms = document.querySelector('.publicRooms');
-        if (!publicRooms) return;
-        
-        // Always re-apply current filter to rooms
-        filterLobbies(activeFilter);
-
-        if (document.getElementById('pt-filter-row')) return;
-        
-        const filterRow = document.createElement('div');
-        filterRow.id = 'pt-filter-row'; filterRow.className = 'pt-filter-row';
-        ['All', 'French', 'English', 'Spanish', 'German', 'Italian', 'Portuguese', 'Bombparty', 'Popsauce'].forEach(f => {
-            const btn = document.createElement('button');
-            btn.className = 'pt-filter-btn' + (f === activeFilter ? ' active' : '');
-            btn.innerText = f;
-            btn.onclick = (e) => {
-                e.preventDefault();
-                document.querySelectorAll('.pt-filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active'); 
-                filterLobbies(f);
-            };
-            filterRow.appendChild(btn);
-        });
-        publicRooms.before(filterRow);
     };
 
     // --- 4. CSS Styles ---
@@ -307,55 +258,6 @@
             .clickable-word { display: inline-block; padding: 8px 16px; margin: 4px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; cursor: pointer; font-weight: 700; transition: var(--pt-transition); }
             .custom-clock { font-family: var(--pt-font-mono); font-size: 14px; font-weight: 600; color: var(--pt-theme-color); background: rgba(var(--pt-theme-color-rgb), 0.1); padding: 6px 14px; border-radius: 10px; }
             .note-item { background: rgba(0, 0, 0, 0.5); border-radius: 12px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-            .pt-filter-row { 
-                display: flex !important; 
-                flex-wrap: wrap !important; 
-                gap: 5px !important; 
-                margin: 20px auto !important; 
-                padding: 10px !important; 
-                justify-content: flex-start !important; 
-                max-width: 1400px !important; 
-                background: transparent !important; 
-                border: none !important;
-                box-shadow: none !important;
-            }
-            .pt-filter-btn { 
-                background-color: #26aa36 !important; 
-                color: #ffffff !important; 
-                border: none !important; 
-                padding: 6px 16px !important; 
-                border-radius: 20px !important; 
-                font-weight: 700 !important; 
-                font-size: 14px !important;
-                cursor: pointer !important; 
-                text-transform: capitalize !important;
-                white-space: nowrap !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                appearance: none !important;
-                outline: none !important;
-                box-shadow: none !important;
-            }
-            .pt-filter-btn.active { 
-                background-color: #ffffff !important; 
-                color: #26aa36 !important; 
-                border: 2px solid #26aa36 !important;
-            }
-            /* Fix JKLM lobby container flow */
-            .publicRooms {
-                display: flex !important;
-                flex-wrap: wrap !important;
-                justify-content: center !important;
-                gap: 15px !important;
-                width: 100% !important;
-                max-width: 1400px !important;
-                margin: 0 auto !important;
-            }
-            .publicRooms .entry {
-                margin: 0 !important; /* Remove JKLM default margins to prevent gaps */
-                flex: 0 1 auto !important;
-            }
             @keyframes fadeInGlass { from { opacity: 0; } to { opacity: 1; } }
             @keyframes slideInPanelRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
             @keyframes slideInPanelLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
@@ -384,7 +286,6 @@
     let isInitialized = false, lastSyllable = '', isGameRunning = false;
 
     const init = () => {
-        initHomepageFilters();
         if (isInitialized) return;
         const nav = document.querySelector('.navigation, .tabs, .room .bottom, .room .navigation');
         if (!nav) return;
@@ -434,7 +335,7 @@
         };
 
         const updateDict = () => {
-            const t = translations['English'], history = Config.getSearchHistory(), notes = Config.getNotes();
+            const t = translations['English'], notes = Config.getNotes();
             dictPage.innerHTML = `${getPanelNav('dict-btn', t.dictHeader)}
                 <div style="padding:15px;">
                     <div class="feature-card">
@@ -488,46 +389,19 @@
                 return;
             }
 
-            if (e.target.closest('#toggle-space-hyphen')) { 
-                Config.setEnabled(!Config.getEnabled()); 
-                updateKb(); 
-            }
-            if (e.target.closest('#toggle-chat-hyphen')) { 
-                Config.setChatEnabled(!Config.getChatEnabled()); 
-                updateKb(); 
-            }
+            if (e.target.closest('#toggle-space-hyphen')) { Config.setEnabled(!Config.getEnabled()); updateKb(); }
+            if (e.target.closest('#toggle-chat-hyphen')) { Config.setChatEnabled(!Config.getChatEnabled()); updateKb(); }
             if (e.target.closest('#add-note')) { 
                 const inp = document.getElementById('note-input'), n = Config.getNotes(); 
                 if (inp.value) { n.unshift({ content: inp.value }); Config.setNotes(n); inp.value = ''; updateDict(); } 
             }
             if (e.target.classList.contains('del-note')) { 
                 const n = Config.getNotes(); 
-                n.splice(e.target.dataset.idx, 1); 
-                Config.setNotes(n); 
-                updateDict(); 
+                n.splice(e.target.dataset.idx, 1); Config.setNotes(n); updateDict(); 
             }
         }, true);
 
-        document.body.oninput = (e) => {
-            if (e.target.id === 'theme-picker') { Config.setThemeColor(e.target.value); updateThemeStyles(); }
-            if (e.target.id === 'pos-select') { Config.setPanelPosition(e.target.value); updateThemeStyles(); }
-            if (e.target.id === 'dict-input') {
-                const syl = e.target.value.toLowerCase(), res = document.getElementById('dict-results');
-                if (syl.length < 2) { res.innerHTML = ''; return; }
-                const words = dictionary.filter(w => w.toLowerCase().includes(syl)).slice(0, 20);
-                res.innerHTML = words.map(w => `<span class="clickable-word" onclick="navigator.clipboard.writeText('${w}')">${w}</span>`).join('');
-            }
-        };
-
-        const observer = new MutationObserver((mutations) => {
-            initHomepageFilters();
-            
-            // Check if rooms were added/updated and re-apply filter
-            const roomsUpdated = mutations.some(m => m.target.classList?.contains('publicRooms') || m.target.closest?.('.publicRooms'));
-            if (roomsUpdated) {
-                filterLobbies(activeFilter);
-            }
-
+        const observer = new MutationObserver(() => {
             const syl = document.querySelector('.syllable')?.innerText.trim().toLowerCase();
             if (syl && syl !== lastSyllable) {
                 lastSyllable = syl;
@@ -553,7 +427,7 @@
         }
     }, true);
 
-    const checkInit = new MutationObserver(() => { if (document.querySelector('.navigation, .publicRooms')) init(); });
+    const checkInit = new MutationObserver(() => { if (document.querySelector('.navigation')) init(); });
     checkInit.observe(document.documentElement, { childList: true, subtree: true });
     init(); setTimeout(init, 1000); setTimeout(init, 3000);
 })();
