@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      16.5
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v16.5)
+// @version      16.6
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v16.6)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -190,7 +190,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '16.5';
+    const SCRIPT_VERSION = '16.6';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -365,8 +365,21 @@
         'zander', 'zingel', 'humuhumunukunukuapua\'a'
     ];
 
+    const isWordFish = (w) => {
+        const low = w.toLowerCase();
+        return FISH_KEYWORDS.some(fish => {
+            if (low === fish) return true;
+            if (low === fish + 's') return true;
+            if (low === fish + 'es') return true;
+            // Handle fish ending in 'y' -> 'ies'
+            if (fish.endsWith('y') && low === fish.slice(0, -1) + 'ies') return true;
+            return false;
+        });
+    };
+
     const downloadAllCategories = async () => {
         await loadDictionary();
+        const fishList = dictionary.filter(isWordFish);
         const categories = {
             'All_Words': dictionary,
             'Hyphenated': dictionary.filter(w => w.includes('-')),
@@ -379,7 +392,7 @@
                 const low = w.toLowerCase();
                 return w.length >= 4 && w.length <= 8 && !rareChars.some(c => low.includes(c));
             }),
-            'Fish_Species': FISH_KEYWORDS
+            'Fish_Species': fishList
         };
 
         let content = `JKLM POWER TOOLS - CATEGORY EXPORT (v${SCRIPT_VERSION})\n`;
@@ -1581,7 +1594,7 @@
                 };
 
                 ensureDictionary().then(() => {
-                    let words = wordType === 'Fish' ? [...FISH_KEYWORDS] : [...dictionary];
+                    let words = wordType === 'Fish' ? dictionary.filter(isWordFish) : [...dictionary];
                     
                     const minLen = getMinWordLength();
                     const maxLen = getMaxWordLength();
