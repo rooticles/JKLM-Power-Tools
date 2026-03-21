@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      14.2
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.2)
+// @version      14.3
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.3)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -20,7 +20,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '14.2';
+    const SCRIPT_VERSION = '14.3';
     let activeFilter = 'All';
 
     // --- 1. Global Stability Patches ---
@@ -308,33 +308,37 @@
             .custom-clock { font-family: var(--pt-font-mono); font-size: 14px; font-weight: 600; color: var(--pt-theme-color); background: rgba(var(--pt-theme-color-rgb), 0.1); padding: 6px 14px; border-radius: 10px; }
             .note-item { background: rgba(0, 0, 0, 0.5); border-radius: 12px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
             .pt-filter-row { 
-                display: flex; 
-                flex-wrap: wrap; 
-                gap: 5px; 
-                margin: 20px auto; 
-                padding: 10px; 
-                justify-content: flex-start; 
-                max-width: 1400px; 
-                background: transparent; 
+                display: flex !important; 
+                flex-wrap: wrap !important; 
+                gap: 5px !important; 
+                margin: 20px auto !important; 
+                padding: 10px !important; 
+                justify-content: flex-start !important; 
+                max-width: 1400px !important; 
+                background: transparent !important; 
+                border: none !important;
+                box-shadow: none !important;
             }
             .pt-filter-btn { 
-                background: #26aa36 !important; 
-                color: #fff !important; 
+                background-color: #26aa36 !important; 
+                color: #ffffff !important; 
                 border: none !important; 
                 padding: 6px 16px !important; 
                 border-radius: 20px !important; 
                 font-weight: 700 !important; 
                 font-size: 14px !important;
                 cursor: pointer !important; 
-                text-transform: capitalize;
-                white-space: nowrap;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: filter 0.2s ease !important;
+                text-transform: capitalize !important;
+                white-space: nowrap !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                appearance: none !important;
+                outline: none !important;
+                box-shadow: none !important;
             }
             .pt-filter-btn.active { 
-                background: #fff !important; 
+                background-color: #ffffff !important; 
                 color: #26aa36 !important; 
                 border: 2px solid #26aa36 !important;
             }
@@ -463,17 +467,46 @@
             if (!active) { tab.classList.add('active'); page.classList.add('active'); }
         };
 
-        catTab.onclick = () => togglePage(catTab, kbPage);
-        dictTab.onclick = () => { togglePage(dictTab, dictPage); loadDictionary(); };
-        adminTab.onclick = () => togglePage(adminTab, adminPage);
+        catTab.onclick = (e) => { e.stopPropagation(); togglePage(catTab, kbPage); };
+        dictTab.onclick = (e) => { e.stopPropagation(); togglePage(dictTab, dictPage); loadDictionary(); };
+        adminTab.onclick = (e) => { e.stopPropagation(); togglePage(adminTab, adminPage); };
 
-        document.body.onclick = (e) => {
-            if (e.target.closest('.panel-close')) { [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active')); [kbPage, dictPage, adminPage].forEach(p => p.classList.remove('active')); }
-            if (e.target.id === 'toggle-space-hyphen') { Config.setEnabled(!Config.getEnabled()); updateKb(); }
-            if (e.target.id === 'toggle-chat-hyphen') { Config.setChatEnabled(!Config.getChatEnabled()); updateKb(); }
-            if (e.target.id === 'add-note') { const inp = document.getElementById('note-input'), n = Config.getNotes(); if (inp.value) { n.unshift({ content: inp.value }); Config.setNotes(n); inp.value = ''; updateDict(); } }
-            if (e.target.classList.contains('del-note')) { const n = Config.getNotes(); n.splice(e.target.dataset.idx, 1); Config.setNotes(n); updateDict(); }
-        };
+        document.body.addEventListener('click', (e) => {
+            if (e.target.closest('.panel-close')) { 
+                e.stopPropagation();
+                [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active')); 
+                [kbPage, dictPage, adminPage].forEach(p => p.classList.remove('active')); 
+                return;
+            }
+            
+            const tabInNav = e.target.closest('.custom-tab[data-target]');
+            if (tabInNav) {
+                const targetId = tabInNav.getAttribute('data-target');
+                if (targetId === 'cat-btn') catTab.click();
+                if (targetId === 'dict-btn') dictTab.click();
+                if (targetId === 'admin-btn') adminTab.click();
+                return;
+            }
+
+            if (e.target.closest('#toggle-space-hyphen')) { 
+                Config.setEnabled(!Config.getEnabled()); 
+                updateKb(); 
+            }
+            if (e.target.closest('#toggle-chat-hyphen')) { 
+                Config.setChatEnabled(!Config.getChatEnabled()); 
+                updateKb(); 
+            }
+            if (e.target.closest('#add-note')) { 
+                const inp = document.getElementById('note-input'), n = Config.getNotes(); 
+                if (inp.value) { n.unshift({ content: inp.value }); Config.setNotes(n); inp.value = ''; updateDict(); } 
+            }
+            if (e.target.classList.contains('del-note')) { 
+                const n = Config.getNotes(); 
+                n.splice(e.target.dataset.idx, 1); 
+                Config.setNotes(n); 
+                updateDict(); 
+            }
+        }, true);
 
         document.body.oninput = (e) => {
             if (e.target.id === 'theme-picker') { Config.setThemeColor(e.target.value); updateThemeStyles(); }
