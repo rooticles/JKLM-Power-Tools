@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      15.9
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.9)
+// @version      16.0
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v16.0)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '15.9';
+    const SCRIPT_VERSION = '16.0';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1168,6 +1168,7 @@
                                     <option value="Shorts" ${wordType === 'Shorts' ? 'selected' : ''}>Shorts</option>
                                     <option value="Phobia" ${wordType === 'Phobia' ? 'selected' : ''}>Phobia</option>
                                     <option value="Apostrophes" ${wordType === 'Apostrophes' ? 'selected' : ''}>Apostrophes</option>
+                                    <option value="Fish" ${wordType === 'Fish' ? 'selected' : ''}>Fish</option>
                                 </select>
                             </div>
 
@@ -1499,6 +1500,28 @@
                         words = words.filter(w => {
                             const low = w.toLowerCase();
                             return w.length >= 4 && w.length <= 8 && !rareChars.some(c => low.includes(c));
+                        });
+                    } else if (wordType === 'Fish') {
+                        const fishKeywords = [
+                            'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
+                            'pike', 'perch', 'snapper', 'grouper', 'marlin', 'swordfish', 'stingray', 'ray', 
+                            'flounder', 'halibut', 'sole', 'mullet', 'sardine', 'anchovy', 'herring', 'barracuda', 
+                            'piranha', 'tilapia', 'catfish', 'guppy', 'goldfish', 'clownfish', 'angelfish', 
+                            'betta', 'tetra', 'molly', 'platies', 'danio', 'loach', 'discus', 'gourami', 'oscar', 
+                            'cichlid', 'sturgeon', 'gar', 'bowfin', 'lungfish', 'lamprey', 'hagfish', 'coelacanth',
+                            'humuhumunukunukuapua', 'mahimahi', 'wahoo', 'opakapaka', 'monchong', 'uhu', 'aku', 'ahi',
+                            'walleye', 'muskellunge', 'bluegill', 'crappie', 'sunfish', 'shad', 'minnow', 'dace',
+                            'roach', 'tench', 'bream', 'chub', 'barbel', 'grayling', 'char', 'whitefish', 'smelt',
+                            'capelin', 'hake', 'pollock', 'haddock', 'whiting', 'ling', 'burbot', 'angler', 'monkfish',
+                            'batfish', 'frogfish', 'needlefish', 'flyingfish', 'seahorse', 'pipefish', 'stickleback',
+                            'sculpin', 'lionfish', 'rockfish', 'tilefish', 'remora', 'jack', 'pompano', 'dorado',
+                            'bream', 'porgy', 'drum', 'croaker', 'surmullet', 'goatfish', 'archerfish', 'leaffish',
+                            'nandids', 'badis', 'glassfish', 'paradisefish', 'snakehead', 'turbot', 'plaice', 'dab',
+                            'tonguefish', 'puffer', 'boxfish', 'triggerfish', 'filefish', 'sunfish', 'molidae'
+                        ];
+                        words = words.filter(w => {
+                            const low = w.toLowerCase();
+                            return fishKeywords.some(f => low.includes(f));
                         });
                     }
 
