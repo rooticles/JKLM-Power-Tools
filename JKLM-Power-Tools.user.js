@@ -2,8 +2,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      17.2
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v17.2)
+// @version      17.3
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v17.3)
 // @author       Root
 // @icon         https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTJbeFZgV0zcGPsl6DlZo3cGrxKIEsWPIcJw&s
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -174,7 +174,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '17.2';
+    const SCRIPT_VERSION = '17.3';
 
     const FISH_KEYWORDS = [
         'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
@@ -278,130 +278,6 @@
         'cumin', 'paprika', 'clove', 'nutmeg', 'oregano', 'parsley', 'dill', 'mint', 'chili', 'vanilla'
     ];
 
-    const CHEMICAL_KEYWORDS = [
-        'water', 'ethanol', 'methanol', 'acetone', 'ammonia', 'benzene', 'toluene', 'glucose', 'sucrose',
-        'methane', 'ethane', 'propane', 'butane', 'pentane', 'hexane', 'heptane', 'octane', 'nonane',
-        'decane', 'caffeine', 'nicotine', 'aspirin', 'penicillin', 'sulfuric', 'nitric', 'hydrochloric',
-        'acetic', 'sodium', 'potassium', 'calcium', 'carbon', 'oxide', 'peroxide', 'formaldehyde',
-        'glycerin', 'ether', 'chloroform', 'urea', 'melamine', 'polyethylene', 'polystyrene', 'teflon',
-        'nylon', 'polyester', 'acrylate', 'acetate', 'alcohol', 'aldehyde', 'alkane', 'alkene', 'alkyne',
-        'amide', 'amine', 'aniline', 'anthracene', 'benzene', 'benzoate', 'bicarbonate', 'bisulfate',
-        'bisulfite', 'borate', 'bromide', 'carbonate', 'chlorate', 'chloride', 'chlorite', 'chromate',
-        'citrate', 'cyanide', 'dichromate', 'fluoride', 'formate', 'glycol', 'hydroxide', 'hypochlorite',
-        'iodate', 'iodide', 'lactate', 'nitrate', 'nitrite', 'oxalate', 'perchlorate', 'permanganate',
-        'peroxide', 'phosphate', 'phosphide', 'phosphite', 'propionate', 'silicate', 'stearate',
-        'sulfate', 'sulfide', 'sulfite', 'tartrate', 'thiocyanate', 'thiosulfate', 'acetamide', 'acetanilide',
-        'acetonitrile', 'acetophenone', 'acetylene', 'acrolein', 'acrylamide', 'acrylonitrile', 'adipic',
-        'adrenaline', 'alanine', 'albumin', 'alizarin', 'alkaloid', 'allantoin', 'alloxan', 'allyl',
-        'alumina', 'aluminum', 'amalgam', 'amatoxin', 'americium', 'aminoacid', 'aminobenzene',
-        'aminobenzoic', 'aminophenol', 'amobarbital', 'amphetamine', 'amygdalin', 'amylase', 'amylopectin',
-        'amylose', 'anabasine', 'androstenedione', 'anethole', 'angelic', 'angiotensin', 'aniline',
-        'anisaldehyde', 'anisole', 'anthocyanin', 'anthracene', 'anthraquinone', 'antimony', 'antipyrine',
-        'apigenin', 'apomorphine', 'arabinose', 'arginine', 'arsenic', 'arsine', 'ascorbic', 'asparagine',
-        'aspartame', 'aspartic', 'astatine', 'atropine', 'aureomycin', 'avidin', 'azobenzene', 'azulene',
-        'barbituric', 'barium', 'benzaldehyde', 'benzamide', 'benzanthracene', 'benzene', 'benzenesulfonic',
-        'benzidine', 'benzil', 'benzilic', 'benzoate', 'benzofuran', 'benzoic', 'benzoin', 'benzonitrile',
-        'benzophenone', 'benzopyrene', 'benzoquinone', 'benzothiazole', 'benzothiophene', 'benzotriazole',
-        'benzoxazole', 'benzoyl', 'benzyl', 'berkelium', 'beryllium', 'betaine', 'bilirubin', 'biotin',
-        'biphenyl', 'bismuth', 'bisphenol', 'biuret', 'borneol', 'boron', 'brassidic', 'bromine',
-        'bromoform', 'brucine', 'butadiene', 'butanal', 'butanamide', 'butane', 'butanoic', 'butanol',
-        'butanone', 'butyl', 'butyrate', 'butyric', 'butyrolactone', 'cadaverine', 'cadmium', 'caffeine',
-        'calciferol', 'calcium', 'californium', 'camphor', 'capric', 'caproic', 'caprolactam', 'caprylic',
-        'capsaicin', 'carbamate', 'carbamide', 'carbazole', 'carbon', 'carbonate', 'carbonic', 'carbonyl',
-        'carborane', 'carboxyl', 'carboxylic', 'carotene', 'carvacrol', 'carvone', 'casein', 'catechol',
-        'cellulose', 'cerium', 'cesium', 'cetyl', 'chalcone', 'chloral', 'chloramine', 'chloramphenicol',
-        'chloranil', 'chlorate', 'chlordane', 'chloride', 'chlorine', 'chloroacetic', 'chlorobenzene',
-        'chloroform', 'chlorogenic', 'chloromethyl', 'chloronaphthalene', 'chlorophenol', 'chlorophyll',
-        'chloroprene', 'chlorosulfonic', 'cholesterol', 'choline', 'chromate', 'chromium', 'chromone',
-        'chrysene', 'cinchomine', 'cinchonine', 'cinnamaldehyde', 'cinnamic', 'citral', 'citrate',
-        'citric', 'citronellal', 'citronellol', 'clathrate', 'cobalt', 'cocaine', 'codeine', 'colchicine',
-        'conicine', 'coniferin', 'copper', 'coprostane', 'coronene', 'corticosterone', 'cortisone',
-        'coumarin', 'creatine', 'creatinine', 'cresol', 'crotonaldehyde', 'crotonic', 'cumene', 'cyanide',
-        'cyanogen', 'cyanuric', 'cyclobutane', 'cycloheptane', 'cyclohexane', 'cyclohexanol',
-        'cyclohexanone', 'cyclooctane', 'cyclopentane', 'cyclopropane', 'cymene', 'cysteine', 'cystine',
-        'cytidine', 'cytosine', 'decane', 'decanoic', 'decanol', 'dextrin', 'dextrose', 'diacetone',
-        'diacetyl', 'diaminobenzene', 'dianisidine', 'diastase', 'diazonium', 'dibenzofuran', 'diborane',
-        'dibutyl', 'dicarboxylic', 'dichloroacetic', 'dichlorobenzene', 'dichloromethane', 'dicyanogen',
-        'diethyl', 'diethylene', 'digitonin', 'digitoxin', 'diglyme', 'digoxin', 'dihydroxybenzene',
-        'diisopropyl', 'dimethyl', 'dimethylamine', 'dimethylformamide', 'dimethylglyoxime',
-        'dimethylsulfoxide', 'dinitrobenzene', 'dinitrophenol', 'dioxane', 'dioxin', 'diphenyl',
-        'diphenylamine', 'diphenylmethane', 'disaccharide', 'dodecane', 'dodecanoic', 'dopamine',
-        'dulcitol', 'dysprosium', 'eicosane', 'einsteinium', 'elaidic', 'elastin', 'emetine', 'enanthic',
-        'endrin', 'ephedrine', 'epinephrine', 'erbium', 'ergocalciferol', 'ergosterol', 'erythritol',
-        'erythrose', 'estradiol', 'estriol', 'estrone', 'ethane', 'ethanol', 'ethanolamine', 'ether',
-        'ethidium', 'ethyl', 'ethylamine', 'ethylbenzene', 'ethylene', 'ethylenediamine', 'ethylenediaminetetraacetate',
-        'ethylenediaminetetraacetic', 'ethyleneglycol', 'europium', 'farnesol', 'fermium', 'ferrocene',
-        'fluorene', 'fluorescein', 'fluorine', 'fluoroacetic', 'fluorocarbon', 'formaldehyde',
-        'formamide', 'formate', 'formic', 'formyl', 'francium', 'fructose', 'fuchsine', 'fumaric',
-        'furfural', 'gadolinium', 'galactose', 'gallium', 'germanium', 'globulin', 'glucagon', 'glucose',
-        'glucoside', 'glutamic', 'glutamine', 'glutaric', 'glutathione', 'glyceraldehyde', 'glyceride',
-        'glycerin', 'glycerol', 'glyceryl', 'glycine', 'glycogen', 'glycol', 'glycolic', 'glycoprotein',
-        'glyoxal', 'glyoxalic', 'gold', 'guaiacol', 'guanidine', 'guanine', 'guanosine', 'hafnium',
-        'hassium', 'helium', 'hemicellulose', 'hemin', 'hemoglobin', 'heparin', 'heptane', 'heptanoic',
-        'heptanol', 'heroin', 'hexachlorobenzene', 'hexachloroethane', 'hexadecane', 'hexadecanoic',
-        'hexamethylene', 'hexamethylenediamine', 'hexane', 'hexanoic', 'hexanol', 'hexose', 'hexyl',
-        'histamine', 'histidine', 'holmium', 'hydrazine', 'hydrazone', 'hydride', 'hydrocarbon',
-        'hydrochloric', 'hydrocyanic', 'hydrofluoric', 'hydrogen', 'hydroquinone', 'hydroxide',
-        'hydroxyproline', 'hyoscyamine', 'hypoxanthine', 'idose', 'imidazole', 'indane', 'indene',
-        'indium', 'indole', 'indophenol', 'inositol', 'insulin', 'iodate', 'iodine', 'iodoform',
-        'iodomethane', 'iridium', 'isatine', 'isobutane', 'isobutanol', 'isobutyric', 'isocitric',
-        'isocyanide', 'isoelectric', 'isoleucine', 'isooctane', 'isopentane', 'isoprene', 'isopropanol',
-        'isopropyl', 'isoquinoline', 'isosafrole', 'isothiocyanate', 'itaconic', 'kaempferol', 'keratin',
-        'ketene', 'ketone', 'krypton', 'lactate', 'lactic', 'lactose', 'lanthanum', 'lauric', 'lead',
-        'lecithin', 'leucine', 'levulose', 'limonene', 'linalool', 'linoleic', 'linolenic', 'lipase',
-        'lipid', 'lithium', 'lutetium', 'lycopene', 'lysine', 'lyxose', 'magnesium', 'malate', 'malathion',
-        'maleic', 'malic', 'malonate', 'malonic', 'maltose', 'mandelic', 'manganese', 'mannitol',
-        'mannose', 'margaric', 'meitnerium', 'melamine', 'melibiose', 'menthol', 'menthone', 'mercaptan',
-        'mercury', 'mesitylene', 'mesoxalic', 'metaldehyde', 'methane', 'methanol', 'methionine',
-        'methoxy', 'methyl', 'methylamine', 'methylbenzene', 'methylcellulose', 'methylene',
-        'methylethylketone', 'methylglyoxal', 'methylorange', 'methylred', 'methylsalicylate',
-        'mevalonic', 'molybdenum', 'morphine', 'mucic', 'murexide', 'myrcene', 'myristic', 'naphthalene',
-        'naphthol', 'naphthoquinone', 'naphthyl', 'naphthylamine', 'narcotine', 'neodymium', 'neon',
-        'neopentane', 'neptunium', 'nerol', 'niacin', 'nickel', 'nicotine', 'nicotinic', 'ninhydrin',
-        'niobium', 'nitrate', 'nitrite', 'nitroaniline', 'nitrobenzene', 'nitrocellulose', 'nitrogen',
-        'nitroglycerin', 'nitromethane', 'nitrophenol', 'nitroso', 'nitrotoluene', 'nobelium', 'nonane',
-        'nonanoic', 'nonanol', 'noradrenaline', 'norleucine', 'octamethylcyclotetrasiloxane', 'octane', 'octanoic',
-        'octanol', 'oenanthic', 'oleic', 'opium', 'organometallic', 'ornithine', 'orotic', 'orthophosphoric',
-        'osmium', 'oxalate', 'oxalic', 'oxaloacetic', 'oxamide', 'oxazole', 'oxide', 'oxygen', 'ozone',
-        'palmitic', 'palladium', 'pantothenic', 'papaverine', 'paraffin', 'paraldehyde', 'pelargonic',
-        'penicillin', 'pentane', 'pentanoic', 'pentanol', 'pentose', 'pepsin', 'peptide', 'perchlorate',
-        'permanganate', 'peroxide', 'perylene', 'phenacetin', 'phenanthrene', 'phenanthroline',
-        'phenazine', 'phenobarbital', 'phenol', 'phenolphthalein', 'phenothiazine', 'phenyl',
-        'phenylalanine', 'phenylenediamine', 'phenylhydrazine', 'phloroglucinol', 'phosgene',
-        'phosphate', 'phosphine', 'phosphite', 'phospholipid', 'phosphoric', 'phosphorus', 'phthalate',
-        'phthalic', 'phthalimide', 'picoline', 'picric', 'pimelic', 'pinene', 'piperazine', 'piperidine',
-        'piperonal', 'platinum', 'plutonium', 'polyethylene', 'polymer', 'polypeptide', 'polysaccharide',
-        'polystyrene', 'polyurethane', 'polyvinyl', 'porphyrin', 'potassium', 'praseodymium',
-        'progesterone', 'proline', 'promethium', 'propane', 'propanoic', 'propanol', 'propargyl',
-        'propionic', 'propionitrile', 'propyl', 'propylene', 'protactinium', 'protein', 'pteridine',
-        'purine', 'putrescine', 'pyranose', 'pyrazine', 'pyrazole', 'pyrene', 'pyridazine', 'pyridine',
-        'pyrimidine', 'pyrocatechol', 'pyrogallol', 'pyromellitic', 'pyrone', 'pyrrole', 'pyrrolidine',
-        'pyruvate', 'pyruvic', 'quercetin', 'quinaldine', 'quinhydrone', 'quinine', 'quinoline',
-        'quinone', 'quinoxaline', 'quinuclidine', 'raffinose', 'radium', 'radon', 'reserpine',
-        'resorcinol', 'retinol', 'rhenium', 'rhodium', 'riboflavin', 'ribose', 'ricinoleic', 'roentgenium',
-        'rosaniline', 'rotenone', 'rubidium', 'ruthenium', 'rutherfordium', 'saccharin', 'saccharose',
-        'safrole', 'salicylaldehyde', 'salicylamide', 'salicylate', 'salicylic', 'saligenin', 'samarium',
-        'santonin', 'sarcosine', 'scandium', 'seaborgium', 'sebacic', 'selenium', 'serine', 'serotonin',
-        'silane', 'silica', 'silicate', 'silicon', 'silver', 'skatole', 'sodium', 'sorbitol', 'sorbose',
-        'squalene', 'stannane', 'stannic', 'stannous', 'stearic', 'stearin', 'stearyl', 'stilbene',
-        'stovaine', 'streptomycin', 'strontium', 'strychnine', 'styrene', 'suberic', 'succinic',
-        'succinimide', 'sucrose', 'sulfanilamide', 'sulfanilic', 'sulfate', 'sulfide', 'sulfite',
-        'sulfonal', 'sulfone', 'sulfonic', 'sulfoxide', 'sulfur', 'sulfuric', 'sulfurous', 'tallow',
-        'tantalum', 'tartaric', 'tartrate', 'taurine', 'technetium', 'teflon', 'tellurium', 'tennessine',
-        'terbium', 'terebphthalic', 'terpene', 'terpineol', 'testosterone', 'tetracaine', 'tetrachloroethylene',
-        'tetrachloromethane', 'tetradecane', 'tetraethyl', 'tetrahydrofuran', 'tetralin', 'tetramethyl',
-        'tetraphenyl', 'tetrose', 'thallium', 'thebaine', 'theobromine', 'theophylline', 'thiamine',
-        'thiazole', 'thioacetamide', 'thiocyanate', 'thiophene', 'thiophenol', 'thiourea', 'threonine',
-        'thulium', 'thymidine', 'thymine', 'thymol', 'thyroxine', 'tin', 'titanium', 'tocopherol',
-        'toluene', 'toluidine', 'triazole', 'tributyl', 'trichloroacetic', 'trichloroethylene',
-        'trichloromethane', 'triethyl', 'triethylene', 'trimethyl', 'trimethylamine', 'trinitrophenol',
-        'trinitrotoluene', 'trioxane', 'triphenyl', 'triphenylmethane', 'triphosphate', 'trisaccharide',
-        'tritium', 'trypsin', 'tryptophan', 'tungsten', 'tyrosine', 'undecane', 'uracil', 'uranium',
-        'urea', 'urethane', 'uric', 'uridine', 'valeric', 'valine', 'vanadium', 'vanillin', 'vasopressin',
-        'veronal', 'vinyl', 'vitamin', 'warfarin', 'water', 'xenon', 'xylene', 'xylitol', 'xylose',
-        'ytterbium', 'yttrium', 'zinc', 'zirconium'
-    ];
-
     const matchCategory = (w, keywords) => {
         const low = w.toLowerCase();
         return keywords.some(k => {
@@ -423,7 +299,6 @@
     const isWordTech = (w) => matchCategory(w, TECH_KEYWORDS);
     const isWordFood = (w) => matchCategory(w, FOOD_KEYWORDS);
     const isWordSpice = (w) => matchCategory(w, SPICE_KEYWORDS);
-    const isWordChemical = (w) => matchCategory(w, CHEMICAL_KEYWORDS);
 
     const debounce = (func, wait) => {
         let timeout;
@@ -1424,7 +1299,6 @@
                                     <option value="IT" ${wordType === 'IT' ? 'selected' : ''}>IT</option>
                                     <option value="Food" ${wordType === 'Food' ? 'selected' : ''}>Food</option>
                                     <option value="Spices" ${wordType === 'Spices' ? 'selected' : ''}>Spices</option>
-                                    <option value="Chemicals" ${wordType === 'Chemicals' ? 'selected' : ''}>Chemicals</option>
                                 </select>
                             </div>
 
@@ -1728,7 +1602,6 @@
                     else if (wordType === 'IT') words = dictionary.filter(isWordTech);
                     else if (wordType === 'Food') words = dictionary.filter(isWordFood);
                     else if (wordType === 'Spices') words = dictionary.filter(isWordSpice);
-                    else if (wordType === 'Chemicals') words = dictionary.filter(isWordChemical);
                     else words = [...dictionary];
                     
                     const minLen = getMinWordLength();
