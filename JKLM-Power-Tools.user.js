@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      15.3
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.3)
+// @version      15.4
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.4)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '15.3';
+    const SCRIPT_VERSION = '15.4';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -427,11 +427,16 @@
             width: 100%;
             border-bottom: none;
             position: relative;
-            z-index: 10001;
+            z-index: 20001; /* Erhöht für bessere Sichtbarkeit */
             gap: 15px;
             padding: 0 25px;
             box-sizing: border-box;
             margin-top: -5px;
+            pointer-events: none; /* Klicks durchlassen außer auf Kinder */
+        }
+
+        .custom-nav-row > * {
+            pointer-events: auto !important; /* Kinder sind klickbar */
         }
 
         .panel-nav {
@@ -448,6 +453,7 @@
             background: rgba(27, 31, 59, 0.4);
             backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--pt-glass-border);
+            pointer-events: auto !important; /* Interaktion für Nav-Bereich */
         }
 
         .panel-title {
@@ -482,6 +488,11 @@
             transition: var(--pt-transition);
             color: var(--pt-text-muted);
             position: relative;
+            pointer-events: auto !important;
+        }
+
+        .custom-tab span {
+            pointer-events: none !important; /* Emojis/Icons ignorieren Klicks */
         }
 
         .custom-tab:hover {
@@ -506,14 +517,14 @@
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
             height: 100vh;
-            overflow-y: auto;
+            overflow-y: auto !important; /* Sicherstellen, dass Scrolling immer möglich ist */
             overflow-x: hidden;
             box-sizing: border-box;
             width: 650px;
             box-shadow: var(--pt-panel-shadow);
             position: fixed;
             top: 0;
-            z-index: 10001;
+            z-index: 20000 !important; /* Über dem Chat-Icon */
             font-family: var(--pt-font-main);
             transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s ease;
             border-radius: var(--pt-border-radius);
@@ -522,6 +533,7 @@
             backface-visibility: hidden;
             contain: content;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+            pointer-events: auto !important; /* Interaktion sicherstellen */
         }
 
         .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left {
