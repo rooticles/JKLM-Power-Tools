@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      14.2
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.2)
+// @version      14.3
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.3)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '14.2';
+    const SCRIPT_VERSION = '14.3';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -957,12 +957,22 @@
     const applyLobbyFilter = () => {
         // Find ALL potential lobby elements on the entire page
         const lobbies = document.querySelectorAll('.lobby, .room, .entry, [class*="lobby"], [class*="room"], .publicRooms > div');
+        const lobbiesContainer = document.querySelector('.lobbies') || document.querySelector('.rooms') || document.querySelector('.publicRooms') || (lobbies.length > 0 ? lobbies[0].parentElement : null);
         
         if (lobbies.length === 0) return;
+
+        // Force container to be a flexbox to avoid gaps and ensure wrapping
+        if (lobbiesContainer) {
+            lobbiesContainer.style.setProperty('display', 'flex', 'important');
+            lobbiesContainer.style.setProperty('flex-wrap', 'wrap', 'important');
+            lobbiesContainer.style.setProperty('gap', '10px', 'important');
+            lobbiesContainer.style.setProperty('justify-content', 'center', 'important');
+        }
 
         lobbies.forEach(lobby => {
             if (currentLobbyFilter.type === 'all') {
                 lobby.style.setProperty('display', '', 'important');
+                lobby.style.setProperty('order', '0', 'important'); // Reset order
                 lobby.removeAttribute('data-matched');
             } else {
                 // Get all text and image attributes from the lobby card
@@ -978,8 +988,13 @@
                 let match = false;
                 if (currentLobbyFilter.type === 'language') {
                     const searchTerms = [currentLobbyFilter.value.toLowerCase(), ...(currentLobbyFilter.synonyms || [])];
-                    // Broad matching for language: text, alt tags, or image sources (flag icons)
-                    match = searchTerms.some(term => searchableText.includes(term));
+                    // Search for the language term specifically in brackets or as standalone word
+                    match = searchTerms.some(term => {
+                        const inBrackets = searchableText.includes(`(${term})`);
+                        const inSquareBrackets = searchableText.includes(`[${term}]`);
+                        const broadMatch = searchableText.includes(term);
+                        return inBrackets || inSquareBrackets || broadMatch;
+                    });
                 } else if (currentLobbyFilter.type === 'game') {
                     const searchTerm = currentLobbyFilter.value.toLowerCase();
                     match = searchableText.includes(searchTerm);
@@ -987,6 +1002,7 @@
                 
                 if (match) {
                     lobby.style.setProperty('display', '', 'important');
+                    lobby.style.setProperty('order', '-1', 'important'); // Move matched items to the top
                     lobby.setAttribute('data-matched', 'true');
                 } else {
                     lobby.style.setProperty('display', 'none', 'important');
