@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      14.3
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.3)
+// @version      14.4
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.4)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '14.3';
+    const SCRIPT_VERSION = '14.4';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -955,58 +955,58 @@
     let currentLobbyFilter = getStoredLobbyFilter();
 
     const applyLobbyFilter = () => {
-        // Find ALL potential lobby elements on the entire page
-        const lobbies = document.querySelectorAll('.lobby, .room, .entry, [class*="lobby"], [class*="room"], .publicRooms > div');
-        const lobbiesContainer = document.querySelector('.lobbies') || document.querySelector('.rooms') || document.querySelector('.publicRooms') || (lobbies.length > 0 ? lobbies[0].parentElement : null);
+        // Broad search for any element that could be a room entry
+        const entries = document.querySelectorAll('.publicRooms > a, .publicRooms > div, .lobbies > a, .lobbies > div, a[href^="/"], div[class*="room"], div[class*="lobby"]');
+        const container = document.querySelector('.publicRooms, .lobbies, .rooms');
         
-        if (lobbies.length === 0) return;
+        if (entries.length === 0) return;
 
-        // Force container to be a flexbox to avoid gaps and ensure wrapping
-        if (lobbiesContainer) {
-            lobbiesContainer.style.setProperty('display', 'flex', 'important');
-            lobbiesContainer.style.setProperty('flex-wrap', 'wrap', 'important');
-            lobbiesContainer.style.setProperty('gap', '10px', 'important');
-            lobbiesContainer.style.setProperty('justify-content', 'center', 'important');
+        // Force a clean grid layout for "straight" and gapless appearance
+        if (container) {
+            container.style.setProperty('display', 'grid', 'important');
+            container.style.setProperty('grid-template-columns', 'repeat(auto-fill, minmax(300px, 1fr))', 'important');
+            container.style.setProperty('gap', '15px', 'important');
+            container.style.setProperty('padding', '20px', 'important');
+            // Remove any JKLM-specific positioning that might cause gaps
+            container.style.setProperty('height', 'auto', 'important');
+            container.style.setProperty('position', 'relative', 'important');
         }
 
-        lobbies.forEach(lobby => {
+        entries.forEach(entry => {
+            // Only process elements that look like room tickets (usually have a room code or specific game text)
+            const isTicket = entry.textContent.includes('(') || entry.querySelector('img') || entry.querySelector('.roomCode');
+            if (!isTicket) return;
+
             if (currentLobbyFilter.type === 'all') {
-                lobby.style.setProperty('display', '', 'important');
-                lobby.style.setProperty('order', '0', 'important'); // Reset order
-                lobby.removeAttribute('data-matched');
+                entry.style.setProperty('display', 'flex', 'important');
+                entry.style.setProperty('order', '0', 'important');
+                entry.style.setProperty('visibility', 'visible', 'important');
+                entry.style.setProperty('position', 'relative', 'important');
             } else {
-                // Get all text and image attributes from the lobby card
-                const fullText = lobby.textContent.toLowerCase();
-                const titleText = lobby.getAttribute('title')?.toLowerCase() || '';
-                
-                const images = Array.from(lobby.querySelectorAll('img'));
-                const altTexts = images.map(img => img.getAttribute('alt')?.toLowerCase() || '').join(' ');
-                const srcTexts = images.map(img => img.getAttribute('src')?.toLowerCase() || '').join(' ');
-                
-                const searchableText = `${fullText} ${titleText} ${altTexts} ${srcTexts}`.replace(/\s+/g, ' ');
+                const text = entry.textContent.toLowerCase();
+                const alt = Array.from(entry.querySelectorAll('img')).map(i => i.alt.toLowerCase()).join(' ');
+                const searchable = `${text} ${alt}`;
                 
                 let match = false;
                 if (currentLobbyFilter.type === 'language') {
-                    const searchTerms = [currentLobbyFilter.value.toLowerCase(), ...(currentLobbyFilter.synonyms || [])];
-                    // Search for the language term specifically in brackets or as standalone word
-                    match = searchTerms.some(term => {
-                        const inBrackets = searchableText.includes(`(${term})`);
-                        const inSquareBrackets = searchableText.includes(`[${term}]`);
-                        const broadMatch = searchableText.includes(term);
-                        return inBrackets || inSquareBrackets || broadMatch;
-                    });
+                    const terms = [currentLobbyFilter.value.toLowerCase(), ...(currentLobbyFilter.synonyms || [])];
+                    // Look specifically for the language name, especially in parentheses like "(English)"
+                    match = terms.some(t => searchable.includes(t) || searchable.includes(`(${t})`));
                 } else if (currentLobbyFilter.type === 'game') {
-                    const searchTerm = currentLobbyFilter.value.toLowerCase();
-                    match = searchableText.includes(searchTerm);
+                    const game = currentLobbyFilter.value.toLowerCase();
+                    match = searchable.includes(game);
                 }
-                
+
                 if (match) {
-                    lobby.style.setProperty('display', '', 'important');
-                    lobby.style.setProperty('order', '-1', 'important'); // Move matched items to the top
-                    lobby.setAttribute('data-matched', 'true');
+                    entry.style.setProperty('display', 'flex', 'important');
+                    entry.style.setProperty('order', '-1', 'important');
+                    entry.style.setProperty('visibility', 'visible', 'important');
+                    entry.style.setProperty('position', 'relative', 'important');
                 } else {
-                    lobby.style.setProperty('display', 'none', 'important');
-                    lobby.setAttribute('data-matched', 'false');
+                    // Using both display:none and absolute positioning as fallback to ensure it's GONE
+                    entry.style.setProperty('display', 'none', 'important');
+                    entry.style.setProperty('position', 'absolute', 'important');
+                    entry.style.setProperty('visibility', 'hidden', 'important');
                 }
             }
         });
