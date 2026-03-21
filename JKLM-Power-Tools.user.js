@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      15.8
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.8)
+// @version      15.9
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.9)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '15.8';
+    const SCRIPT_VERSION = '15.9';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -217,8 +217,6 @@
     const getMaxWordLength = () => GM_getValue('maxWordLength', 30);
     const setMaxWordLength = (val) => GM_setValue('maxWordLength', val);
 
-    const getAntiDoubleSpace = () => GM_getValue('antiDoubleSpace', false);
-    const setAntiDoubleSpace = (val) => GM_setValue('antiDoubleSpace', val);
     const getTabHotkeys = () => GM_getValue('tabHotkeys', false);
     const setTabHotkeys = (val) => GM_setValue('tabHotkeys', val);
     const getOpacityToggleKey = () => GM_getValue('opacityToggleKey', 'Control');
@@ -293,8 +291,6 @@
             saveNote: 'Save',
             noNotes: 'No notes available yet.',
             toggleKeyLabel: 'Panel Fast-Access (Key)',
-            antiDoubleSpaceLabel: 'Anti-Double-Space',
-            antiDoubleSpaceDesc: 'Prevents accidental double spaces or hyphens.',
             tabHotkeysLabel: 'Panel Tab Hotkeys (F1-F3)',
             tabHotkeysDesc: 'Quickly switch panels using F1, F2, and F3.',
             opacityKeyLabel: 'Panel Opacity Toggle (Key)',
@@ -1065,14 +1061,6 @@
                                 <div class="toggle-switch ${isChatEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
                             </div>
 
-                            <div class="settings-row" id="toggle-anti-double">
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700; font-size: 16px;">${t.antiDoubleSpaceLabel}</span>
-                                    <span style="color: var(--pt-text-muted); font-size: 13px; line-height: 1.4;">${t.antiDoubleSpaceDesc}</span>
-                                </div>
-                                <div class="toggle-switch ${getAntiDoubleSpace() ? 'on' : ''}"><div class="toggle-knob"></div></div>
-                            </div>
-
                             <div class="settings-row" id="toggle-tab-hotkeys">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
                                     <span style="font-weight: 700; font-size: 16px;">${t.tabHotkeysLabel}</span>
@@ -1437,7 +1425,6 @@
 
                 if (row.id === 'toggle-space-hyphen') setEnabled(!getEnabled());
                 if (row.id === 'toggle-chat-hyphen') setChatEnabled(!getChatEnabled());
-                if (row.id === 'toggle-anti-double') setAntiDoubleSpace(!getAntiDoubleSpace());
                 if (row.id === 'toggle-tab-hotkeys') setTabHotkeys(!getTabHotkeys());
                 updateKbContent();
             });
@@ -1822,26 +1809,10 @@
 
         const enabled = getEnabled();
         const chatEnabled = getChatEnabled();
-        const antiDouble = getAntiDoubleSpace();
-        if (!enabled && !chatEnabled && !antiDouble) return;
+        if (!enabled && !chatEnabled) return;
 
         const active = document.activeElement;
         const isInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
-
-        if (antiDouble && isInput) {
-            if (e.code === 'Space' || e.key === ' ' || e.key === '-') {
-                const val = active.value || active.innerText || '';
-                const lastChar = val.slice(-1);
-                if ((e.key === ' ' || e.code === 'Space') && (lastChar === ' ' || lastChar === '-')) {
-                    e.preventDefault();
-                    return;
-                }
-                if (e.key === '-' && (lastChar === ' ' || lastChar === '-')) {
-                    e.preventDefault();
-                    return;
-                }
-            }
-        }
 
         if (e.code === 'Space' || e.key === ' ') {
             if (!isInput) return;
