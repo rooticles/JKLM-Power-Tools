@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      14.6
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.6)
+// @version      14.7
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.7)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '14.6';
+    const SCRIPT_VERSION = '14.7';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -400,7 +400,7 @@
             --pt-text-color: #E0E0E0; /* Light Gray */
             --pt-text-muted: #A0A0A0; /* Gray */
             --pt-panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            --pt-transition: 0.3s ease;
+            --pt-transition: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             --pt-font-main: 'Inter', sans-serif;
             --pt-font-mono: 'Fira Code', monospace;
             --pt-accent-gradient: linear-gradient(135deg, var(--pt-theme-color), #FF69B4); /* Hot Pink */
@@ -515,10 +515,13 @@
             top: 0;
             z-index: 9999;
             font-family: var(--pt-font-main);
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s ease;
             border-radius: var(--pt-border-radius);
             will-change: transform, opacity;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); /* Text shadow for high readability */
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            contain: content;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
         }
 
         .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left {
@@ -539,12 +542,12 @@
 
         .custom-kb-page.active, .custom-dict-page.active, .custom-admin-page.active {
             display: block;
-            animation: fadeInGlass 0.5s ease-out;
+            animation: fadeInGlass 0.2s ease-out;
         }
 
         @keyframes fadeInGlass {
-            from { opacity: 0; backdrop-filter: blur(0px); }
-            to { opacity: 1; backdrop-filter: blur(16px); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .custom-close-x {
@@ -581,6 +584,8 @@
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(12px); /* Stronger blur for text isolation */
+            transform: translate3d(0, 0, 0);
+            will-change: transform, box-shadow;
         }
 
         .feature-card:hover {
@@ -831,13 +836,13 @@
 
         /* Responsive Animations */
         @keyframes slideInPanelRight {
-            from { transform: translateX(100%) scale(0.96); opacity: 0; filter: blur(10px); }
-            to { transform: translateX(0) scale(1); opacity: 1; filter: blur(0); }
+            from { transform: translate3d(100%, 0, 0); opacity: 0; }
+            to { transform: translate3d(0, 0, 0); opacity: 1; }
         }
 
         @keyframes slideInPanelLeft {
-            from { transform: translateX(-100%) scale(0.96); opacity: 0; filter: blur(10px); }
-            to { transform: translateX(0) scale(1); opacity: 1; filter: blur(0); }
+            from { transform: translate3d(-100%, 0, 0); opacity: 0; }
+            to { transform: translate3d(0, 0, 0); opacity: 1; }
         }
 
         /* Animated Themes */
@@ -966,11 +971,17 @@
                 const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 const clockEnabled = getClockEnabled();
                 
-                clock.innerHTML = clockEnabled ? `<span>${timeStr}</span>` : '';
-                clock.style.display = clockEnabled ? 'flex' : 'none';
+                if (clockEnabled) {
+                    if (clock.innerText !== timeStr) {
+                        clock.innerText = timeStr;
+                    }
+                    clock.style.display = 'flex';
+                } else {
+                    clock.style.display = 'none';
+                }
 
                 document.querySelectorAll('.panel-clock').forEach(el => {
-                    el.innerText = timeStr;
+                    if (el.innerText !== timeStr) el.innerText = timeStr;
                 });
             };
             setInterval(updateClock, 1000);
@@ -1314,7 +1325,7 @@
                     window.closeCustomTabs();
                     return;
                 }
-                // Ensure width is at least 650px if it was the old default
+                // Ensure width is at least 650px
                 let currentWidth = getSidebarWidth();
                 if (currentWidth < 650) {
                     currentWidth = 650;
@@ -1322,25 +1333,27 @@
                     updateSidebarWidths(650);
                 }
 
-                document.querySelectorAll('.page, .tab, .custom-tab').forEach(el => el.classList.remove('active'));
-                allCustomPages.forEach(p => {
-                    p.classList.remove('active');
-                    p.classList.remove('selective-hidden');
+                // Batch DOM updates for smoothness
+                requestAnimationFrame(() => {
+                    document.querySelectorAll('.page, .tab, .custom-tab').forEach(el => el.classList.remove('active'));
+                    allCustomPages.forEach(p => {
+                        p.classList.remove('active');
+                        p.classList.remove('selective-hidden');
+                    });
+                    tab.classList.add('active');
+                    page.classList.add('active');
+                    if (customRow) customRow.style.display = 'none';
+                    
+                    if (page === dictPage) {
+                        setTimeout(loadDictionary, 50); // Small delay to prioritize UI switch
+                    }
                 });
-                tab.classList.add('active');
-                page.classList.add('active');
-                if (customRow) customRow.style.display = 'none';
-                if (page === dictPage) {
-                    updateDictContent();
-                    loadDictionary();
-                }
             };
 
             catTab.addEventListener('click', (e) => { e.preventDefault(); toggleTab(catTab, kbPage); });
             dictTab.addEventListener('click', (e) => { e.preventDefault(); toggleTab(dictTab, dictPage); });
             adminTab.addEventListener('click', (e) => {
                 e.preventDefault();
-                updateAdminContent();
                 toggleTab(adminTab, adminPage);
             });
 
