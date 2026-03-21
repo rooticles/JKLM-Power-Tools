@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      14.0
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.0)
+// @version      14.1
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.1)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -20,7 +20,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '14.0';
+    const SCRIPT_VERSION = '14.1';
     let activeFilter = 'All';
 
     // --- 1. Global Stability Patches ---
@@ -310,28 +310,28 @@
             .pt-filter-row { 
                 display: flex; 
                 flex-wrap: wrap; 
-                gap: 12px; 
-                margin: 25px auto; 
-                padding: 20px; 
-                justify-content: center; 
-                max-width: 1300px; 
-                background: rgba(0,0,0,0.15); 
-                border-radius: 25px; 
-                backdrop-filter: blur(12px);
-                border: 1px solid rgba(255,255,255,0.05);
-                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                gap: 8px; 
+                margin: 20px auto; 
+                padding: 10px; 
+                justify-content: flex-start; 
+                max-width: 1400px; 
+                background: transparent; 
+                border-radius: 0; 
+                backdrop-filter: none;
+                border: none;
+                box-shadow: none;
             }
             .pt-filter-btn { 
                 background: #26aa36 !important; 
                 color: #fff !important; 
                 border: none !important; 
-                padding: 12px 24px !important; 
-                border-radius: 40px !important; 
-                font-weight: 800 !important; 
-                font-size: 15px !important;
+                padding: 6px 14px !important; 
+                border-radius: 20px !important; 
+                font-weight: 700 !important; 
+                font-size: 14px !important;
                 cursor: pointer !important; 
-                transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
+                transition: 0.2s ease !important;
+                box-shadow: none !important;
                 text-transform: capitalize;
                 white-space: nowrap;
                 display: flex;
@@ -339,16 +339,14 @@
                 justify-content: center;
             }
             .pt-filter-btn:hover {
-                transform: translateY(-2px);
                 filter: brightness(1.1);
-                box-shadow: 0 6px 15px rgba(38, 170, 54, 0.3) !important;
             }
             .pt-filter-btn.active { 
-                background: #fff !important; 
-                color: #26aa36 !important; 
-                border: 2px solid #26aa36 !important;
-                box-shadow: 0 0 15px rgba(255, 255, 255, 0.3) !important;
-                transform: scale(1.05);
+                background: #1e8a2b !important; /* Slightly darker for active if no white bg */
+                color: #fff !important; 
+                box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important;
+                transform: none;
+                border: none !important;
             }
             /* Fix JKLM lobby container flow */
             .publicRooms {
