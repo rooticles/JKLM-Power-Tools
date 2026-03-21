@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      13.9
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v13.9)
+// @version      14.0
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.0)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -20,7 +20,8 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '13.9';
+    const SCRIPT_VERSION = '14.0';
+    let activeFilter = 'All';
 
     // --- 1. Global Stability Patches ---
     const patchGlobalBugs = () => {
@@ -219,27 +220,47 @@
     };
 
     const filterLobbies = (filter) => {
+        activeFilter = filter;
         const rooms = document.querySelectorAll('.publicRooms .entry');
+        if (!rooms.length) return;
+        
         rooms.forEach(room => {
-            if (filter === 'All') { room.style.display = 'flex'; return; }
-            room.style.display = room.innerText.toLowerCase().includes(filter.toLowerCase()) ? 'flex' : 'none';
+            if (activeFilter === 'All') { 
+                room.style.display = 'flex'; 
+                return; 
+            }
+            
+            // Search in room text for language (e.g., "(English)") or game type
+            const text = room.innerText.toLowerCase();
+            const filterLower = activeFilter.toLowerCase();
+            
+            // Special handling for English/EN, German/DE etc.
+            const matches = text.includes(`(${filterLower})`) || text.includes(`[${filterLower}]`) || text.includes(filterLower);
+            
+            room.style.display = matches ? 'flex' : 'none';
         });
     };
 
     const initHomepageFilters = () => {
-        if (document.getElementById('pt-filter-row')) return;
         const publicRooms = document.querySelector('.publicRooms');
         if (!publicRooms) return;
+        
+        // Always re-apply current filter to rooms
+        filterLobbies(activeFilter);
+
+        if (document.getElementById('pt-filter-row')) return;
+        
         const filterRow = document.createElement('div');
         filterRow.id = 'pt-filter-row'; filterRow.className = 'pt-filter-row';
         ['All', 'French', 'English', 'Spanish', 'German', 'Italian', 'Portuguese', 'Bombparty', 'Popsauce'].forEach(f => {
             const btn = document.createElement('button');
-            btn.className = 'pt-filter-btn' + (f === 'All' ? ' active' : '');
+            btn.className = 'pt-filter-btn' + (f === activeFilter ? ' active' : '');
             btn.innerText = f;
             btn.onclick = (e) => {
                 e.preventDefault();
                 document.querySelectorAll('.pt-filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active'); filterLobbies(f);
+                btn.classList.add('active'); 
+                filterLobbies(f);
             };
             filterRow.appendChild(btn);
         });
@@ -286,9 +307,63 @@
             .clickable-word { display: inline-block; padding: 8px 16px; margin: 4px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; cursor: pointer; font-weight: 700; transition: var(--pt-transition); }
             .custom-clock { font-family: var(--pt-font-mono); font-size: 14px; font-weight: 600; color: var(--pt-theme-color); background: rgba(var(--pt-theme-color-rgb), 0.1); padding: 6px 14px; border-radius: 10px; }
             .note-item { background: rgba(0, 0, 0, 0.5); border-radius: 12px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-            .pt-filter-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px auto; padding: 15px; justify-content: center; max-width: 1200px; background: rgba(0,0,0,0.1); border-radius: 20px; backdrop-filter: blur(10px); }
-            .pt-filter-btn { background: #26aa36 !important; color: #fff !important; border: none !important; padding: 10px 22px !important; border-radius: 30px !important; font-weight: 800 !important; cursor: pointer !important; transition: 0.2s ease !important; }
-            .pt-filter-btn.active { background: #fff !important; color: #26aa36 !important; border: 2px solid #26aa36 !important; }
+            .pt-filter-row { 
+                display: flex; 
+                flex-wrap: wrap; 
+                gap: 12px; 
+                margin: 25px auto; 
+                padding: 20px; 
+                justify-content: center; 
+                max-width: 1300px; 
+                background: rgba(0,0,0,0.15); 
+                border-radius: 25px; 
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(255,255,255,0.05);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            }
+            .pt-filter-btn { 
+                background: #26aa36 !important; 
+                color: #fff !important; 
+                border: none !important; 
+                padding: 12px 24px !important; 
+                border-radius: 40px !important; 
+                font-weight: 800 !important; 
+                font-size: 15px !important;
+                cursor: pointer !important; 
+                transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
+                text-transform: capitalize;
+                white-space: nowrap;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .pt-filter-btn:hover {
+                transform: translateY(-2px);
+                filter: brightness(1.1);
+                box-shadow: 0 6px 15px rgba(38, 170, 54, 0.3) !important;
+            }
+            .pt-filter-btn.active { 
+                background: #fff !important; 
+                color: #26aa36 !important; 
+                border: 2px solid #26aa36 !important;
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.3) !important;
+                transform: scale(1.05);
+            }
+            /* Fix JKLM lobby container flow */
+            .publicRooms {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                justify-content: center !important;
+                gap: 15px !important;
+                width: 100% !important;
+                max-width: 1400px !important;
+                margin: 0 auto !important;
+            }
+            .publicRooms .entry {
+                margin: 0 !important; /* Remove JKLM default margins to prevent gaps */
+                flex: 0 1 auto !important;
+            }
             @keyframes fadeInGlass { from { opacity: 0; } to { opacity: 1; } }
             @keyframes slideInPanelRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
             @keyframes slideInPanelLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
@@ -423,8 +498,15 @@
             }
         };
 
-        const observer = new MutationObserver(() => {
+        const observer = new MutationObserver((mutations) => {
             initHomepageFilters();
+            
+            // Check if rooms were added/updated and re-apply filter
+            const roomsUpdated = mutations.some(m => m.target.classList?.contains('publicRooms') || m.target.closest?.('.publicRooms'));
+            if (roomsUpdated) {
+                filterLobbies(activeFilter);
+            }
+
             const syl = document.querySelector('.syllable')?.innerText.trim().toLowerCase();
             if (syl && syl !== lastSyllable) {
                 lastSyllable = syl;
