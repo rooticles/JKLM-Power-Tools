@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      14.1
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.1)
+// @version      14.2
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.2)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -20,7 +20,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '14.1';
+    const SCRIPT_VERSION = '14.2';
     let activeFilter = 'All';
 
     // --- 1. Global Stability Patches ---
@@ -310,43 +310,33 @@
             .pt-filter-row { 
                 display: flex; 
                 flex-wrap: wrap; 
-                gap: 8px; 
+                gap: 5px; 
                 margin: 20px auto; 
                 padding: 10px; 
                 justify-content: flex-start; 
                 max-width: 1400px; 
                 background: transparent; 
-                border-radius: 0; 
-                backdrop-filter: none;
-                border: none;
-                box-shadow: none;
             }
             .pt-filter-btn { 
                 background: #26aa36 !important; 
                 color: #fff !important; 
                 border: none !important; 
-                padding: 6px 14px !important; 
+                padding: 6px 16px !important; 
                 border-radius: 20px !important; 
                 font-weight: 700 !important; 
                 font-size: 14px !important;
                 cursor: pointer !important; 
-                transition: 0.2s ease !important;
-                box-shadow: none !important;
                 text-transform: capitalize;
                 white-space: nowrap;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-            }
-            .pt-filter-btn:hover {
-                filter: brightness(1.1);
+                transition: filter 0.2s ease !important;
             }
             .pt-filter-btn.active { 
-                background: #1e8a2b !important; /* Slightly darker for active if no white bg */
-                color: #fff !important; 
-                box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important;
-                transform: none;
-                border: none !important;
+                background: #fff !important; 
+                color: #26aa36 !important; 
+                border: 2px solid #26aa36 !important;
             }
             /* Fix JKLM lobby container flow */
             .publicRooms {
