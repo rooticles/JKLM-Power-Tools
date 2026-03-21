@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      14.8
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.8)
+// @version      14.9
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.9)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '14.8';
+    const SCRIPT_VERSION = '14.9';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1011,7 +1011,7 @@
                 const t = document.createElement('div');
                 t.className = 'custom-tab';
                 t.id = id;
-                t.innerHTML = `<span>${icon}</span>`;
+                t.innerHTML = `<span style="pointer-events: none;">${icon}</span>`;
                 return t;
             };
 
@@ -1072,9 +1072,9 @@
                     <div class="panel-title">
                         <span style="background: linear-gradient(to right, var(--pt-theme-color), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(var(--pt-theme-color-rgb), 0.3));">${title}</span>
                         <div class="custom-tab-group">
-                            <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn">🚀</div>
-                            <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn">📖</div>
-                            <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn">⚙️</div>
+                            <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn"><span style="pointer-events: none;">🚀</span></div>
+                            <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn"><span style="pointer-events: none;">📖</span></div>
+                            <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn"><span style="pointer-events: none;">⚙️</span></div>
                          </div>
                      </div>
                     ${clockEnabled ? `<div class="custom-clock panel-clock">${timeStr}</div>` : ''}
