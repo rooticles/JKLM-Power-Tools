@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      13.8
+// @version      13.9
 // @description  Advanced JKLM Power Tools - Ultimate Edition (v13.7)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
@@ -960,13 +960,35 @@
             if (currentLobbyFilter.type === 'all') {
                 lobby.style.display = '';
             } else {
-                const text = lobby.innerText.toLowerCase();
+                // Try to find specific elements for more accurate filtering
+                const gameEl = lobby.querySelector('.game, .game-name, [class*="game"]');
+                const langEl = lobby.querySelector('.language, .language-name, [class*="language"]');
+                
+                const gameText = gameEl ? gameEl.innerText.toLowerCase() : '';
+                const langText = langEl ? langEl.innerText.toLowerCase() : '';
+                const fullText = lobby.innerText.toLowerCase();
+                
                 let match = false;
                 if (currentLobbyFilter.type === 'language') {
-                    match = text.includes(currentLobbyFilter.value.toLowerCase());
+                    const searchTerms = [currentLobbyFilter.value.toLowerCase(), ...(currentLobbyFilter.synonyms || [])];
+                    if (langEl) {
+                        match = searchTerms.some(term => langText.includes(term));
+                    } else {
+                        match = searchTerms.some(term => {
+                            const regex = new RegExp('\\b' + term + '\\b', 'i');
+                            return regex.test(fullText);
+                        });
+                    }
                 } else if (currentLobbyFilter.type === 'game') {
-                    match = text.includes(currentLobbyFilter.value.toLowerCase());
+                    const searchTerm = currentLobbyFilter.value.toLowerCase();
+                    if (gameEl) {
+                        match = gameText.includes(searchTerm);
+                    } else {
+                        const regex = new RegExp('\\b' + searchTerm + '\\b', 'i');
+                        match = regex.test(fullText);
+                    }
                 }
+                
                 lobby.style.display = match ? '' : 'none';
             }
         });
@@ -983,32 +1005,32 @@
                     const filtersContainer = document.createElement('div');
                     filtersContainer.className = 'homepage-filters';
                     
-                    const filterOptions = [
-                        { label: 'All', type: 'all' },
-                        { label: 'French', type: 'language', value: 'French' },
-                        { label: 'English', type: 'language', value: 'English' },
-                        { label: 'Spanish', type: 'language', value: 'Spanish' },
-                        { label: 'German', type: 'language', value: 'German' },
-                        { label: 'Italian', type: 'language', value: 'Italian' },
-                        { label: 'Portuguese', type: 'language', value: 'Portuguese' },
-                        { label: 'Bombparty', type: 'game', value: 'Bombparty' },
-                        { label: 'Popsauce', type: 'game', value: 'Popsauce' }
-                    ];
+                const filterOptions = [
+                    { label: 'All', type: 'all' },
+                    { label: 'French', type: 'language', value: 'French', synonyms: ['français', 'french', 'fr'] },
+                    { label: 'English', type: 'language', value: 'English', synonyms: ['english', 'en'] },
+                    { label: 'Spanish', type: 'language', value: 'Spanish', synonyms: ['español', 'spanish', 'es'] },
+                    { label: 'German', type: 'language', value: 'German', synonyms: ['deutsch', 'german', 'de'] },
+                    { label: 'Italian', type: 'language', value: 'Italian', synonyms: ['italiano', 'italian', 'it'] },
+                    { label: 'Portuguese', type: 'language', value: 'Portuguese', synonyms: ['português', 'portuguese', 'pt'] },
+                    { label: 'Bombparty', type: 'game', value: 'Bombparty' },
+                    { label: 'Popsauce', type: 'game', value: 'Popsauce' }
+                ];
+                
+                filterOptions.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'filter-btn';
+                    btn.innerText = opt.label;
+                    if (opt.type === 'all') btn.classList.add('active');
                     
-                    filterOptions.forEach(opt => {
-                        const btn = document.createElement('button');
-                        btn.className = 'filter-btn';
-                        btn.innerText = opt.label;
-                        if (opt.type === 'all') btn.classList.add('active');
-                        
-                        btn.onclick = () => {
-                            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                            btn.classList.add('active');
-                            currentLobbyFilter = { type: opt.type, value: opt.value || '' };
-                            applyLobbyFilter();
-                        };
-                        filtersContainer.appendChild(btn);
-                    });
+                    btn.onclick = () => {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        currentLobbyFilter = { type: opt.type, value: opt.value || '', synonyms: opt.synonyms || [] };
+                        applyLobbyFilter();
+                    };
+                    filtersContainer.appendChild(btn);
+                });
                     lobbiesContainer.before(filtersContainer);
                 }
                 // Re-apply filter in case new lobbies were added
