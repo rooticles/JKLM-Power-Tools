@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      15.7
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.7)
+// @version      15.8
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.8)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '15.7';
+    const SCRIPT_VERSION = '15.8';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -216,6 +216,13 @@
     const setMinWordLength = (val) => GM_setValue('minWordLength', val);
     const getMaxWordLength = () => GM_getValue('maxWordLength', 30);
     const setMaxWordLength = (val) => GM_setValue('maxWordLength', val);
+
+    const getAntiDoubleSpace = () => GM_getValue('antiDoubleSpace', false);
+    const setAntiDoubleSpace = (val) => GM_setValue('antiDoubleSpace', val);
+    const getTabHotkeys = () => GM_getValue('tabHotkeys', false);
+    const setTabHotkeys = (val) => GM_setValue('tabHotkeys', val);
+    const getOpacityToggleKey = () => GM_getValue('opacityToggleKey', 'Control');
+    const setOpacityToggleKey = (val) => GM_setValue('opacityToggleKey', val);
 
     // --- Chat & Macro Helpers ---
     const sendToChat = (msg) => {
@@ -286,6 +293,11 @@
             saveNote: 'Save',
             noNotes: 'No notes available yet.',
             toggleKeyLabel: 'Panel Fast-Access (Key)',
+            antiDoubleSpaceLabel: 'Anti-Double-Space',
+            antiDoubleSpaceDesc: 'Prevents accidental double spaces or hyphens.',
+            tabHotkeysLabel: 'Panel Tab Hotkeys (F1-F3)',
+            tabHotkeysDesc: 'Quickly switch panels using F1, F2, and F3.',
+            opacityKeyLabel: 'Panel Opacity Toggle (Key)',
             ideaBy: 'Idea by'
         }
     };
@@ -885,6 +897,7 @@
     `;
     document.head.appendChild(style);
 
+    let isOpacityReduced = false;
     const updateThemeStyles = () => {
         const themeColor = getThemeColor();
         const borderRadius = getBorderRadius();
@@ -914,8 +927,8 @@
             p.classList.add(`pos-${panelPosition}`);
             
             p.style.animation = `slideInPanel${panelPosition.charAt(0).toUpperCase() + panelPosition.slice(1)} 0.6s cubic-bezier(0.16, 1, 0.3, 1)`;
-            p.style.background = 'rgba(26, 26, 46, 0.95)';
-            p.style.backdropFilter = 'blur(16px)';
+            p.style.background = isOpacityReduced ? 'rgba(26, 26, 46, 0.2)' : 'rgba(26, 26, 46, 0.95)';
+            p.style.backdropFilter = isOpacityReduced ? 'blur(2px)' : 'blur(16px)';
         });
     };
     updateThemeStyles();
@@ -1050,6 +1063,22 @@
                                     <span style="color: var(--pt-text-muted); font-size: 13px; line-height: 1.4;">${isChatEnabled ? t.chatDesc : t.chatOffDesc}</span>
                                 </div>
                                 <div class="toggle-switch ${isChatEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
+                            </div>
+
+                            <div class="settings-row" id="toggle-anti-double">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-weight: 700; font-size: 16px;">${t.antiDoubleSpaceLabel}</span>
+                                    <span style="color: var(--pt-text-muted); font-size: 13px; line-height: 1.4;">${t.antiDoubleSpaceDesc}</span>
+                                </div>
+                                <div class="toggle-switch ${getAntiDoubleSpace() ? 'on' : ''}"><div class="toggle-knob"></div></div>
+                            </div>
+
+                            <div class="settings-row" id="toggle-tab-hotkeys">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-weight: 700; font-size: 16px;">${t.tabHotkeysLabel}</span>
+                                    <span style="color: var(--pt-text-muted); font-size: 13px; line-height: 1.4;">${t.tabHotkeysDesc}</span>
+                                </div>
+                                <div class="toggle-switch ${getTabHotkeys() ? 'on' : ''}"><div class="toggle-knob"></div></div>
                             </div>
 
                             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; opacity: 0.9; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
@@ -1287,6 +1316,14 @@
                                 </div>
                                 <input type="text" id="admin-toggle-key" class="modern-input" value="${getToggleKey()}" style="width: 80px; text-align: center; font-weight: 900; padding: 10px; border-radius: 12px; background: rgba(var(--pt-theme-color-rgb), 0.1); color: var(--pt-theme-color); border-color: rgba(var(--pt-theme-color-rgb), 0.2);">
                             </div>
+
+                            <div class="settings-row" style="cursor: default;">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-weight: 700; font-size: 15px;">${t.opacityKeyLabel}</span>
+                                    <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Hold/Toggle this key for transparency.</span>
+                                </div>
+                                <input type="text" id="admin-opacity-key" class="modern-input" value="${getOpacityToggleKey()}" style="width: 80px; text-align: center; font-weight: 900; padding: 10px; border-radius: 12px; background: rgba(var(--pt-theme-color-rgb), 0.1); color: var(--pt-theme-color); border-color: rgba(var(--pt-theme-color-rgb), 0.2);">
+                            </div>
                         </div>
                     </div>
 
@@ -1400,6 +1437,8 @@
 
                 if (row.id === 'toggle-space-hyphen') setEnabled(!getEnabled());
                 if (row.id === 'toggle-chat-hyphen') setChatEnabled(!getChatEnabled());
+                if (row.id === 'toggle-anti-double') setAntiDoubleSpace(!getAntiDoubleSpace());
+                if (row.id === 'toggle-tab-hotkeys') setTabHotkeys(!getTabHotkeys());
                 updateKbContent();
             });
 
@@ -1680,6 +1719,12 @@
                     e.target.value = key;
                     setToggleKey(key);
                 }
+                if (e.target.id === 'admin-opacity-key') {
+                    e.preventDefault();
+                    const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
+                    e.target.value = key;
+                    setOpacityToggleKey(key);
+                }
             });
 
             const gameObserver = new MutationObserver(() => {
@@ -1747,6 +1792,17 @@
                     }
                 }
 
+                if (e.key === getOpacityToggleKey()) {
+                    isOpacityReduced = !isOpacityReduced;
+                    updateThemeStyles();
+                }
+
+                if (getTabHotkeys()) {
+                    if (e.key === 'F1') { e.preventDefault(); toggleTab(catTab, kbPage); }
+                    if (e.key === 'F2') { e.preventDefault(); toggleTab(dictTab, dictPage); }
+                    if (e.key === 'F3') { e.preventDefault(); toggleTab(adminTab, adminPage); }
+                }
+
                 if (e.key === 'Escape' && [catTab, dictTab, adminTab].some(t => t.classList.contains('active'))) {
                     window.closeCustomTabs();
                 }
@@ -1758,7 +1814,7 @@
     };
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'F1') {
+        if (e.key === 'F1' && !getTabHotkeys()) {
             e.preventDefault();
             sendToChat('GG');
             return;
@@ -1766,11 +1822,29 @@
 
         const enabled = getEnabled();
         const chatEnabled = getChatEnabled();
-        if (!enabled && !chatEnabled) return;
+        const antiDouble = getAntiDoubleSpace();
+        if (!enabled && !chatEnabled && !antiDouble) return;
+
+        const active = document.activeElement;
+        const isInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+
+        if (antiDouble && isInput) {
+            if (e.code === 'Space' || e.key === ' ' || e.key === '-') {
+                const val = active.value || active.innerText || '';
+                const lastChar = val.slice(-1);
+                if ((e.key === ' ' || e.code === 'Space') && (lastChar === ' ' || lastChar === '-')) {
+                    e.preventDefault();
+                    return;
+                }
+                if (e.key === '-' && (lastChar === ' ' || lastChar === '-')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+        }
 
         if (e.code === 'Space' || e.key === ' ') {
-            const active = document.activeElement;
-            if (!active || !(active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
+            if (!isInput) return;
             const isChatContext = active.closest('.chat') ||
                 active.placeholder?.toLowerCase().includes('chat') ||
                 active.classList.contains('chatInput') ||
