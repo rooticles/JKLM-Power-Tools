@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      15.1
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.1)
+// @version      15.2
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.2)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '15.1';
+    const SCRIPT_VERSION = '15.2';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -513,7 +513,7 @@
             box-shadow: var(--pt-panel-shadow);
             position: fixed;
             top: 0;
-            z-index: 9999;
+            z-index: 10001;
             font-family: var(--pt-font-main);
             transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s ease;
             border-radius: var(--pt-border-radius);
@@ -632,7 +632,7 @@
         /* Glass Inputs */
         .modern-input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.6) !important; /* Darker for readability */
+            background: rgba(0, 0, 0, 0.6) !important;
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #ffffff !important;
             padding: 14px 20px;
@@ -642,8 +642,13 @@
             transition: var(--pt-transition);
             outline: none;
             box-sizing: border-box;
-            backdrop-filter: blur(4px);
-            text-shadow: none; /* No shadow inside inputs for crisp typing */
+            text-shadow: none;
+        }
+
+        select.modern-input {
+            cursor: pointer;
+            appearance: auto !important;
+            -webkit-appearance: auto !important;
         }
 
         .modern-input option {
@@ -1309,12 +1314,12 @@
                                 </div>
                             </div>
 
-                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
+                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border); position: relative; z-index: 10;">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px; pointer-events: none;">
                                     <span>Background Effect</span>
                                     <span style="color: var(--pt-theme-color);">SELECT</span>
                                 </div>
-                                <select class="modern-input" id="admin-animation-select" style="font-weight: 700; appearance: none; cursor: pointer;">
+                                <select class="modern-input" id="admin-animation-select" style="font-weight: 700; cursor: pointer; position: relative; z-index: 20; pointer-events: auto !important;">
                                     <option value="slideIn" ${animationType === 'slideIn' ? 'selected' : ''}>Standard (Glass)</option>
                                     <option value="animated-mesh" ${animationType === 'animated-mesh' ? 'selected' : ''}>Mesh Gradient</option>
                                     <option value="animated-matrix" ${animationType === 'animated-matrix' ? 'selected' : ''}>Matrix Rain</option>
