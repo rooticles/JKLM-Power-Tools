@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      14.9
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.9)
+// @version      15.0
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.0)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '14.9';
+    const SCRIPT_VERSION = '15.0';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1011,7 +1011,8 @@
                 const t = document.createElement('div');
                 t.className = 'custom-tab';
                 t.id = id;
-                t.innerHTML = `<span style="pointer-events: none;">${icon}</span>`;
+                t.setAttribute('data-custom-tab', id);
+                t.innerHTML = `<span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">${icon}</span>`;
                 return t;
             };
 
@@ -1072,9 +1073,9 @@
                     <div class="panel-title">
                         <span style="background: linear-gradient(to right, var(--pt-theme-color), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(var(--pt-theme-color-rgb), 0.3));">${title}</span>
                         <div class="custom-tab-group">
-                            <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn"><span style="pointer-events: none;">🚀</span></div>
-                            <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn"><span style="pointer-events: none;">📖</span></div>
-                            <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn"><span style="pointer-events: none;">⚙️</span></div>
+                            <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">🚀</span></div>
+                            <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">📖</span></div>
+                            <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">⚙️</span></div>
                          </div>
                      </div>
                     ${clockEnabled ? `<div class="custom-clock panel-clock">${timeStr}</div>` : ''}
@@ -1394,7 +1395,6 @@
             window.closeCustomTabs = () => {
                 [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
                 allCustomPages.forEach(p => p.classList.remove('active'));
-                if (customRow) customRow.style.display = 'flex';
                 const home = nav.querySelector('[data-tab="home"]') || nav.querySelector('.tab') || nav.querySelector('.custom-tab');
                 if (home && ![catTab, dictTab, adminTab].includes(home)) home.click();
             };
@@ -1422,7 +1422,6 @@
                     });
                     tab.classList.add('active');
                     page.classList.add('active');
-                    if (customRow) customRow.style.display = 'none';
                     
                     if (page === dictPage) {
                         setTimeout(loadDictionary, 50); // Small delay to prioritize UI switch
@@ -1430,12 +1429,22 @@
                 });
             };
 
-            catTab.addEventListener('click', (e) => { e.preventDefault(); toggleTab(catTab, kbPage); });
-            dictTab.addEventListener('click', (e) => { e.preventDefault(); toggleTab(dictTab, dictPage); });
-            adminTab.addEventListener('click', (e) => {
+            // Enhanced Event Delegation for Tabs
+            customRow.addEventListener('click', (e) => {
+                const tab = e.target.closest('.custom-tab');
+                if (!tab) return;
+                
                 e.preventDefault();
-                toggleTab(adminTab, adminPage);
-            });
+                e.stopPropagation();
+                
+                const tabId = tab.id;
+                if (tabId === 'cat-btn') toggleTab(catTab, kbPage);
+                else if (tabId === 'dict-btn') toggleTab(dictTab, dictPage);
+                else if (tabId === 'admin-btn') {
+                    updateAdminContent();
+                    toggleTab(adminTab, adminPage);
+                }
+            }, true); // Use capture phase to intercept before JKLM
 
             nav.addEventListener('click', (e) => {
                 const clicked = e.target.closest('.tab') || e.target.closest('.custom-tab');
@@ -1455,6 +1464,8 @@
 
                     const tabBtn = e.target.closest('.panel-nav .custom-tab');
                     if (tabBtn) {
+                        e.preventDefault();
+                        e.stopPropagation();
                         const targetId = tabBtn.getAttribute('data-target');
                         if (targetId === 'cat-btn') toggleTab(catTab, kbPage);
                         if (targetId === 'dict-btn') toggleTab(dictTab, dictPage);
