@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      14.7
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.7)
+// @version      14.8
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.8)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '14.7';
+    const SCRIPT_VERSION = '14.8';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -866,6 +866,59 @@
             from { background-position: 0% -100%; }
             to { background-position: 0% 100%; }
         }
+
+        /* New Background Effects */
+        .effect-stars {
+            background: radial-gradient(circle at 50% 50%, #1B1F3B 0%, #050505 100%);
+            overflow: hidden;
+        }
+        .effect-stars::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+            opacity: 0.3;
+            animation: starsMove 100s linear infinite;
+        }
+        @keyframes starsMove {
+            from { background-position: 0 0, 40px 60px, 130px 270px; }
+            to { background-position: 550px 550px, 390px 410px, 380px 820px; }
+        }
+
+        .effect-waves {
+            background: linear-gradient(180deg, #1B1F3B 0%, #2a1f4d 100%);
+            overflow: hidden;
+        }
+        .effect-waves::after {
+            content: "";
+            position: absolute;
+            bottom: 0; left: 0; width: 200%; height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.05" d="M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,197.3C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: 50% 100px;
+            animation: waveMove 10s linear infinite;
+            opacity: 0.5;
+        }
+        @keyframes waveMove {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        .effect-neon {
+            background: #050505;
+            box-shadow: inset 0 0 100px rgba(var(--pt-theme-color-rgb), 0.2);
+        }
+        .effect-neon::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(var(--pt-theme-color-rgb), 0.03) 40px, rgba(var(--pt-theme-color-rgb), 0.03) 41px);
+            pointer-events: none;
+        }
     `;
     document.head.appendChild(style);
 
@@ -896,7 +949,7 @@
         document.documentElement.style.setProperty('--pt-glass-border', glassBorder);
 
         document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
-            p.classList.remove('pos-left', 'pos-right', 'animated-mesh', 'animated-matrix');
+            p.classList.remove('pos-left', 'pos-right', 'animated-mesh', 'animated-matrix', 'effect-stars', 'effect-waves', 'effect-neon');
             p.classList.add(`pos-${panelPosition}`);
             
             const animName = animationType === 'slideIn' ? `slideInPanel${panelPosition.charAt(0).toUpperCase() + panelPosition.slice(1)}` : animationType;
@@ -910,6 +963,18 @@
                 p.classList.add('animated-matrix');
                 p.style.background = 'rgba(0,0,0,0.9)';
                 p.style.backdropFilter = 'blur(10px)';
+            } else if (animationType === 'effect-stars') {
+                p.classList.add('effect-stars');
+                p.style.background = 'transparent';
+                p.style.backdropFilter = 'none';
+            } else if (animationType === 'effect-waves') {
+                p.classList.add('effect-waves');
+                p.style.background = 'transparent';
+                p.style.backdropFilter = 'none';
+            } else if (animationType === 'effect-neon') {
+                p.classList.add('effect-neon');
+                p.style.background = 'transparent';
+                p.style.backdropFilter = 'none';
             } else {
                 p.style.background = 'rgba(26, 26, 46, 0.95)';
                 p.style.backdropFilter = 'blur(16px)';
@@ -1148,6 +1213,21 @@
                                     <option value="Shorts" ${wordType === 'Shorts' ? 'selected' : ''}>Shorts</option>
                                     <option value="Phobia" ${wordType === 'Phobia' ? 'selected' : ''}>Phobia</option>
                                     <option value="Apostrophes" ${wordType === 'Apostrophes' ? 'selected' : ''}>Apostrophes</option>
+                                </select>
+                            </div>
+
+                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
+                                    <span>Background Effect</span>
+                                    <span style="color: var(--pt-theme-color);">SELECT</span>
+                                </div>
+                                <select class="modern-input" id="admin-animation-select" style="font-weight: 700; appearance: none; cursor: pointer;">
+                                    <option value="slideIn" ${animationType === 'slideIn' ? 'selected' : ''}>Standard (Glass)</option>
+                                    <option value="animated-mesh" ${animationType === 'animated-mesh' ? 'selected' : ''}>Mesh Gradient</option>
+                                    <option value="animated-matrix" ${animationType === 'animated-matrix' ? 'selected' : ''}>Matrix Rain</option>
+                                    <option value="effect-stars" ${animationType === 'effect-stars' ? 'selected' : ''}>Starry Night</option>
+                                    <option value="effect-waves" ${animationType === 'effect-waves' ? 'selected' : ''}>Ocean Waves</option>
+                                    <option value="effect-neon" ${animationType === 'effect-neon' ? 'selected' : ''}>Neon Grid</option>
                                 </select>
                             </div>
 
@@ -1639,6 +1719,22 @@
                 if (e.target.id === 'admin-animation-type') {
                     setAnimationType(e.target.value);
                     updateThemeStyles();
+                }
+            });
+
+            adminPage.addEventListener('change', (e) => {
+                const picker = e.target.closest('#admin-theme-picker');
+                if (picker) {
+                    setThemeColor(picker.value);
+                    updateThemeStyles();
+                }
+
+                const select = e.target.closest('#admin-animation-select');
+                if (select) {
+                    setAnimationType(select.value);
+                    updateThemeStyles();
+                    // Re-render to show active effect immediately
+                    updateAdminContent();
                 }
             });
 
