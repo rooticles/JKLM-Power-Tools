@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      13.7
+// @version      13.8
 // @description  Advanced JKLM Power Tools - Ultimate Edition (v13.7)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
