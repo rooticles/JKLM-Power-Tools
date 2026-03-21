@@ -2,8 +2,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      17.0
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v17.0)
+// @version      17.1
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v17.1)
 // @author       Root
 // @icon         https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTJbeFZgV0zcGPsl6DlZo3cGrxKIEsWPIcJw&s
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -21,12 +21,10 @@
 (function () {
     'use strict';
 
-    // --- Global Patch for JKLM & Overlay Bugs ---
     const patchGlobalBugs = () => {
         try {
             const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
             
-            // --- Global Error Suppressor (Unbreakable Mode) ---
             const ignoreError = (msg) => {
                 const ignoredErrors = [
                     'addEventListener', 'milestones', 'socket', 'undefined', 'null',
@@ -50,8 +48,6 @@
                 }
             }, true);
 
-            // --- Service Worker Suppression (Performance Patch) ---
-            // Prevents no-op fetch handlers from bringing overhead during navigation
             if (win.navigator.serviceWorker) {
                 win.navigator.serviceWorker.getRegistrations().then(registrations => {
                     for (let registration of registrations) {
@@ -59,23 +55,19 @@
                     }
                 });
                 win.navigator.serviceWorker.register = () => {
-                    return new Promise(() => {}); // Do nothing
+                    return new Promise(() => {});
                 };
             }
 
-            // Fix JKLM 'chatUnreadHighlightCount' ReferenceError
             if (typeof win.chatUnreadHighlightCount === 'undefined') {
                 win.chatUnreadHighlightCount = 0;
             }
 
-            // --- Audio Autoplay Resilience ---
-            // Fixes "AudioContext was not allowed to start" error
             const resumeAudio = () => {
                 const contexts = [win.AudioContext, win.webkitAudioContext];
                 contexts.forEach(Ctx => {
                     if (Ctx && Ctx.prototype) {
                         const originalResume = Ctx.prototype.resume;
-                        // We don't necessarily need to wrap it, but we can proactively try to resume
                     }
                 });
 
@@ -88,16 +80,12 @@
                     });
                 };
 
-                // Resume on first user interaction
                 ['click', 'keydown', 'touchstart', 'mousedown'].forEach(evt => {
                     win.addEventListener(evt, triggerResume, { once: true, capture: true });
                 });
             };
             resumeAudio();
 
-            // --- Ultra Stability Patch (v5 - Ultimate Edition) ---
-            // This is the absolute final fix for "Cannot read properties of undefined (reading 'addEventListener')"
-            
             const createRecursiveProxy = (name = 'root') => {
                 const noop = () => {};
                 const handler = {
@@ -122,7 +110,6 @@
                 return new Proxy(noop, handler);
             };
 
-            // The "Nuclear Option": Ensure 'milestones' property exists on EVERY object in the JS environment
             if (win.Object && typeof win.Object.prototype.milestones === 'undefined') {
                 let _globalMilestones = win.milestones || createRecursiveProxy('milestones');
                 Object.defineProperty(win.Object.prototype, 'milestones', {
@@ -151,10 +138,8 @@
                 });
             };
 
-            // Patch global objects
             ['milestones', 'game', 'socket', 'room', 'client', 'roomProxy'].forEach(safeProxy);
 
-            // Continously monitor for Socket/Emitter definitions to patch prototypes
             const patchPrototypes = () => {
                 ['Socket', 'Emitter', 'EventEmitter', 'Room', 'Client'].forEach(objName => {
                     const Proto = win[objName] && win[objName].prototype;
@@ -165,13 +150,11 @@
                             }
                         });
                         
-                        // Specifically patch setMilestone to be resilient
                         const originalSetMilestone = Proto.setMilestone;
                         Proto.setMilestone = function(...args) {
                             try {
                                 if (originalSetMilestone) return originalSetMilestone.apply(this, args);
                             } catch (e) {
-                                // Suppress error if setMilestone fails internally
                                 return this;
                             }
                             return this;
@@ -191,9 +174,8 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '17.0';
+    const SCRIPT_VERSION = '17.1';
 
-    // --- Category Constants ---
     const FISH_KEYWORDS = [
         'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
         'pike', 'perch', 'snapper', 'grouper', 'marlin', 'swordfish', 'stingray', 'ray', 
@@ -296,6 +278,21 @@
         'cumin', 'paprika', 'clove', 'nutmeg', 'oregano', 'parsley', 'dill', 'mint', 'chili', 'vanilla'
     ];
 
+    const CHEMICAL_KEYWORDS = [
+        'water', 'ethanol', 'methanol', 'acetone', 'ammonia', 'benzene', 'toluene', 'glucose', 'sucrose',
+        'methane', 'ethane', 'propane', 'butane', 'pentane', 'hexane', 'heptane', 'octane', 'nonane',
+        'decane', 'caffeine', 'nicotine', 'aspirin', 'penicillin', 'sulfuric', 'nitric', 'hydrochloric',
+        'acetic', 'sodium', 'potassium', 'calcium', 'carbon', 'oxide', 'peroxide', 'formaldehyde',
+        'glycerin', 'ether', 'chloroform', 'urea', 'melamine', 'polyethylene', 'polystyrene', 'teflon',
+        'nylon', 'polyester', 'acrylate', 'acetate', 'alcohol', 'aldehyde', 'alkane', 'alkene', 'alkyne',
+        'amide', 'amine', 'aniline', 'anthracene', 'benzene', 'benzoate', 'bicarbonate', 'bisulfate',
+        'bisulfite', 'borate', 'bromide', 'carbonate', 'chlorate', 'chloride', 'chlorite', 'chromate',
+        'citrate', 'cyanide', 'dichromate', 'fluoride', 'formate', 'glycol', 'hydroxide', 'hypochlorite',
+        'iodate', 'iodide', 'lactate', 'nitrate', 'nitrite', 'oxalate', 'perchlorate', 'permanganate',
+        'peroxide', 'phosphate', 'phosphide', 'phosphite', 'propionate', 'silicate', 'stearate',
+        'sulfate', 'sulfide', 'sulfite', 'tartrate', 'thiocyanate', 'thiosulfate'
+    ];
+
     const matchCategory = (w, keywords) => {
         const low = w.toLowerCase();
         return keywords.some(k => {
@@ -317,8 +314,8 @@
     const isWordTech = (w) => matchCategory(w, TECH_KEYWORDS);
     const isWordFood = (w) => matchCategory(w, FOOD_KEYWORDS);
     const isWordSpice = (w) => matchCategory(w, SPICE_KEYWORDS);
+    const isWordChemical = (w) => matchCategory(w, CHEMICAL_KEYWORDS);
 
-    // --- Performance Helpers ---
     const debounce = (func, wait) => {
         let timeout;
         return (...args) => {
@@ -327,7 +324,6 @@
         };
     };
 
-    // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
     const setEnabled = (val) => GM_setValue('spaceToHyphenEnabled', val);
     const getChatEnabled = () => GM_getValue('spaceToHyphenChatEnabled', false);
@@ -356,7 +352,6 @@
     const getSearchHistory = () => GM_getValue('searchHistory', []);
     const setSearchHistory = (val) => GM_setValue('searchHistory', val);
 
-    // --- New Features Storage ---
     const getNotes = () => GM_getValue('notes', []);
     const setNotes = (val) => GM_setValue('notes', val);
     const getToggleKey = () => GM_getValue('toggleKey', 'F2');
@@ -373,7 +368,6 @@
     const getOpacityToggleKey = () => GM_getValue('opacityToggleKey', 'Control');
     const setOpacityToggleKey = (val) => GM_setValue('opacityToggleKey', val);
 
-    // --- Chat & Macro Helpers ---
     const sendToChat = (msg) => {
         const chatInput = document.querySelector('.chat input, .chat textarea, .chatInput');
         if (chatInput) {
@@ -386,7 +380,6 @@
         }
     };
 
-    // --- Translations ---
     const translations = {
         'English': {
             kbHeader: '🚀 Keyboard Settings',
@@ -449,13 +442,11 @@
         }
     };
 
-    // --- Dictionary Logic ---
     let dictionary = [];
     let lowercasedDictionary = [];
     let dictionaryLoaded = false;
     let currentDictLang = '';
 
-    // --- Local Music Player ---
     const dictionaryUrls = {
         'English': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/121bf1a601ed822553c2e68c38a4cdcd7737d352/words.txt'
     };
@@ -512,7 +503,6 @@
         return array;
     };
 
-    // --- Base64 & Profile Picture Helpers ---
     function uint6ToB64(nUint6) {
         return nUint6 < 26 ? nUint6 + 65 : nUint6 < 52 ? nUint6 + 71 : nUint6 < 62 ? nUint6 - 4 : nUint6 === 62 ? 43 : nUint6 === 63 ? 47 : 65;
     }
@@ -538,7 +528,6 @@
         return (sB64Enc.substr(0, sB64Enc.length - 2 + nMod3) + (nMod3 === 2 ? "" : nMod3 === 1 ? "=" : "=="));
     }
 
-    // --- CSS Styles ---
     const style = document.createElement('style');
     style.innerHTML = `
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -563,7 +552,7 @@
             --pt-glow-effect: 0 0 20px rgba(var(--pt-theme-color-rgb), 0.4);
         }
 
-        /* Glassmorphism Scrollbar (Panel only) */
+        /* Panel only */
         .custom-kb-page::-webkit-scrollbar, .custom-dict-page::-webkit-scrollbar, .custom-admin-page::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-kb-page::-webkit-scrollbar-track, .custom-dict-page::-webkit-scrollbar-track, .custom-admin-page::-webkit-scrollbar-track { background: transparent; }
         .custom-kb-page::-webkit-scrollbar-thumb, .custom-dict-page::-webkit-scrollbar-thumb, .custom-admin-page::-webkit-scrollbar-thumb { 
@@ -583,16 +572,16 @@
             width: 100%;
             border-bottom: none;
             position: relative;
-            z-index: 19999; /* Lower than pages to prevent overlap */
+            z-index: 19999;
             gap: 15px;
             padding: 0 25px;
             box-sizing: border-box;
             margin-top: -5px;
-            pointer-events: none; /* Klicks durchlassen außer auf Kinder */
+            pointer-events: none;
         }
 
         .custom-nav-row > * {
-            pointer-events: auto !important; /* Kinder sind klickbar */
+            pointer-events: auto !important;
         }
 
         .panel-nav {
@@ -609,7 +598,7 @@
             background: rgba(27, 31, 59, 0.4);
             backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--pt-glass-border);
-            pointer-events: auto !important; /* Interaktion für Nav-Bereich */
+            pointer-events: auto !important;
         }
 
         .panel-title {
@@ -648,7 +637,7 @@
         }
 
         .custom-tab span {
-            pointer-events: none !important; /* Emojis/Icons ignorieren Klicks */
+            pointer-events: none !important;
         }
 
         .custom-tab:hover {
@@ -673,14 +662,14 @@
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
             height: 100vh;
-            overflow-y: auto !important; /* Sicherstellen, dass Scrolling immer möglich ist */
+            overflow-y: auto !important;
             overflow-x: hidden;
             box-sizing: border-box;
             width: 650px;
             box-shadow: var(--pt-panel-shadow);
             position: fixed;
             top: 0;
-            z-index: 20000 !important; /* Above nav row */
+            z-index: 20000 !important;
             font-family: var(--pt-font-main);
             transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s ease;
             border-radius: var(--pt-border-radius);
@@ -689,7 +678,7 @@
             backface-visibility: hidden;
             contain: content;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
-            pointer-events: auto !important; /* Interaktion sicherstellen */
+            pointer-events: auto !important;
         }
 
         .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left {
@@ -749,9 +738,8 @@
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
         }
 
-        /* Frosted Glass Cards */
         .feature-card {
-            background: rgba(0, 0, 0, 0.45) !important; /* Darker for high readability */
+            background: rgba(0, 0, 0, 0.45) !important;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: var(--pt-border-radius);
             padding: 24px;
@@ -759,14 +747,14 @@
             transition: var(--pt-transition);
             position: relative;
             overflow: hidden;
-            backdrop-filter: blur(12px); /* Stronger blur for text isolation */
+            backdrop-filter: blur(12px);
             transform: translate3d(0, 0, 0);
             will-change: transform, box-shadow;
-            pointer-events: auto !important; /* Interaktion erzwingen */
+            pointer-events: auto !important;
         }
 
         .feature-card * {
-            pointer-events: auto !important; /* Alle Elemente in der Card klickbar machen */
+            pointer-events: auto !important;
         }
 
         .feature-card:hover {
@@ -810,7 +798,6 @@
             box-shadow: inset 0 0 10px rgba(var(--pt-theme-color-rgb), 0.2);
         }
 
-        /* Glass Inputs */
         .modern-input {
             width: 100%;
             background: rgba(0, 0, 0, 0.6) !important;
@@ -833,8 +820,8 @@
         }
 
         .modern-input option {
-            background-color: #000000 !important; /* Deep black for all browsers */
-            color: #ffffff !important; /* White text for contrast */
+            background-color: #000000 !important;
+            color: #ffffff !important;
             padding: 12px;
             font-weight: 500;
         }
@@ -880,7 +867,7 @@
             cursor: pointer;
             transition: var(--pt-transition);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            user-select: none; /* Verhindert Text-Markierung beim Klicken */
+            user-select: none;
         }
 
         .settings-row:hover {
@@ -924,12 +911,12 @@
             display: inline-block;
             padding: 8px 16px;
             margin: 4px;
-            background: rgba(0, 0, 0, 0.6) !important; /* Darker background */
+            background: rgba(0, 0, 0, 0.6) !important;
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 10px;
             cursor: pointer;
             transition: var(--pt-transition);
-            font-weight: 700; /* Bolder */
+            font-weight: 700;
             font-size: 14px;
             color: #ffffff !important;
             backdrop-filter: blur(4px);
@@ -966,7 +953,7 @@
         }
 
         .note-item {
-            background: rgba(0, 0, 0, 0.5) !important; /* Darker for readability */
+            background: rgba(0, 0, 0, 0.5) !important;
             border: 1px solid var(--pt-glass-border);
             border-radius: 12px;
             padding: 24px;
@@ -1031,7 +1018,6 @@
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
         }
 
-        /* Responsive Animations */
         @keyframes slideInPanelRight {
             from { transform: translate3d(100%, 0, 0); opacity: 0; }
             to { transform: translate3d(0, 0, 0); opacity: 1; }
@@ -1329,6 +1315,7 @@
                                     <option value="IT" ${wordType === 'IT' ? 'selected' : ''}>IT</option>
                                     <option value="Food" ${wordType === 'Food' ? 'selected' : ''}>Food</option>
                                     <option value="Spices" ${wordType === 'Spices' ? 'selected' : ''}>Spices</option>
+                                    <option value="Chemicals" ${wordType === 'Chemicals' ? 'selected' : ''}>Chemicals</option>
                                 </select>
                             </div>
 
@@ -1613,7 +1600,6 @@
                         history.unshift(syllable.toUpperCase());
                         history = history.slice(0, 10);
                         setSearchHistory(history);
-                        // Don't call updateDictContent here to avoid re-rendering while typing
                     }
                 }
 
@@ -1633,12 +1619,12 @@
                     else if (wordType === 'IT') words = dictionary.filter(isWordTech);
                     else if (wordType === 'Food') words = dictionary.filter(isWordFood);
                     else if (wordType === 'Spices') words = dictionary.filter(isWordSpice);
+                    else if (wordType === 'Chemicals') words = dictionary.filter(isWordChemical);
                     else words = [...dictionary];
                     
                     const minLen = getMinWordLength();
                     const maxLen = getMaxWordLength();
 
-                    // Apply word length filter first
                     words = words.filter(w => w.length >= minLen && w.length <= maxLen);
 
                     if (syllable) {
@@ -1647,7 +1633,6 @@
                         } else if (searchMode === 'EndsWith') {
                             words = words.filter(w => w.toLowerCase().endsWith(syllable));
                         } else if (searchMode === 'SyllableChain') {
-                            // Example: If last word was "APPLE", syllable is "E" or "LE"
                             words = words.filter(w => w.toLowerCase().startsWith(syllable));
                         } else {
                             words = words.filter(w => w.toLowerCase().includes(syllable));
@@ -1888,7 +1873,6 @@
                 const sylEl = document.querySelector('.syllable');
                 const selfInput = document.querySelector('.selfTurn input, .selfTurn textarea');
 
-                // Word length counter logic
                 if (selfInput) {
                     let counter = document.getElementById('pt-word-counter');
                     if (!counter) {
@@ -2017,9 +2001,7 @@
             });
     checkInit.observe(document.documentElement, { childList: true, subtree: true });
 
-    // Initial check
     init();
-    // Fallbacks
     setTimeout(init, 1000);
     setTimeout(init, 3000);
     setTimeout(init, 6000);
