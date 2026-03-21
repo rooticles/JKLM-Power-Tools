@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      15.6
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.6)
+// @version      15.7
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.7)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '15.6';
+    const SCRIPT_VERSION = '15.7';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1052,18 +1052,6 @@
                                 <div class="toggle-switch ${isChatEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
                             </div>
 
-                            <div class="feature-card" style="background: rgba(var(--pt-theme-color-rgb), 0.05); border-color: rgba(var(--pt-theme-color-rgb), 0.2);">
-                                <div class="feature-header" style="color: var(--pt-theme-color);">
-                                    <div class="feature-icon" style="background: rgba(var(--pt-theme-color-rgb), 0.15); box-shadow: var(--pt-glow-effect);">💬</div>
-                                    <span>Quick-Chat Macros</span>
-                                </div>
-                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                    ${['GG', 'WP', 'GLHF', 'Nice!', 'LOL', 'Close!'].map(msg => `
-                                        <button class="macro-btn" style="padding: 8px 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--pt-glass-border); border-radius: 10px; color: #fff; font-weight: 700; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='var(--pt-theme-color)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--pt-glass-border)'; this.style.transform='translateY(0)'" onclick="window.sendMacro('${msg}')">${msg}</button>
-                                    `).join('')}
-                                </div>
-                            </div>
-
                             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; opacity: 0.9; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
                                 <div style="width: 32px; height: 32px; border-radius: 10px; border: 2px solid var(--pt-theme-color); overflow: hidden; background: rgba(var(--pt-theme-color-rgb), 0.1); box-shadow: var(--pt-glow-effect); display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--pt-theme-color); font-size: 14px;">
                                     <img src="https://media.discordapp.net/attachments/1362588131966062736/1484245858982564163/download.jfif?ex=69bd872c&is=69bc35ac&hm=c8fb790d9047f95f9158952dec974f5ad608d504c98c959901e41b6421c14923&=&format=webp&width=32&height=32" style="width: 100%; height: 100%; object-fit: cover;" id="kb-idea-author-img" onerror="this.style.display='none'; this.parentElement.innerText='M'">
@@ -1325,10 +1313,6 @@
             updateSidebarWidths(getSidebarWidth());
 
             allCustomPages.forEach(p => document.body.appendChild(p));
-
-            window.sendMacro = (msg) => {
-                sendToChat(msg);
-            };
 
             window.closeCustomTabs = () => {
                 [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
