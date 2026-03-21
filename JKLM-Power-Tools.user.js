@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      13.7
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v13.7)
+// @version      13.8
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v13.8)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '13.7';
+    const SCRIPT_VERSION = '13.8';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -861,6 +861,48 @@
             from { background-position: 0% -100%; }
             to { background-position: 0% 100%; }
         }
+
+        /* Lobby Filter Styles */
+        .pt-filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px auto;
+            padding: 15px;
+            justify-content: center;
+            max-width: 1200px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .pt-filter-btn {
+            background: #26aa36 !important;
+            color: #fff !important;
+            border: none !important;
+            padding: 10px 22px !important;
+            border-radius: 30px !important;
+            font-weight: 800 !important;
+            font-size: 14px !important;
+            cursor: pointer !important;
+            transition: 0.2s ease !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+            text-transform: capitalize;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pt-filter-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            filter: brightness(1.2);
+            box-shadow: 0 8px 25px rgba(38, 170, 54, 0.4) !important;
+        }
+        .pt-filter-btn.active {
+            background: #ffffff !important;
+            color: #26aa36 !important;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4) !important;
+            transform: scale(1.05);
+            border: 2px solid #26aa36 !important;
+        }
     `;
     document.head.appendChild(style);
 
@@ -913,11 +955,64 @@
     };
     updateThemeStyles();
 
+    // --- Homepage Lobby Filter Logic ---
+    const filterLobbies = (filter) => {
+        const rooms = document.querySelectorAll('.publicRooms .entry');
+        if (!rooms.length) return;
+
+        rooms.forEach(room => {
+            if (filter === 'All') {
+                room.style.display = 'flex';
+                return;
+            }
+            
+            const text = room.innerText.toLowerCase();
+            const filterLower = filter.toLowerCase();
+            
+            // JKLM room entries often have language indicators (e.g., [EN], [FR], or flag icons)
+            // or explicit game names
+            if (text.includes(filterLower)) {
+                room.style.display = 'flex';
+            } else {
+                room.style.display = 'none';
+            }
+        });
+    };
+
+    const initHomepageFilters = () => {
+        if (document.getElementById('pt-filter-row')) return;
+        const publicRooms = document.querySelector('.publicRooms');
+        if (!publicRooms) return;
+
+        const filterRow = document.createElement('div');
+        filterRow.id = 'pt-filter-row';
+        filterRow.className = 'pt-filter-row';
+
+        const filters = ['All', 'French', 'English', 'Spanish', 'German', 'Italian', 'Portuguese', 'Bombparty', 'Popsauce'];
+        
+        filters.forEach(f => {
+            const btn = document.createElement('button');
+            btn.className = 'pt-filter-btn' + (f === 'All' ? ' active' : '');
+            btn.innerText = f;
+            btn.onclick = (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.pt-filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                filterLobbies(f);
+            };
+            filterRow.appendChild(btn);
+        });
+
+        publicRooms.before(filterRow);
+        console.log('[JKLM Power Tools] Homepage Filters injected.');
+    };
+
     let lastDetectedSyllable = '';
     let isGameRunning = false;
 
     let isInitialized = false;
     const init = () => {
+        initHomepageFilters();
         if (isInitialized) return;
         try {
             const nav = document.querySelector('.navigation') || document.querySelector('.tabs') || document.querySelector('.room .bottom') || document.querySelector('.room .navigation');
@@ -1658,6 +1753,7 @@
             });
 
             const gameObserver = new MutationObserver(() => {
+                initHomepageFilters(); // Try to inject filters on homepage
                 const sylEl = document.querySelector('.syllable');
                 if (sylEl) {
                     const currentSyl = sylEl.innerText.trim().toLowerCase();
@@ -1751,6 +1847,7 @@
     }, true);
 
             const checkInit = new MutationObserver(() => {
+                initHomepageFilters();
                 const nav = document.querySelector('.navigation, .tabs, .room .bottom, .room .navigation');
                 if (nav) init();
             });
@@ -1758,8 +1855,12 @@
 
     // Initial check
     init();
+    initHomepageFilters();
     // Fallbacks
     setTimeout(init, 1000);
+    setTimeout(initHomepageFilters, 1000);
     setTimeout(init, 3000);
+    setTimeout(initHomepageFilters, 3000);
     setTimeout(init, 6000);
+    setTimeout(initHomepageFilters, 6000);
 })();
