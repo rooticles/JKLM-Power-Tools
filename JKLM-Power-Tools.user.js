@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      16.3
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v16.3)
+// @version      16.5
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v16.5)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -26,13 +26,24 @@
             const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
             
             // --- Global Error Suppressor (Unbreakable Mode) ---
-            win.addEventListener('error', (event) => {
-                const msg = event.message || '';
+            const ignoreError = (msg) => {
                 const ignoredErrors = [
                     'addEventListener', 'milestones', 'socket', 'undefined', 'null',
-                    'PartyPlus', 'overlay.js', 'falcon.jklm.fun'
+                    'PartyPlus', 'overlay.js', 'falcon.jklm.fun', 'setMilestone'
                 ];
-                if (ignoredErrors.some(err => msg.includes(err))) {
+                return ignoredErrors.some(err => msg.includes(err));
+            };
+
+            win.addEventListener('error', (event) => {
+                if (ignoreError(event.message || '')) {
+                    event.stopImmediatePropagation();
+                    event.preventDefault();
+                }
+            }, true);
+
+            win.addEventListener('unhandledrejection', (event) => {
+                const reason = event.reason?.message || event.reason?.toString() || '';
+                if (ignoreError(reason)) {
                     event.stopImmediatePropagation();
                     event.preventDefault();
                 }
@@ -148,8 +159,22 @@
                     const Proto = win[objName] && win[objName].prototype;
                     if (Proto) {
                         ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'setMilestone', 'trigger'].forEach(m => {
-                            if (typeof Proto[m] === 'undefined') Proto[m] = () => {};
+                            if (typeof Proto[m] === 'undefined' || Proto[m] === null) {
+                                Proto[m] = function() { return this; };
+                            }
                         });
+                        
+                        // Specifically patch setMilestone to be resilient
+                        const originalSetMilestone = Proto.setMilestone;
+                        Proto.setMilestone = function(...args) {
+                            try {
+                                if (originalSetMilestone) return originalSetMilestone.apply(this, args);
+                            } catch (e) {
+                                // Suppress error if setMilestone fails internally
+                                return this;
+                            }
+                            return this;
+                        };
                     }
                 });
             };
@@ -165,7 +190,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '16.3';
+    const SCRIPT_VERSION = '16.5';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -303,6 +328,81 @@
     let lowercasedDictionary = [];
     let dictionaryLoaded = false;
     let currentDictLang = '';
+
+    const FISH_KEYWORDS = [
+        'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
+        'pike', 'perch', 'snapper', 'grouper', 'marlin', 'swordfish', 'stingray', 'ray', 
+        'flounder', 'halibut', 'sole', 'mullet', 'sardine', 'anchovy', 'herring', 'barracuda', 
+        'piranha', 'tilapia', 'catfish', 'guppy', 'goldfish', 'clownfish', 'angelfish', 
+        'betta', 'tetra', 'molly', 'platy', 'danio', 'loach', 'discus', 'gourami', 'oscar', 
+        'cichlid', 'sturgeon', 'gar', 'bowfin', 'lungfish', 'lamprey', 'hagfish', 'coelacanth',
+        'mahimahi', 'wahoo', 'walleye', 'muskellunge', 'bluegill', 'crappie', 'sunfish', 'shad', 
+        'minnow', 'dace', 'roach', 'tench', 'bream', 'chub', 'barbel', 'grayling', 'char', 
+        'whitefish', 'smelt', 'capelin', 'hake', 'pollock', 'haddock', 'whiting', 'ling', 
+        'burbot', 'angler', 'monkfish', 'batfish', 'frogfish', 'needlefish', 'flyingfish', 
+        'seahorse', 'pipefish', 'stickleback', 'sculpin', 'lionfish', 'rockfish', 'tilefish', 
+        'remora', 'jack', 'pompano', 'dorado', 'porgy', 'drum', 'croaker', 'surmullet', 
+        'goatfish', 'archerfish', 'leaffish', 'snakehead', 'turbot', 'plaice', 'dab', 'puffer', 
+        'boxfish', 'triggerfish', 'filefish', 'albacore', 'alewife', 'alfonsino', 'amberjack', 
+        'anemonefish', 'arapaima', 'arowana', 'ayu', 'bangus', 'barracudina', 'barramundi', 
+        'bichir', 'bitterling', 'bleak', 'blenny', 'blobfish', 'blowfish', 'boga', 'bonefish', 
+        'bonito', 'bonytail', 'brill', 'brotula', 'candiru', 'catalufa', 'catla', 'cisco', 
+        'cobia', 'coley', 'cornetfish', 'cusk', 'damselfish', 'dartfish', 'dealfish', 'dhufish', 
+        'dory', 'dottyback', 'dragonet', 'driftfish', 'escolar', 'eulachon', 'fangtooth', 
+        'fierasfer', 'flier', 'garibaldi', 'goldeye', 'grunion', 'grunt', 'grunter', 'gudgeon', 
+        'halosaur', 'hamlet', 'hoki', 'huchen', 'hussar', 'icefish', 'ide', 'ilish', 'inanga', 
+        'inconnu', 'kahawai', 'kaluga', 'kokanee', 'kokopu', 'ladyfish', 'lenok', 'limia', 
+        'louvar', 'luderick', 'lumpsucker', 'mahseer', 'medaka', 'menhaden', 'mojarra', 'mola', 
+        'monchong', 'mooneye', 'moonfish', 'mora', 'morwong', 'mrigal', 'mummichog', 'nase', 
+        'notothen', 'oarfish', 'oldwife', 'opah', 'opaleye', 'orfe', 'panga', 'parore', 
+        'peamouth', 'pearleye', 'pleco', 'poacher', 'pomfret', 'powen', 'quillback', 'quillfish', 
+        'rasbora', 'rohu', 'ronquil', 'roosterfish', 'ruffe', 'sabertooth', 'sablefish', 'scat', 
+        'scup', 'shiner', 'sillago', 'skate', 'skilfish', 'sleeper', 'slickhead', 'slimehead', 
+        'snook', 'sprat', 'squeaker', 'stargazer', 'steelhead', 'stonecat', 'sucker', 'tailor', 
+        'taimen', 'tang', 'tarpon', 'tarwhine', 'tenpounder', 'thornfish', 'threadfin', 'tope', 
+        'torpedo', 'trahira', 'treefish', 'tripletail', 'trumpeter', 'trunkfish', 'uaru', 
+        'vanjaram', 'vendace', 'vimba', 'walu', 'warmouth', 'whiff', 'wobbegong', 'wrasse', 
+        'zander', 'zingel', 'humuhumunukunukuapua\'a'
+    ];
+
+    const downloadAllCategories = async () => {
+        await loadDictionary();
+        const categories = {
+            'All_Words': dictionary,
+            'Hyphenated': dictionary.filter(w => w.includes('-')),
+            'Long_Words': dictionary.filter(w => w.length >= 20),
+            'Short_Words': dictionary.filter(w => w.length >= 2 && w.length <= 4),
+            'Phobias': dictionary.filter(w => { const low = w.toLowerCase(); return low.includes('phobia') || low.includes('phobias') || low.includes('phobic'); }),
+            'Apostrophes': dictionary.filter(w => w.includes("'")),
+            'Casual': dictionary.filter(w => {
+                const rareChars = ['x', 'q', 'z', 'j'];
+                const low = w.toLowerCase();
+                return w.length >= 4 && w.length <= 8 && !rareChars.some(c => low.includes(c));
+            }),
+            'Fish_Species': FISH_KEYWORDS
+        };
+
+        let content = `JKLM POWER TOOLS - CATEGORY EXPORT (v${SCRIPT_VERSION})\n`;
+        content += `Generated: ${new Date().toLocaleString()}\n`;
+        content += `====================================================\n\n`;
+
+        for (const [name, list] of Object.entries(categories)) {
+            content += `[ CATEGORY: ${name} (${list.length} words) ]\n`;
+            content += `----------------------------------------------------\n`;
+            content += list.join('\n');
+            content += `\n\n`;
+        }
+
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `JKLM-Power-Tools-Categories.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     // --- Local Music Player ---
     const dictionaryUrls = {
@@ -1316,6 +1416,25 @@
                         </div>
                     </div>
 
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">🔑</div>
+                            <span>Admin Access</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div class="settings-row" style="cursor: default; flex-direction: column; align-items: stretch; gap: 15px;">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-weight: 700; font-size: 15px;">Admin Password</span>
+                                    <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Enter the admin password to unlock secret features.</span>
+                                </div>
+                                <input type="password" id="admin-password-input" class="modern-input" placeholder="Enter Password..." style="width: 100%; font-weight: 700; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--pt-glass-border);">
+                                <button class="modern-button" id="admin-download-all" style="width: 100%; display: none; background: var(--pt-theme-color); color: white; box-shadow: var(--pt-glow-effect);">
+                                    <span>📥</span> Download All Category Lists
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div style="display: flex; flex-direction: column; align-items: center; padding: 40px 20px; gap: 15px;">
                         <div style="font-size: 11px; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; color: var(--pt-theme-color); opacity: 0.8; text-shadow: 0 0 15px rgba(var(--pt-theme-color-rgb), 0.4);">
                             JKLM POWER TOOLS
@@ -1462,43 +1581,7 @@
                 };
 
                 ensureDictionary().then(() => {
-                    const fishKeywords = [
-                        'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
-                        'pike', 'perch', 'snapper', 'grouper', 'marlin', 'swordfish', 'stingray', 'ray', 
-                        'flounder', 'halibut', 'sole', 'mullet', 'sardine', 'anchovy', 'herring', 'barracuda', 
-                        'piranha', 'tilapia', 'catfish', 'guppy', 'goldfish', 'clownfish', 'angelfish', 
-                        'betta', 'tetra', 'molly', 'platy', 'danio', 'loach', 'discus', 'gourami', 'oscar', 
-                        'cichlid', 'sturgeon', 'gar', 'bowfin', 'lungfish', 'lamprey', 'hagfish', 'coelacanth',
-                        'mahimahi', 'wahoo', 'walleye', 'muskellunge', 'bluegill', 'crappie', 'sunfish', 'shad', 
-                        'minnow', 'dace', 'roach', 'tench', 'bream', 'chub', 'barbel', 'grayling', 'char', 
-                        'whitefish', 'smelt', 'capelin', 'hake', 'pollock', 'haddock', 'whiting', 'ling', 
-                        'burbot', 'angler', 'monkfish', 'batfish', 'frogfish', 'needlefish', 'flyingfish', 
-                        'seahorse', 'pipefish', 'stickleback', 'sculpin', 'lionfish', 'rockfish', 'tilefish', 
-                        'remora', 'jack', 'pompano', 'dorado', 'porgy', 'drum', 'croaker', 'surmullet', 
-                        'goatfish', 'archerfish', 'leaffish', 'snakehead', 'turbot', 'plaice', 'dab', 'puffer', 
-                        'boxfish', 'triggerfish', 'filefish', 'albacore', 'alewife', 'alfonsino', 'amberjack', 
-                        'anemonefish', 'arapaima', 'arowana', 'ayu', 'bangus', 'barracudina', 'barramundi', 
-                        'bichir', 'bitterling', 'bleak', 'blenny', 'blobfish', 'blowfish', 'boga', 'bonefish', 
-                        'bonito', 'bonytail', 'brill', 'brotula', 'candiru', 'catalufa', 'catla', 'cisco', 
-                        'cobia', 'coley', 'cornetfish', 'cusk', 'damselfish', 'dartfish', 'dealfish', 'dhufish', 
-                        'dory', 'dottyback', 'dragonet', 'driftfish', 'escolar', 'eulachon', 'fangtooth', 
-                        'fierasfer', 'flier', 'garibaldi', 'goldeye', 'grunion', 'grunt', 'grunter', 'gudgeon', 
-                        'halosaur', 'hamlet', 'hoki', 'huchen', 'hussar', 'icefish', 'ide', 'ilish', 'inanga', 
-                        'inconnu', 'kahawai', 'kaluga', 'kokanee', 'kokopu', 'ladyfish', 'lenok', 'limia', 
-                        'louvar', 'luderick', 'lumpsucker', 'mahseer', 'medaka', 'menhaden', 'mojarra', 'mola', 
-                        'monchong', 'mooneye', 'moonfish', 'mora', 'morwong', 'mrigal', 'mummichog', 'nase', 
-                        'notothen', 'oarfish', 'oldwife', 'opah', 'opaleye', 'orfe', 'panga', 'parore', 
-                        'peamouth', 'pearleye', 'pleco', 'poacher', 'pomfret', 'powen', 'quillback', 'quillfish', 
-                        'rasbora', 'rohu', 'ronquil', 'roosterfish', 'ruffe', 'sabertooth', 'sablefish', 'scat', 
-                        'scup', 'shiner', 'sillago', 'skate', 'skilfish', 'sleeper', 'slickhead', 'slimehead', 
-                        'snook', 'sprat', 'squeaker', 'stargazer', 'steelhead', 'stonecat', 'sucker', 'tailor', 
-                        'taimen', 'tang', 'tarpon', 'tarwhine', 'tenpounder', 'thornfish', 'threadfin', 'tope', 
-                        'torpedo', 'trahira', 'treefish', 'tripletail', 'trumpeter', 'trunkfish', 'uaru', 
-                        'vanjaram', 'vendace', 'vimba', 'walu', 'warmouth', 'whiff', 'wobbegong', 'wrasse', 
-                            'zander', 'zingel', 'humuhumunukunukuapua\'a'
-                        ];
-
-                    let words = wordType === 'Fish' ? [...fishKeywords] : [...dictionary];
+                    let words = wordType === 'Fish' ? [...FISH_KEYWORDS] : [...dictionary];
                     
                     const minLen = getMinWordLength();
                     const maxLen = getMaxWordLength();
@@ -1710,6 +1793,14 @@
                     updateAdminContent();
                     return;
                 }
+
+                if (e.target.id === 'admin-download-all') {
+                    const pass = document.getElementById('admin-password-input')?.value;
+                    if (pass === 'VnHj]/|MiPuI7oz4JVTGQiq~#Sf7gt9eJq1up0d;(>jkt/1MB') {
+                        downloadAllCategories();
+                    }
+                    return;
+                }
             });
 
             adminPage.addEventListener('change', (e) => {
@@ -1731,6 +1822,16 @@
                     const span = document.getElementById('val-admin-border-radius');
                     if (span) span.innerText = val;
                     updateThemeStyles();
+                }
+                if (e.target.id === 'admin-password-input') {
+                    const downloadBtn = document.getElementById('admin-download-all');
+                    if (downloadBtn) {
+                        if (e.target.value === 'VnHj]/|MiPuI7oz4JVTGQiq~#Sf7gt9eJq1up0d;(>jkt/1MB') {
+                            downloadBtn.style.display = 'block';
+                        } else {
+                            downloadBtn.style.display = 'none';
+                        }
+                    }
                 }
             });
 
