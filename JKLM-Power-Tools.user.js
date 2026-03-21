@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      15.0
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.0)
+// @version      15.1
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.1)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '15.0';
+    const SCRIPT_VERSION = '15.1';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1219,21 +1219,6 @@
 
                             <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
                                 <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
-                                    <span>Background Effect</span>
-                                    <span style="color: var(--pt-theme-color);">SELECT</span>
-                                </div>
-                                <select class="modern-input" id="admin-animation-select" style="font-weight: 700; appearance: none; cursor: pointer;">
-                                    <option value="slideIn" ${animationType === 'slideIn' ? 'selected' : ''}>Standard (Glass)</option>
-                                    <option value="animated-mesh" ${animationType === 'animated-mesh' ? 'selected' : ''}>Mesh Gradient</option>
-                                    <option value="animated-matrix" ${animationType === 'animated-matrix' ? 'selected' : ''}>Matrix Rain</option>
-                                    <option value="effect-stars" ${animationType === 'effect-stars' ? 'selected' : ''}>Starry Night</option>
-                                    <option value="effect-waves" ${animationType === 'effect-waves' ? 'selected' : ''}>Ocean Waves</option>
-                                    <option value="effect-neon" ${animationType === 'effect-neon' ? 'selected' : ''}>Neon Grid</option>
-                                </select>
-                            </div>
-
-                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
                                     <span>Word Length</span>
                                     <span style="color: var(--pt-theme-color);"><span id="val-dict-min-len">${minLen}</span> - <span id="val-dict-max-len">${maxLen}</span> chars</span>
                                 </div>
@@ -1305,6 +1290,7 @@
                 const borderRadius = getBorderRadius();
                 const clockEnabled = getClockEnabled();
                 const panelPosition = getPanelPosition();
+                const animationType = getAnimationType();
                 adminTab.title = t.adminHeader;
 
                 adminPage.innerHTML = `
@@ -1321,6 +1307,21 @@
                                     <span style="font-size: 11px; font-weight: 800; color: var(--pt-text-muted); letter-spacing: 2px; text-transform: uppercase;">ACCENT COLOR</span>
                                     <input type="color" class="custom-theme-picker" id="admin-theme-picker" value="${themeColor}" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,0.1); cursor: pointer;">
                                 </div>
+                            </div>
+
+                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
+                                    <span>Background Effect</span>
+                                    <span style="color: var(--pt-theme-color);">SELECT</span>
+                                </div>
+                                <select class="modern-input" id="admin-animation-select" style="font-weight: 700; appearance: none; cursor: pointer;">
+                                    <option value="slideIn" ${animationType === 'slideIn' ? 'selected' : ''}>Standard (Glass)</option>
+                                    <option value="animated-mesh" ${animationType === 'animated-mesh' ? 'selected' : ''}>Mesh Gradient</option>
+                                    <option value="animated-matrix" ${animationType === 'animated-matrix' ? 'selected' : ''}>Matrix Rain</option>
+                                    <option value="effect-stars" ${animationType === 'effect-stars' ? 'selected' : ''}>Starry Night</option>
+                                    <option value="effect-waves" ${animationType === 'effect-waves' ? 'selected' : ''}>Ocean Waves</option>
+                                    <option value="effect-neon" ${animationType === 'effect-neon' ? 'selected' : ''}>Neon Grid</option>
+                                </select>
                             </div>
 
                             <div class="settings-row" id="toggle-panel-pos" style="padding: 16px 20px;">
