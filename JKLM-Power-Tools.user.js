@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      14.4
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.4)
+// @version      14.5
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v14.5)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '14.4';
+    const SCRIPT_VERSION = '14.5';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -861,41 +861,6 @@
             from { background-position: 0% -100%; }
             to { background-position: 0% 100%; }
         }
-
-        /* Homepage Filters */
-        .homepage-filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-            padding: 10px 0;
-            justify-content: center;
-        }
-
-        .filter-btn {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .filter-btn:hover {
-            background-color: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-
-        .filter-btn.active {
-            background-color: #1e7e34;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-            transform: translateY(0);
-        }
     `;
     document.head.appendChild(style);
 
@@ -947,147 +912,6 @@
         });
     };
     updateThemeStyles();
-
-    // --- Homepage Filters Logic ---
-    const getStoredLobbyFilter = () => GM_getValue('currentLobbyFilter', { type: 'all', value: '', synonyms: [] });
-    const setStoredLobbyFilter = (val) => GM_setValue('currentLobbyFilter', val);
-
-    let currentLobbyFilter = getStoredLobbyFilter();
-
-    const applyLobbyFilter = () => {
-        // Broad search for any element that could be a room entry
-        const entries = document.querySelectorAll('.publicRooms > a, .publicRooms > div, .lobbies > a, .lobbies > div, a[href^="/"], div[class*="room"], div[class*="lobby"]');
-        const container = document.querySelector('.publicRooms, .lobbies, .rooms');
-        
-        if (entries.length === 0) return;
-
-        // Force a clean grid layout for "straight" and gapless appearance
-        if (container) {
-            container.style.setProperty('display', 'grid', 'important');
-            container.style.setProperty('grid-template-columns', 'repeat(auto-fill, minmax(300px, 1fr))', 'important');
-            container.style.setProperty('gap', '15px', 'important');
-            container.style.setProperty('padding', '20px', 'important');
-            // Remove any JKLM-specific positioning that might cause gaps
-            container.style.setProperty('height', 'auto', 'important');
-            container.style.setProperty('position', 'relative', 'important');
-        }
-
-        entries.forEach(entry => {
-            // Only process elements that look like room tickets (usually have a room code or specific game text)
-            const isTicket = entry.textContent.includes('(') || entry.querySelector('img') || entry.querySelector('.roomCode');
-            if (!isTicket) return;
-
-            if (currentLobbyFilter.type === 'all') {
-                entry.style.setProperty('display', 'flex', 'important');
-                entry.style.setProperty('order', '0', 'important');
-                entry.style.setProperty('visibility', 'visible', 'important');
-                entry.style.setProperty('position', 'relative', 'important');
-            } else {
-                const text = entry.textContent.toLowerCase();
-                const alt = Array.from(entry.querySelectorAll('img')).map(i => i.alt.toLowerCase()).join(' ');
-                const searchable = `${text} ${alt}`;
-                
-                let match = false;
-                if (currentLobbyFilter.type === 'language') {
-                    const terms = [currentLobbyFilter.value.toLowerCase(), ...(currentLobbyFilter.synonyms || [])];
-                    // Look specifically for the language name, especially in parentheses like "(English)"
-                    match = terms.some(t => searchable.includes(t) || searchable.includes(`(${t})`));
-                } else if (currentLobbyFilter.type === 'game') {
-                    const game = currentLobbyFilter.value.toLowerCase();
-                    match = searchable.includes(game);
-                }
-
-                if (match) {
-                    entry.style.setProperty('display', 'flex', 'important');
-                    entry.style.setProperty('order', '-1', 'important');
-                    entry.style.setProperty('visibility', 'visible', 'important');
-                    entry.style.setProperty('position', 'relative', 'important');
-                } else {
-                    // Using both display:none and absolute positioning as fallback to ensure it's GONE
-                    entry.style.setProperty('display', 'none', 'important');
-                    entry.style.setProperty('position', 'absolute', 'important');
-                    entry.style.setProperty('visibility', 'hidden', 'important');
-                }
-            }
-        });
-    };
-
-    GM_addValueChangeListener('currentLobbyFilter', (name, oldVal, newVal) => {
-        currentLobbyFilter = newVal;
-        applyLobbyFilter();
-        // Update active class on buttons if they exist in this context
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            if (btn.innerText === currentLobbyFilter.label || (btn.innerText === 'All' && currentLobbyFilter.type === 'all')) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-    });
-
-    const initHomepageFilters = () => {
-        // Run in both main page and iframes to ensure coverage
-        const isLobbyPage = window.location.pathname === '/' || 
-                           window.location.hostname.includes('jklm.fun') ||
-                           document.querySelector('.lobbies, .rooms, .publicRooms');
-        
-        if (!isLobbyPage) return;
-        
-        const lobbyObserver = new MutationObserver(() => {
-            const lobbiesContainer = document.querySelector('.lobbies') || document.querySelector('.rooms') || document.querySelector('.publicRooms') || document.querySelector('main .content');
-            
-            if (lobbiesContainer) {
-                if (!document.querySelector('.homepage-filters')) {
-                    const filtersContainer = document.createElement('div');
-                    filtersContainer.className = 'homepage-filters';
-                    
-                    const filterOptions = [
-                        { label: 'All', type: 'all' },
-                        { label: 'French', type: 'language', value: 'French', synonyms: ['français', 'french', 'fr', '🇫🇷'] },
-                        { label: 'English', type: 'language', value: 'English', synonyms: ['english', 'en', '🇬🇧', '🇺🇸'] },
-                        { label: 'Spanish', type: 'language', value: 'Spanish', synonyms: ['español', 'spanish', 'es', '🇪🇸'] },
-                        { label: 'German', type: 'language', value: 'German', synonyms: ['deutsch', 'german', 'de', '🇩🇪'] },
-                        { label: 'Italian', type: 'language', value: 'Italian', synonyms: ['italiano', 'italian', 'it', '🇮🇹'] },
-                        { label: 'Portuguese', type: 'language', value: 'Portuguese', synonyms: ['português', 'portuguese', 'pt', '🇵🇹', '🇧🇷'] },
-                        { label: 'Bombparty', type: 'game', value: 'Bombparty' },
-                        { label: 'Popsauce', type: 'game', value: 'Popsauce' }
-                    ];
-                    
-                    filterOptions.forEach(opt => {
-                        const btn = document.createElement('button');
-                        btn.className = 'filter-btn';
-                        btn.innerText = opt.label;
-                        
-                        // Set initial active state based on stored filter
-                        if (opt.type === currentLobbyFilter.type && (opt.value === currentLobbyFilter.value || opt.type === 'all')) {
-                            btn.classList.add('active');
-                        }
-                        
-                        btn.onclick = (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            const newFilter = { type: opt.type, value: opt.value || '', synonyms: opt.synonyms || [], label: opt.label };
-                            setStoredLobbyFilter(newFilter);
-                            // The listener will trigger applyLobbyFilter
-                        };
-                        filtersContainer.appendChild(btn);
-                    });
-                    lobbiesContainer.before(filtersContainer);
-                }
-                applyLobbyFilter();
-            }
-        });
-        
-        lobbyObserver.observe(document.body, { childList: true, subtree: true });
-        
-        setInterval(() => {
-            const container = document.querySelector('.lobbies, .rooms, .publicRooms');
-            if (container && !document.querySelector('.homepage-filters') && window.top === window.self) {
-                 document.body.appendChild(document.createTextNode(' ')); // Trigger observer
-            }
-            applyLobbyFilter();
-        }, 1500);
-    };
 
     let lastDetectedSyllable = '';
     let isGameRunning = false;
@@ -1934,12 +1758,8 @@
 
     // Initial check
     init();
-    initHomepageFilters();
     // Fallbacks
     setTimeout(init, 1000);
-    setTimeout(initHomepageFilters, 1000);
     setTimeout(init, 3000);
-    setTimeout(initHomepageFilters, 3000);
     setTimeout(init, 6000);
-    setTimeout(initHomepageFilters, 6000);
 })();
