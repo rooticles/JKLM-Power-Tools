@@ -861,6 +861,41 @@
             from { background-position: 0% -100%; }
             to { background-position: 0% 100%; }
         }
+
+        /* Homepage Filters */
+        .homepage-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-btn:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .filter-btn.active {
+            background-color: #1e7e34;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+            transform: translateY(0);
+        }
     `;
     document.head.appendChild(style);
 
@@ -912,6 +947,77 @@
         });
     };
     updateThemeStyles();
+
+    // --- Homepage Filters Logic ---
+    let currentLobbyFilter = { type: 'all', value: '' };
+
+    const applyLobbyFilter = () => {
+        const lobbiesContainer = document.querySelector('.lobbies') || document.querySelector('.rooms') || document.querySelector('.publicRooms');
+        if (!lobbiesContainer) return;
+
+        const lobbies = Array.from(lobbiesContainer.children);
+        lobbies.forEach(lobby => {
+            if (currentLobbyFilter.type === 'all') {
+                lobby.style.display = '';
+            } else {
+                const text = lobby.innerText.toLowerCase();
+                let match = false;
+                if (currentLobbyFilter.type === 'language') {
+                    match = text.includes(currentLobbyFilter.value.toLowerCase());
+                } else if (currentLobbyFilter.type === 'game') {
+                    match = text.includes(currentLobbyFilter.value.toLowerCase());
+                }
+                lobby.style.display = match ? '' : 'none';
+            }
+        });
+    };
+
+    const initHomepageFilters = () => {
+        if (window.location.pathname !== '/' && !window.location.hostname.includes('jklm.fun')) return;
+        
+        const lobbyObserver = new MutationObserver(() => {
+            const lobbiesContainer = document.querySelector('.lobbies') || document.querySelector('.rooms') || document.querySelector('.publicRooms');
+            
+            if (lobbiesContainer) {
+                if (!document.querySelector('.homepage-filters')) {
+                    const filtersContainer = document.createElement('div');
+                    filtersContainer.className = 'homepage-filters';
+                    
+                    const filterOptions = [
+                        { label: 'All', type: 'all' },
+                        { label: 'French', type: 'language', value: 'French' },
+                        { label: 'English', type: 'language', value: 'English' },
+                        { label: 'Spanish', type: 'language', value: 'Spanish' },
+                        { label: 'German', type: 'language', value: 'German' },
+                        { label: 'Italian', type: 'language', value: 'Italian' },
+                        { label: 'Portuguese', type: 'language', value: 'Portuguese' },
+                        { label: 'Bombparty', type: 'game', value: 'Bombparty' },
+                        { label: 'Popsauce', type: 'game', value: 'Popsauce' }
+                    ];
+                    
+                    filterOptions.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'filter-btn';
+                        btn.innerText = opt.label;
+                        if (opt.type === 'all') btn.classList.add('active');
+                        
+                        btn.onclick = () => {
+                            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            currentLobbyFilter = { type: opt.type, value: opt.value || '' };
+                            applyLobbyFilter();
+                        };
+                        filtersContainer.appendChild(btn);
+                    });
+                    lobbiesContainer.before(filtersContainer);
+                }
+                // Re-apply filter in case new lobbies were added
+                applyLobbyFilter();
+            }
+        });
+        
+        lobbyObserver.observe(document.body, { childList: true, subtree: true });
+    };
 
     let lastDetectedSyllable = '';
     let isGameRunning = false;
@@ -1758,8 +1864,12 @@
 
     // Initial check
     init();
+    initHomepageFilters();
     // Fallbacks
     setTimeout(init, 1000);
+    setTimeout(initHomepageFilters, 1000);
     setTimeout(init, 3000);
+    setTimeout(initHomepageFilters, 3000);
     setTimeout(init, 6000);
+    setTimeout(initHomepageFilters, 6000);
 })();
