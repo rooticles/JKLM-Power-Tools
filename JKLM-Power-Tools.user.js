@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      13.8
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v13.8)
+// @version      13.9
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v13.9)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -20,105 +20,56 @@
 (function () {
     'use strict';
 
-    // --- Global Patch for JKLM & Overlay Bugs ---
+    const SCRIPT_VERSION = '13.9';
+
+    // --- 1. Global Stability Patches ---
     const patchGlobalBugs = () => {
         try {
             const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
             
-            // --- Global Error Suppressor (Unbreakable Mode) ---
             win.addEventListener('error', (event) => {
                 const msg = event.message || '';
-                const ignoredErrors = [
-                    'addEventListener', 'milestones', 'socket', 'undefined', 'null',
-                    'PartyPlus', 'overlay.js', 'falcon.jklm.fun'
-                ];
+                const ignoredErrors = ['addEventListener', 'milestones', 'socket', 'undefined', 'null', 'PartyPlus', 'overlay.js', 'falcon.jklm.fun'];
                 if (ignoredErrors.some(err => msg.includes(err))) {
                     event.stopImmediatePropagation();
                     event.preventDefault();
                 }
             }, true);
 
-            // --- Service Worker Suppression (Performance Patch) ---
-            // Prevents no-op fetch handlers from bringing overhead during navigation
             if (win.navigator.serviceWorker) {
-                win.navigator.serviceWorker.getRegistrations().then(registrations => {
-                    for (let registration of registrations) {
-                        registration.unregister();
-                    }
-                });
-                win.navigator.serviceWorker.register = () => {
-                    return new Promise(() => {}); // Do nothing
-                };
+                win.navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+                win.navigator.serviceWorker.register = () => new Promise(() => {});
             }
 
-            // Fix JKLM 'chatUnreadHighlightCount' ReferenceError
-            if (typeof win.chatUnreadHighlightCount === 'undefined') {
-                win.chatUnreadHighlightCount = 0;
-            }
+            if (typeof win.chatUnreadHighlightCount === 'undefined') win.chatUnreadHighlightCount = 0;
 
-            // --- Audio Autoplay Resilience ---
-            // Fixes "AudioContext was not allowed to start" error
             const resumeAudio = () => {
-                const contexts = [win.AudioContext, win.webkitAudioContext];
-                contexts.forEach(Ctx => {
-                    if (Ctx && Ctx.prototype) {
-                        const originalResume = Ctx.prototype.resume;
-                        // We don't necessarily need to wrap it, but we can proactively try to resume
-                    }
-                });
-
                 const triggerResume = () => {
                     const audioCtxs = [win.audioContext, win.AudioContext, win.webkitAudioContext, win.room?.audioContext];
-                    audioCtxs.forEach(ctx => {
-                        if (ctx && typeof ctx === 'object' && ctx.state === 'suspended') {
-                            ctx.resume().catch(() => {});
-                        }
-                    });
+                    audioCtxs.forEach(ctx => { if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {}); });
                 };
-
-                // Resume on first user interaction
-                ['click', 'keydown', 'touchstart', 'mousedown'].forEach(evt => {
-                    win.addEventListener(evt, triggerResume, { once: true, capture: true });
-                });
+                ['click', 'keydown', 'touchstart', 'mousedown'].forEach(evt => win.addEventListener(evt, triggerResume, { once: true, capture: true }));
             };
             resumeAudio();
 
-            // --- Ultra Stability Patch (v5 - Ultimate Edition) ---
-            // This is the absolute final fix for "Cannot read properties of undefined (reading 'addEventListener')"
-            
             const createRecursiveProxy = (name = 'root') => {
                 const noop = () => {};
                 const handler = {
                     get: (target, prop) => {
-                        if (prop === 'then') return undefined;
-                        if (prop === 'toJSON') return () => ({});
-                        if (typeof prop === 'symbol') return undefined;
-                        
-                        const methods = [
-                            'addEventListener', 'removeEventListener', 'on', 'off', 'emit', 
-                            'dispatchEvent', 'setMilestone', 'trigger', 'dispatch', 'join', 
-                            'leave', 'send', 'connect', 'disconnect'
-                        ];
-                        if (methods.includes(prop)) return noop;
-                        
-                        return createRecursiveProxy(`${name}.${prop.toString()}`);
+                        if (prop === 'then' || prop === 'toJSON' || typeof prop === 'symbol') return undefined;
+                        const methods = ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'dispatchEvent', 'setMilestone', 'trigger', 'dispatch', 'join', 'leave', 'send', 'connect', 'disconnect'];
+                        return methods.includes(prop) ? noop : createRecursiveProxy(`${name}.${prop.toString()}`);
                     },
-                    apply: (target, thisArg, args) => {
-                        return createRecursiveProxy(`${name}()`);
-                    }
+                    apply: () => createRecursiveProxy(`${name}()`)
                 };
                 return new Proxy(noop, handler);
             };
 
-            // The "Nuclear Option": Ensure 'milestones' property exists on EVERY object in the JS environment
             if (win.Object && typeof win.Object.prototype.milestones === 'undefined') {
                 let _globalMilestones = win.milestones || createRecursiveProxy('milestones');
                 Object.defineProperty(win.Object.prototype, 'milestones', {
                     get: function() { return _globalMilestones; },
-                    set: function(val) { 
-                        if (this === win) _globalMilestones = val;
-                        else this._milestones = val; 
-                    },
+                    set: function(val) { if (this === win) _globalMilestones = val; else this._milestones = val; },
                     configurable: true
                 });
             }
@@ -129,110 +80,67 @@
                     get: () => _val,
                     set: (val) => { 
                         if (val && typeof val === 'object') {
-                            ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'setMilestone'].forEach(m => {
-                                if (typeof val[m] === 'undefined') val[m] = () => {};
-                            });
+                            ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'setMilestone'].forEach(m => { if (typeof val[m] === 'undefined') val[m] = () => {}; });
                             _val = val; 
                         }
                     },
                     configurable: true
                 });
             };
-
-            // Patch global objects
             ['milestones', 'game', 'socket', 'room', 'client', 'roomProxy'].forEach(safeProxy);
 
-            // Continously monitor for Socket/Emitter definitions to patch prototypes
             const patchPrototypes = () => {
                 ['Socket', 'Emitter', 'EventEmitter', 'Room', 'Client'].forEach(objName => {
                     const Proto = win[objName] && win[objName].prototype;
-                    if (Proto) {
-                        ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'setMilestone', 'trigger'].forEach(m => {
-                            if (typeof Proto[m] === 'undefined') Proto[m] = () => {};
-                        });
-                    }
+                    if (Proto) ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'setMilestone', 'trigger'].forEach(m => { if (typeof Proto[m] === 'undefined') Proto[m] = () => {}; });
                 });
             };
-            
             patchPrototypes();
             setTimeout(patchPrototypes, 500);
-            setTimeout(patchPrototypes, 2000);
             setTimeout(patchPrototypes, 5000);
-
-        } catch (e) {
-            console.warn('[JKLM Power Tools] Stability patch failed:', e);
-        }
-    };
-    patchGlobalBugs();
-
-    const SCRIPT_VERSION = '13.8';
-
-    // --- Performance Helpers ---
-    const debounce = (func, wait) => {
-        let timeout;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
+        } catch (e) { console.warn('[JKLM Power Tools] Stability patch failed:', e); }
     };
 
-    // --- Storage Helpers ---
-    const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
-    const setEnabled = (val) => GM_setValue('spaceToHyphenEnabled', val);
-    const getChatEnabled = () => GM_getValue('spaceToHyphenChatEnabled', false);
-    const setChatEnabled = (val) => GM_setValue('spaceToHyphenChatEnabled', val);
-
-    const getDictLanguage = () => GM_getValue('dictLanguage', 'English');
-    const setDictLanguage = (val) => GM_setValue('dictLanguage', val);
-    const getSearchMode = () => GM_getValue('dictSearchMode', 'Contains');
-    const setSearchMode = (val) => GM_setValue('dictSearchMode', val);
-    const getWordType = () => GM_getValue('dictWordType', 'All');
-    const setWordType = (val) => GM_setValue('dictWordType', val);
-    const getCustomDictionary = () => GM_getValue('customDictionary', []);
-    const setCustomDictionary = (val) => GM_setValue('customDictionary', val);
-    const getSidebarWidth = () => GM_getValue('sidebarWidth', 650);
-    const setSidebarWidth = (val) => GM_setValue('sidebarWidth', val);
-    const getThemeColor = () => GM_getValue('themeColor', '#00d2ff');
-    const setThemeColor = (val) => GM_setValue('themeColor', val);
-
-    const getLanguage = () => 'English';
-
-    const getBorderRadius = () => GM_getValue('borderRadius', 16);
-    const setBorderRadius = (val) => GM_setValue('borderRadius', val);
-    const getClockEnabled = () => GM_getValue('clockEnabled', true);
-    const setClockEnabled = (val) => GM_setValue('clockEnabled', val);
-    const getAnimationType = () => GM_getValue('animationType', 'slideIn');
-    const setAnimationType = (val) => GM_setValue('animationType', val);
-
-    const getSearchHistory = () => GM_getValue('searchHistory', []);
-    const setSearchHistory = (val) => GM_setValue('searchHistory', val);
-
-    // --- New Features Storage ---
-    const getNotes = () => GM_getValue('notes', []);
-    const setNotes = (val) => GM_setValue('notes', val);
-    const getToggleKey = () => GM_getValue('toggleKey', 'F2');
-    const setToggleKey = (val) => GM_setValue('toggleKey', val);
-    const getPanelPosition = () => GM_getValue('panelPosition', 'right');
-    const setPanelPosition = (val) => GM_setValue('panelPosition', val);
-    const getMinWordLength = () => GM_getValue('minWordLength', 2);
-    const setMinWordLength = (val) => GM_setValue('minWordLength', val);
-    const getMaxWordLength = () => GM_getValue('maxWordLength', 30);
-    const setMaxWordLength = (val) => GM_setValue('maxWordLength', val);
-
-    // --- Chat & Macro Helpers ---
-    const sendToChat = (msg) => {
-        const chatInput = document.querySelector('.chat input, .chat textarea, .chatInput');
-        if (chatInput) {
-            chatInput.value = msg;
-            chatInput.dispatchEvent(new Event('input', { bubbles: true }));
-            chatInput.focus();
-            setTimeout(() => {
-                chatInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true }));
-            }, 50);
-        }
+    // --- 2. Storage & Configuration ---
+    const Config = {
+        get: (key, def) => GM_getValue(key, def),
+        set: (key, val) => GM_setValue(key, val),
+        getEnabled: () => GM_getValue('spaceToHyphenEnabled', false),
+        setEnabled: (val) => GM_setValue('spaceToHyphenEnabled', val),
+        getChatEnabled: () => GM_getValue('spaceToHyphenChatEnabled', false),
+        setChatEnabled: (val) => GM_setValue('spaceToHyphenChatEnabled', val),
+        getDictLanguage: () => GM_getValue('dictLanguage', 'English'),
+        setDictLanguage: (val) => GM_setValue('dictLanguage', val),
+        getSearchMode: () => GM_getValue('dictSearchMode', 'Contains'),
+        setSearchMode: (val) => GM_setValue('dictSearchMode', val),
+        getWordType: () => GM_getValue('dictWordType', 'All'),
+        setWordType: (val) => GM_setValue('dictWordType', val),
+        getCustomDictionary: () => GM_getValue('customDictionary', []),
+        setCustomDictionary: (val) => GM_setValue('customDictionary', val),
+        getSidebarWidth: () => GM_getValue('sidebarWidth', 650),
+        setSidebarWidth: (val) => GM_setValue('sidebarWidth', val),
+        getThemeColor: () => GM_getValue('themeColor', '#00d2ff'),
+        setThemeColor: (val) => GM_setValue('themeColor', val),
+        getBorderRadius: () => GM_getValue('borderRadius', 16),
+        setBorderRadius: (val) => GM_setValue('borderRadius', val),
+        getClockEnabled: () => GM_getValue('clockEnabled', true),
+        setClockEnabled: (val) => GM_setValue('clockEnabled', val),
+        getAnimationType: () => GM_getValue('animationType', 'slideIn'),
+        setAnimationType: (val) => GM_setValue('animationType', val),
+        getSearchHistory: () => GM_getValue('searchHistory', []),
+        setSearchHistory: (val) => GM_setValue('searchHistory', val),
+        getNotes: () => GM_getValue('notes', []),
+        setNotes: (val) => GM_setValue('notes', val),
+        getToggleKey: () => GM_getValue('toggleKey', 'F2'),
+        setToggleKey: (val) => GM_setValue('toggleKey', val),
+        getPanelPosition: () => GM_getValue('panelPosition', 'right'),
+        setPanelPosition: (val) => GM_setValue('panelPosition', val),
+        getMinWordLength: () => GM_getValue('minWordLength', 2),
+        setMinWordLength: (val) => GM_setValue('minWordLength', val),
+        getMaxWordLength: () => GM_getValue('maxWordLength', 30),
+        setMaxWordLength: (val) => GM_setValue('maxWordLength', val)
     };
 
-    // --- Translations ---
     const translations = {
         'English': {
             kbHeader: '🚀 Keyboard Settings',
@@ -257,19 +165,8 @@
             adminHeader: '⚙️ Design & System',
             adminVisualHeader: '🎨 Visual Design',
             adminThemeLabel: 'Accent Color:',
-            adminCppHeader: '🖼️ Custom Profile Picture',
-            adminCppDesc: 'Upload an image (local):',
-            adminCppBtn: 'Apply Profile Picture',
-            adminCppError: 'File too large (>10Kb).',
-            adminCppSuccess: 'Applied successfully.',
             adminSidebarWidthLabel: 'Panel Width (pixels):',
             adminMinLabel: 'Minimum: 180.',
-            adminLoginHeader: '🛡️ Admin Area',
-            adminUserPlaceholder: 'Username...',
-            adminPassPlaceholder: 'Password...',
-            adminLoginBtn: 'Login',
-            adminLogoutBtn: 'Logout',
-            adminLoginError: 'Invalid credentials!',
             adminGlassLabel: 'Transparency:',
             adminRadiusLabel: 'Corner Softness:',
             adminClockLabel: 'System Clock',
@@ -281,7 +178,6 @@
             dictFoundWords: '{count} words found:',
             dictNoResultsShort: 'No results.',
             english: 'English',
-            // Features
             notesHeader: '📌 Strategy Notes',
             notesDesc: 'Manage your thoughts and strategies.',
             addNote: 'Add Note',
@@ -293,689 +189,40 @@
         }
     };
 
-    // --- Dictionary Logic ---
+    // --- 3. Dictionary & Lobby Logic ---
     let dictionary = [];
     let lowercasedDictionary = [];
     let dictionaryLoaded = false;
     let currentDictLang = '';
-
-    // --- Local Music Player ---
-    const dictionaryUrls = {
-        'English': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/121bf1a601ed822553c2e68c38a4cdcd7737d352/words.txt'
-    };
+    const dictionaryUrls = { 'English': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/121bf1a601ed822553c2e68c38a4cdcd7737d352/words.txt' };
 
     const loadDictionary = async (force = false) => {
-        const lang = getDictLanguage();
+        const lang = Config.getDictLanguage();
         if (dictionaryLoaded && currentDictLang === lang && !force) return;
-
         if (lang === 'Custom') {
-            dictionary = getCustomDictionary();
+            dictionary = Config.getCustomDictionary();
             lowercasedDictionary = dictionary.map(w => w.toLowerCase());
-            dictionaryLoaded = true;
-            currentDictLang = lang;
-            return;
+            dictionaryLoaded = true; currentDictLang = lang; return;
         }
-
         try {
-            const url = dictionaryUrls[lang] || dictionaryUrls['English'];
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Could not load dictionary');
-
-            const text = await response.text();
+            const res = await fetch(dictionaryUrls[lang] || dictionaryUrls['English']);
+            if (!res.ok) throw new Error();
+            const text = await res.text();
             dictionary = text.split('\n').map(w => w.trim()).filter(w => w.length > 0);
             lowercasedDictionary = dictionary.map(w => w.toLowerCase());
-
-            dictionaryLoaded = true;
-            currentDictLang = lang;
-        } catch (err) {
-            console.error('Dictionary load error:', err);
+            dictionaryLoaded = true; currentDictLang = lang;
+        } catch (e) {
             dictionary = ["ERASEMENT", "BIZARRENESSES", "PROMINENT"];
             lowercasedDictionary = dictionary.map(w => w.toLowerCase());
-            dictionaryLoaded = true;
-            currentDictLang = lang;
+            dictionaryLoaded = true; currentDictLang = lang;
         }
     };
 
-    const findWords = (syllable) => {
-        if (!syllable) return [];
-        const search = syllable.toLowerCase();
-        const results = [];
-        for (let i = 0; i < lowercasedDictionary.length; i++) {
-            if (lowercasedDictionary[i].includes(search)) {
-                results.push(dictionary[i]);
-            }
-        }
-        return results;
-    };
-
-    const shuffleArray = (array) => {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    };
-
-    // --- Base64 & Profile Picture Helpers ---
-    function uint6ToB64(nUint6) {
-        return nUint6 < 26 ? nUint6 + 65 : nUint6 < 52 ? nUint6 + 71 : nUint6 < 62 ? nUint6 - 4 : nUint6 === 62 ? 43 : nUint6 === 63 ? 47 : 65;
-    }
-
-    function base64EncArr(aBytes) {
-        let nMod3 = 2;
-        let sB64Enc = "";
-        const nLen = aBytes.length;
-        let nUint24 = 0;
-        for (let nIdx = 0; nIdx < nLen; nIdx++) {
-            nMod3 = nIdx % 3;
-            nUint24 |= aBytes[nIdx] << ((16 >>> nMod3) & 24);
-            if (nMod3 === 2 || aBytes.length - nIdx === 1) {
-                sB64Enc += String.fromCodePoint(
-                    uint6ToB64((nUint24 >>> 18) & 63),
-                    uint6ToB64((nUint24 >>> 12) & 63),
-                    uint6ToB64((nUint24 >>> 6) & 63),
-                    uint6ToB64(nUint24 & 63)
-                );
-                nUint24 = 0;
-            }
-        }
-        return (sB64Enc.substr(0, sB64Enc.length - 2 + nMod3) + (nMod3 === 2 ? "" : nMod3 === 1 ? "=" : "=="));
-    }
-
-    // --- CSS Styles ---
-    const style = document.createElement('style');
-    style.innerHTML = `
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-
-        :root {
-            --pt-theme-color: #8A2BE2; /* Blue Violet */
-            --pt-theme-color-rgb: 138, 43, 226;
-            --pt-bg-color: #1A1A2E; /* Dark Blue */
-            --pt-bg-rgb: 26, 26, 46;
-            --pt-glass-bg: rgba(26, 26, 46, 0.75);
-            --pt-glass-border: rgba(255, 255, 255, 0.1);
-            --pt-card-bg: rgba(255, 255, 255, 0.05);
-            --pt-card-border: rgba(255, 255, 255, 0.1);
-            --pt-border-radius: 16px;
-            --pt-text-color: #E0E0E0; /* Light Gray */
-            --pt-text-muted: #A0A0A0; /* Gray */
-            --pt-panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            --pt-transition: 0.3s ease;
-            --pt-font-main: 'Inter', sans-serif;
-            --pt-font-mono: 'Fira Code', monospace;
-            --pt-accent-gradient: linear-gradient(135deg, var(--pt-theme-color), #FF69B4); /* Hot Pink */
-            --pt-glow-effect: 0 0 20px rgba(var(--pt-theme-color-rgb), 0.4);
-        }
-
-        /* Glassmorphism Scrollbar (Panel only) */
-        .custom-kb-page::-webkit-scrollbar, .custom-dict-page::-webkit-scrollbar, .custom-admin-page::-webkit-scrollbar { width: 8px; height: 8px; }
-        .custom-kb-page::-webkit-scrollbar-track, .custom-dict-page::-webkit-scrollbar-track, .custom-admin-page::-webkit-scrollbar-track { background: transparent; }
-        .custom-kb-page::-webkit-scrollbar-thumb, .custom-dict-page::-webkit-scrollbar-thumb, .custom-admin-page::-webkit-scrollbar-thumb { 
-            background: rgba(255, 255, 255, 0.1); 
-            border-radius: 10px; 
-            border: 2px solid transparent;
-            background-clip: content-box;
-        }
-        .custom-kb-page::-webkit-scrollbar-thumb:hover, .custom-dict-page::-webkit-scrollbar-thumb:hover, .custom-admin-page::-webkit-scrollbar-thumb:hover { background: rgba(var(--pt-theme-color-rgb), 0.5); }
-
-        .custom-nav-row {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end; /* Align to the right under the chat icon */
-            background: transparent;
-            height: 40px;
-            width: 100%;
-            border-bottom: none;
-            position: relative;
-            z-index: 10001;
-            gap: 15px;
-            padding: 0 25px;
-            box-sizing: border-box;
-            margin-top: -5px;
-        }
-
-        .panel-nav {
-            display: flex;
-            align-items: center;
-            height: 80px;
-            margin: -20px -20px 20px -20px;
-            padding: 0 24px;
-            width: calc(100% + 40px);
-            box-sizing: border-box;
-            position: sticky;
-            top: -20px;
-            z-index: 100;
-            background: rgba(27, 31, 59, 0.4);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--pt-glass-border);
-        }
-
-        .panel-title {
-            font-weight: 700;
-            font-size: 22px;
-            color: var(--pt-text-color);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex: 1;
-            letter-spacing: -0.02em;
-        }
-
-        .custom-tab-group {
-            display: flex;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 5px;
-            border-radius: 14px;
-            border: 1px solid var(--pt-glass-border);
-            gap: 5px;
-        }
-
-        .custom-tab {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            font-size: 18px;
-            transition: var(--pt-transition);
-            color: var(--pt-text-muted);
-            position: relative;
-        }
-
-        .custom-tab:hover {
-            color: var(--pt-text-color);
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.05);
-            box-shadow: var(--pt-glow-effect);
-        }
-
-        .custom-tab.active {
-            color: white;
-            background: var(--pt-theme-color);
-            box-shadow: 0 0 20px rgba(var(--pt-theme-color-rgb), 0.5);
-            transform: scale(1.1);
-        }
-
-        .custom-kb-page, .custom-dict-page, .custom-admin-page {
-            display: none;
-            padding: 20px;
-            color: var(--pt-text-color);
-            background: rgba(26, 26, 46, 0.95);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            height: 100vh;
-            overflow-y: auto;
-            overflow-x: hidden;
-            box-sizing: border-box;
-            width: 650px;
-            box-shadow: var(--pt-panel-shadow);
-            position: fixed;
-            top: 0;
-            z-index: 9999;
-            font-family: var(--pt-font-main);
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            border-radius: var(--pt-border-radius);
-            will-change: transform, opacity;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); /* Text shadow for high readability */
-        }
-
-        .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left {
-            left: 0;
-            border-right: 1px solid var(--pt-glass-border);
-            border-left: none;
-            border-top-left-radius: 0;
-            border-bottom-left-radius: 0;
-        }
-
-        .custom-kb-page.pos-right, .custom-dict-page.pos-right, .custom-admin-page.pos-right {
-            right: 0;
-            border-left: 1px solid var(--pt-glass-border);
-            border-right: none;
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-        }
-
-        .custom-kb-page.active, .custom-dict-page.active, .custom-admin-page.active {
-            display: block;
-            animation: fadeInGlass 0.5s ease-out;
-        }
-
-        @keyframes fadeInGlass {
-            from { opacity: 0; backdrop-filter: blur(0px); }
-            to { opacity: 1; backdrop-filter: blur(16px); }
-        }
-
-        .custom-close-x {
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--pt-glass-border);
-            color: var(--pt-text-muted);
-            transition: var(--pt-transition);
-            margin-left: 15px;
-        }
-
-        .custom-close-x:hover {
-            color: #ffffff;
-            background: rgba(239, 68, 68, 0.5);
-            border-color: rgba(239, 68, 68, 0.8);
-            transform: rotate(90deg) scale(1.1);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-        }
-
-        /* Frosted Glass Cards */
-        .feature-card {
-            background: rgba(0, 0, 0, 0.45) !important; /* Darker for high readability */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--pt-border-radius);
-            padding: 24px;
-            margin-bottom: 20px;
-            transition: var(--pt-transition);
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(12px); /* Stronger blur for text isolation */
-        }
-
-        .feature-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(var(--pt-theme-color-rgb), 0.4);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2), var(--pt-glow-effect);
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--pt-accent-gradient);
-            opacity: 0.3;
-        }
-
-        .feature-header {
-            font-weight: 700;
-            font-size: 18px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            color: var(--pt-text-color);
-        }
-
-        .feature-icon {
-            width: 38px;
-            height: 38px;
-            background: rgba(var(--pt-theme-color-rgb), 0.1);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--pt-theme-color);
-            font-size: 20px;
-            box-shadow: inset 0 0 10px rgba(var(--pt-theme-color-rgb), 0.2);
-        }
-
-        /* Glass Inputs */
-        .modern-input {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.6) !important; /* Darker for readability */
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #ffffff !important;
-            padding: 14px 20px;
-            border-radius: var(--pt-border-radius);
-            font-size: 15px;
-            font-family: var(--pt-font-main);
-            transition: var(--pt-transition);
-            outline: none;
-            box-sizing: border-box;
-            backdrop-filter: blur(4px);
-            text-shadow: none; /* No shadow inside inputs for crisp typing */
-        }
-
-        .modern-input option {
-            background-color: #000000 !important; /* Deep black for all browsers */
-            color: #ffffff !important; /* White text for contrast */
-            padding: 12px;
-            font-weight: 500;
-        }
-
-        .modern-input:focus {
-            border-color: var(--pt-theme-color);
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 4px rgba(var(--pt-theme-color-rgb), 0.1), var(--pt-glow-effect);
-            transform: scale(1.02);
-        }
-
-        .modern-button {
-            background: var(--pt-accent-gradient);
-            color: #1B1F3B;
-            border: none;
-            padding: 14px 28px;
-            border-radius: var(--pt-border-radius);
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 15px;
-            transition: var(--pt-transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 8px 16px rgba(var(--pt-theme-color-rgb), 0.3);
-        }
-
-        .modern-button:hover {
-            transform: translateY(-2px) scale(1.03);
-            box-shadow: 0 12px 24px rgba(var(--pt-theme-color-rgb), 0.5), var(--pt-glow-effect);
-            filter: brightness(1.1);
-        }
-
-        .settings-row {
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: var(--pt-transition);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .settings-row:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.1);
-            transform: translateX(4px);
-        }
-
-        .toggle-switch {
-            width: 50px;
-            height: 28px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
-            position: relative;
-            cursor: pointer;
-            transition: var(--pt-transition);
-            border: 1px solid var(--pt-glass-border);
-        }
-
-        .toggle-switch.on {
-            background: var(--pt-theme-color);
-            box-shadow: var(--pt-glow-effect);
-        }
-
-        .toggle-knob {
-            width: 22px;
-            height: 22px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            transition: var(--pt-transition);
-        }
-
-        .toggle-switch.on .toggle-knob {
-            left: 24px;
-        }
-
-        .clickable-word {
-            display: inline-block;
-            padding: 8px 16px;
-            margin: 4px;
-            background: rgba(0, 0, 0, 0.6) !important; /* Darker background */
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: var(--pt-transition);
-            font-weight: 700; /* Bolder */
-            font-size: 14px;
-            color: #ffffff !important;
-            backdrop-filter: blur(4px);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-        }
-
-        .clickable-word:hover {
-            background: var(--pt-theme-color);
-            color: #1B1F3B;
-            transform: translateY(-3px) scale(1.1);
-            box-shadow: var(--pt-glow-effect);
-        }
-
-        .custom-clock {
-            font-family: var(--pt-font-mono);
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--pt-theme-color);
-            background: rgba(var(--pt-theme-color-rgb), 0.1);
-            padding: 6px 14px;
-            border-radius: 10px;
-            border: 1px solid rgba(var(--pt-theme-color-rgb), 0.2);
-            box-shadow: var(--pt-glow-effect);
-        }
-
-        .note-item {
-            background: rgba(0, 0, 0, 0.5) !important; /* Darker for readability */
-            border: 1px solid var(--pt-glass-border);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 16px;
-            transition: var(--pt-transition);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            backdrop-filter: blur(5px);
-        }
-
-        .note-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(var(--pt-theme-color-rgb), 0.4);
-            transform: translateX(10px) translateY(-2px);
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
-        }
-
-        .word-tooltip {
-            position: fixed;
-            background: rgba(var(--pt-bg-rgb), 0.96);
-            backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid var(--pt-theme-color);
-            padding: 20px;
-            border-radius: 22px;
-            z-index: 10002;
-            max-width: 320px;
-            font-size: 14px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
-            pointer-events: none;
-            display: none;
-            color: var(--pt-text-color);
-            line-height: 1.6;
-            animation: tooltipFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes tooltipFade { 
-            from { opacity: 0; transform: translateY(15px) scale(0.95); } 
-            to { opacity: 1; transform: translateY(0) scale(1); } 
-        }
-
-        .note-delete {
-            width: 36px;
-            height: 36px;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            border-radius: 12px;
-            color: #ef4444;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--pt-transition);
-            font-size: 16px;
-        }
-
-        .note-delete:hover {
-            background: #ef4444;
-            color: white;
-            transform: scale(1.15) rotate(90deg);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-        }
-
-        /* Responsive Animations */
-        @keyframes slideInPanelRight {
-            from { transform: translateX(100%) scale(0.96); opacity: 0; filter: blur(10px); }
-            to { transform: translateX(0) scale(1); opacity: 1; filter: blur(0); }
-        }
-
-        @keyframes slideInPanelLeft {
-            from { transform: translateX(-100%) scale(0.96); opacity: 0; filter: blur(10px); }
-            to { transform: translateX(0) scale(1); opacity: 1; filter: blur(0); }
-        }
-
-        /* Animated Themes */
-        .animated-mesh {
-            background: linear-gradient(45deg, #1B1F3B, #2a1f4d, #1b3b3b, #1B1F3B);
-            background-size: 400% 400%;
-            animation: meshGradient 15s ease infinite;
-        }
-        @keyframes meshGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .animated-matrix {
-            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,210,255,0.05) 50%, rgba(0,0,0,0) 100%);
-            background-size: 100% 200%;
-            animation: matrixFlow 4s linear infinite;
-        }
-        @keyframes matrixFlow {
-            from { background-position: 0% -100%; }
-            to { background-position: 0% 100%; }
-        }
-
-        /* Lobby Filter Styles */
-        .pt-filter-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 20px auto;
-            padding: 15px;
-            justify-content: center;
-            max-width: 1200px;
-            background: rgba(0,0,0,0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-        }
-        .pt-filter-btn {
-            background: #26aa36 !important;
-            color: #fff !important;
-            border: none !important;
-            padding: 10px 22px !important;
-            border-radius: 30px !important;
-            font-weight: 800 !important;
-            font-size: 14px !important;
-            cursor: pointer !important;
-            transition: 0.2s ease !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
-            text-transform: capitalize;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .pt-filter-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            filter: brightness(1.2);
-            box-shadow: 0 8px 25px rgba(38, 170, 54, 0.4) !important;
-        }
-        .pt-filter-btn.active {
-            background: #ffffff !important;
-            color: #26aa36 !important;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4) !important;
-            transform: scale(1.05);
-            border: 2px solid #26aa36 !important;
-        }
-    `;
-    document.head.appendChild(style);
-
-    const updateThemeStyles = () => {
-        const themeColor = getThemeColor();
-        const borderRadius = getBorderRadius();
-        const clockEnabled = getClockEnabled();
-        const animationType = getAnimationType();
-        const panelPosition = getPanelPosition();
-
-        const themeRgb = themeColor.match(/[A-Za-z0-9]{2}/g).map(x => parseInt(x, 16)).join(',');
-
-        document.documentElement.style.setProperty('--pt-theme-color', themeColor);
-        document.documentElement.style.setProperty('--pt-theme-color-rgb', themeRgb);
-        document.documentElement.style.setProperty('--pt-bg-color', '#1A1A2E');
-        document.documentElement.style.setProperty('--pt-bg-rgb', '26, 26, 46');
-        document.documentElement.style.setProperty('--pt-glass-bg', 'rgba(26, 26, 46, 0.75)');
-        document.documentElement.style.setProperty('--pt-border-radius', `${borderRadius}px`);
-        document.documentElement.style.setProperty('--pt-accent-gradient', `linear-gradient(135deg, ${themeColor}, #FF69B4)`);
-        document.documentElement.style.setProperty('--pt-glow-effect', `0 0 20px rgba(${themeRgb}, 0.4)`);
-
-        const textColor = '#ffffff';
-        const textMuted = '#A0A0A0';
-        const glassBorder = 'rgba(255, 255, 255, 0.1)';
-
-        document.documentElement.style.setProperty('--pt-text-color', textColor);
-        document.documentElement.style.setProperty('--pt-text-muted', textMuted);
-        document.documentElement.style.setProperty('--pt-glass-border', glassBorder);
-
-        document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
-            p.classList.remove('pos-left', 'pos-right', 'animated-mesh', 'animated-matrix');
-            p.classList.add(`pos-${panelPosition}`);
-            
-            const animName = animationType === 'slideIn' ? `slideInPanel${panelPosition.charAt(0).toUpperCase() + panelPosition.slice(1)}` : animationType;
-            p.style.animation = `${animName} 0.6s cubic-bezier(0.16, 1, 0.3, 1)`;
-            
-            if (animationType === 'animated-mesh') {
-                p.classList.add('animated-mesh');
-                p.style.background = 'transparent';
-                p.style.backdropFilter = 'none';
-            } else if (animationType === 'animated-matrix') {
-                p.classList.add('animated-matrix');
-                p.style.background = 'rgba(0,0,0,0.9)';
-                p.style.backdropFilter = 'blur(10px)';
-            } else {
-                p.style.background = 'rgba(26, 26, 46, 0.95)';
-                p.style.backdropFilter = 'blur(16px)';
-            }
-        });
-    };
-    updateThemeStyles();
-
-    // --- Homepage Lobby Filter Logic ---
     const filterLobbies = (filter) => {
         const rooms = document.querySelectorAll('.publicRooms .entry');
-        if (!rooms.length) return;
-
         rooms.forEach(room => {
-            if (filter === 'All') {
-                room.style.display = 'flex';
-                return;
-            }
-            
-            const text = room.innerText.toLowerCase();
-            const filterLower = filter.toLowerCase();
-            
-            // JKLM room entries often have language indicators (e.g., [EN], [FR], or flag icons)
-            // or explicit game names
-            if (text.includes(filterLower)) {
-                room.style.display = 'flex';
-            } else {
-                room.style.display = 'none';
-            }
+            if (filter === 'All') { room.style.display = 'flex'; return; }
+            room.style.display = room.innerText.toLowerCase().includes(filter.toLowerCase()) ? 'flex' : 'none';
         });
     };
 
@@ -983,884 +230,227 @@
         if (document.getElementById('pt-filter-row')) return;
         const publicRooms = document.querySelector('.publicRooms');
         if (!publicRooms) return;
-
         const filterRow = document.createElement('div');
-        filterRow.id = 'pt-filter-row';
-        filterRow.className = 'pt-filter-row';
-
-        const filters = ['All', 'French', 'English', 'Spanish', 'German', 'Italian', 'Portuguese', 'Bombparty', 'Popsauce'];
-        
-        filters.forEach(f => {
+        filterRow.id = 'pt-filter-row'; filterRow.className = 'pt-filter-row';
+        ['All', 'French', 'English', 'Spanish', 'German', 'Italian', 'Portuguese', 'Bombparty', 'Popsauce'].forEach(f => {
             const btn = document.createElement('button');
             btn.className = 'pt-filter-btn' + (f === 'All' ? ' active' : '');
             btn.innerText = f;
             btn.onclick = (e) => {
                 e.preventDefault();
                 document.querySelectorAll('.pt-filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                filterLobbies(f);
+                btn.classList.add('active'); filterLobbies(f);
             };
             filterRow.appendChild(btn);
         });
-
         publicRooms.before(filterRow);
-        console.log('[JKLM Power Tools] Homepage Filters injected.');
     };
 
-    let lastDetectedSyllable = '';
-    let isGameRunning = false;
+    // --- 4. CSS Styles ---
+    const injectStyles = () => {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            :root {
+                --pt-theme-color: #8A2BE2; --pt-theme-color-rgb: 138, 43, 226;
+                --pt-bg-color: #1A1A2E; --pt-bg-rgb: 26, 26, 46;
+                --pt-glass-bg: rgba(26, 26, 46, 0.75); --pt-glass-border: rgba(255, 255, 255, 0.1);
+                --pt-card-bg: rgba(255, 255, 255, 0.05); --pt-card-border: rgba(255, 255, 255, 0.1);
+                --pt-border-radius: 16px; --pt-text-color: #E0E0E0; --pt-text-muted: #A0A0A0;
+                --pt-panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); --pt-transition: 0.3s ease;
+                --pt-font-main: 'Inter', sans-serif; --pt-font-mono: 'Fira Code', monospace;
+                --pt-accent-gradient: linear-gradient(135deg, var(--pt-theme-color), #FF69B4);
+                --pt-glow-effect: 0 0 20px rgba(var(--pt-theme-color-rgb), 0.4);
+            }
+            .custom-kb-page::-webkit-scrollbar, .custom-dict-page::-webkit-scrollbar, .custom-admin-page::-webkit-scrollbar { width: 8px; }
+            .custom-kb-page::-webkit-scrollbar-thumb, .custom-dict-page::-webkit-scrollbar-thumb, .custom-admin-page::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+            .custom-nav-row { display: flex; align-items: center; justify-content: flex-end; background: transparent; height: 40px; width: 100%; position: relative; z-index: 10001; gap: 15px; padding: 0 25px; box-sizing: border-box; margin-top: -5px; }
+            .panel-nav { display: flex; align-items: center; height: 80px; margin: -20px -20px 20px -20px; padding: 0 24px; width: calc(100% + 40px); position: sticky; top: -20px; z-index: 100; background: rgba(27, 31, 59, 0.4); backdrop-filter: blur(16px); border-bottom: 1px solid var(--pt-glass-border); }
+            .panel-title { font-weight: 700; font-size: 22px; color: var(--pt-text-color); display: flex; align-items: center; gap: 20px; flex: 1; }
+            .custom-tab-group { display: flex; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 14px; border: 1px solid var(--pt-glass-border); gap: 5px; }
+            .custom-tab { display: flex; align-items: center; justify-content: center; cursor: pointer; width: 40px; height: 40px; border-radius: 10px; font-size: 18px; transition: var(--pt-transition); color: var(--pt-text-muted); }
+            .custom-tab.active { color: white; background: var(--pt-theme-color); box-shadow: 0 0 20px rgba(var(--pt-theme-color-rgb), 0.5); transform: scale(1.1); }
+            .custom-kb-page, .custom-dict-page, .custom-admin-page { display: none; padding: 20px; background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(16px); height: 100vh; width: 650px; position: fixed; top: 0; z-index: 9999; font-family: var(--pt-font-main); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); border-radius: var(--pt-border-radius); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); }
+            .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left { left: 0; }
+            .custom-kb-page.pos-right, .custom-dict-page.pos-right, .custom-admin-page.pos-right { right: 0; }
+            .custom-kb-page.active, .custom-dict-page.active, .custom-admin-page.active { display: block; animation: fadeInGlass 0.5s ease-out; }
+            .feature-card { background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--pt-border-radius); padding: 24px; margin-bottom: 20px; transition: var(--pt-transition); position: relative; overflow: hidden; }
+            .feature-header { font-weight: 700; font-size: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px; }
+            .feature-icon { width: 38px; height: 38px; background: rgba(var(--pt-theme-color-rgb), 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--pt-theme-color); }
+            .modern-input { width: 100%; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 14px 20px; border-radius: var(--pt-border-radius); outline: none; transition: var(--pt-transition); }
+            .modern-button { background: var(--pt-accent-gradient); color: #1B1F3B; border: none; padding: 14px 28px; border-radius: var(--pt-border-radius); cursor: pointer; font-weight: 700; transition: var(--pt-transition); display: flex; align-items: center; justify-content: center; gap: 10px; }
+            .settings-row { padding: 16px 20px; background: rgba(255, 255, 255, 0.02); border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: var(--pt-transition); }
+            .toggle-switch { width: 50px; height: 28px; background: rgba(255, 255, 255, 0.1); border-radius: 50px; position: relative; transition: var(--pt-transition); }
+            .toggle-switch.on { background: var(--pt-theme-color); }
+            .toggle-knob { width: 22px; height: 22px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: var(--pt-transition); }
+            .toggle-switch.on .toggle-knob { left: 24px; }
+            .clickable-word { display: inline-block; padding: 8px 16px; margin: 4px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; cursor: pointer; font-weight: 700; transition: var(--pt-transition); }
+            .custom-clock { font-family: var(--pt-font-mono); font-size: 14px; font-weight: 600; color: var(--pt-theme-color); background: rgba(var(--pt-theme-color-rgb), 0.1); padding: 6px 14px; border-radius: 10px; }
+            .note-item { background: rgba(0, 0, 0, 0.5); border-radius: 12px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+            .pt-filter-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px auto; padding: 15px; justify-content: center; max-width: 1200px; background: rgba(0,0,0,0.1); border-radius: 20px; backdrop-filter: blur(10px); }
+            .pt-filter-btn { background: #26aa36 !important; color: #fff !important; border: none !important; padding: 10px 22px !important; border-radius: 30px !important; font-weight: 800 !important; cursor: pointer !important; transition: 0.2s ease !important; }
+            .pt-filter-btn.active { background: #fff !important; color: #26aa36 !important; border: 2px solid #26aa36 !important; }
+            @keyframes fadeInGlass { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes slideInPanelRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+            @keyframes slideInPanelLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        `;
+        document.head.appendChild(style);
+    };
 
-    let isInitialized = false;
+    const updateThemeStyles = () => {
+        const themeColor = Config.getThemeColor();
+        const themeRgb = themeColor.match(/[A-Za-z0-9]{2}/g).map(x => parseInt(x, 16)).join(',');
+        const pos = Config.getPanelPosition();
+        const anim = Config.getAnimationType();
+
+        document.documentElement.style.setProperty('--pt-theme-color', themeColor);
+        document.documentElement.style.setProperty('--pt-theme-color-rgb', themeRgb);
+        document.documentElement.style.setProperty('--pt-border-radius', `${Config.getBorderRadius()}px`);
+
+        document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
+            p.classList.remove('pos-left', 'pos-right'); p.classList.add(`pos-${pos}`);
+            const animName = anim === 'slideIn' ? `slideInPanel${pos.charAt(0).toUpperCase() + pos.slice(1)}` : anim;
+            p.style.animation = `${animName} 0.6s cubic-bezier(0.16, 1, 0.3, 1)`;
+        });
+    };
+
+    // --- 5. UI Components & Initialization ---
+    let isInitialized = false, lastSyllable = '', isGameRunning = false;
+
     const init = () => {
         initHomepageFilters();
         if (isInitialized) return;
-        try {
-            const nav = document.querySelector('.navigation') || document.querySelector('.tabs') || document.querySelector('.room .bottom') || document.querySelector('.room .navigation');
-            if (!nav) return;
+        const nav = document.querySelector('.navigation, .tabs, .room .bottom, .room .navigation');
+        if (!nav) return;
+        isInitialized = true; patchGlobalBugs(); injectStyles();
 
-            isInitialized = true;
-            console.log(`[JKLM Power Tools] v${SCRIPT_VERSION} Initialized successfully.`);
-            if (checkInit) checkInit.disconnect();
+        let customRow = document.getElementById('custom-nav-row') || document.createElement('div');
+        customRow.id = 'custom-nav-row'; customRow.className = 'custom-nav-row'; nav.after(customRow);
 
-            let customRow = document.getElementById('custom-nav-row');
-            if (!customRow) {
-                customRow = document.createElement('div');
-                customRow.id = 'custom-nav-row';
-                customRow.className = 'custom-nav-row';
-                nav.after(customRow);
+        const createTab = (id, icon) => { const t = document.createElement('div'); t.className = 'custom-tab'; t.id = id; t.innerHTML = icon; return t; };
+        const catTab = createTab('cat-btn', '🚀'), dictTab = createTab('dict-btn', '📖'), adminTab = createTab('admin-btn', '⚙️');
+        [catTab, dictTab, adminTab].forEach(t => customRow.appendChild(t));
+
+        const clock = document.createElement('div'); clock.id = 'custom-clock'; clock.className = 'custom-clock'; customRow.appendChild(clock);
+        const updateClock = () => {
+            const now = new Date(), time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            clock.innerText = Config.getClockEnabled() ? time : '';
+            document.querySelectorAll('.panel-clock').forEach(el => el.innerText = time);
+        };
+        setInterval(updateClock, 1000); updateClock();
+
+        const kbPage = document.createElement('div'), dictPage = document.createElement('div'), adminPage = document.createElement('div');
+        kbPage.className = 'custom-kb-page'; dictPage.className = 'custom-dict-page'; adminPage.className = 'custom-admin-page';
+        [kbPage, dictPage, adminPage].forEach(p => document.body.appendChild(p));
+
+        const getPanelNav = (activeId, title) => `
+            <div class="panel-nav">
+                <div class="panel-title">
+                    <span>${title}</span>
+                    <div class="custom-tab-group">
+                        <div class="custom-tab ${activeId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn">🚀</div>
+                        <div class="custom-tab ${activeId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn">📖</div>
+                        <div class="custom-tab ${activeId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn">⚙️</div>
+                    </div>
+                </div>
+                <div class="custom-clock panel-clock"></div>
+                <div class="custom-close-x panel-close" style="cursor:pointer; margin-left:15px;">✕</div>
+            </div>`;
+
+        const updateKb = () => {
+            const t = translations['English'], enabled = Config.getEnabled(), chat = Config.getChatEnabled();
+            kbPage.innerHTML = `${getPanelNav('cat-btn', t.kbHeader)}
+                <div class="feature-card">
+                    <div class="feature-header"><span>${t.kbHeader}</span></div>
+                    <div class="settings-row" id="toggle-space-hyphen"><div><span>${t.toggleLabel}</span></div><div class="toggle-switch ${enabled ? 'on' : ''}"><div class="toggle-knob"></div></div></div>
+                    <div class="settings-row" id="toggle-chat-hyphen"><div><span>${t.chatToggleLabel}</span></div><div class="toggle-switch ${chat ? 'on' : ''}"><div class="toggle-knob"></div></div></div>
+                </div>`;
+        };
+
+        const updateDict = () => {
+            const t = translations['English'], history = Config.getSearchHistory(), notes = Config.getNotes();
+            dictPage.innerHTML = `${getPanelNav('dict-btn', t.dictHeader)}
+                <div style="padding:15px;">
+                    <div class="feature-card">
+                        <input type="text" class="modern-input" id="dict-input" placeholder="${t.msgPlaceholder}">
+                        <div id="dict-results" style="margin-top:15px;"></div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-header"><span>${t.notesHeader}</span></div>
+                        <div style="display:flex; gap:10px;"><input type="text" id="note-input" class="modern-input"><button id="add-note" class="modern-button">+</button></div>
+                        <div id="notes-list" style="margin-top:15px;">${notes.map((n, i) => `<div class="note-item"><span>${n.content}</span><button class="del-note" data-idx="${i}">✕</button></div>`).join('')}</div>
+                    </div>
+                </div>`;
+        };
+
+        const updateAdmin = () => {
+            const t = translations['English'], color = Config.getThemeColor(), pos = Config.getPanelPosition();
+            adminPage.innerHTML = `${getPanelNav('admin-btn', t.adminHeader)}
+                <div class="feature-card">
+                    <div class="settings-row"><span>Accent Color</span><input type="color" id="theme-picker" value="${color}"></div>
+                    <div class="settings-row"><span>Panel Position</span><select id="pos-select" class="modern-input"><option value="left" ${pos === 'left' ? 'selected' : ''}>Left</option><option value="right" ${pos === 'right' ? 'selected' : ''}>Right</option></select></div>
+                </div>`;
+        };
+
+        [updateKb, updateDict, updateAdmin].forEach(u => u()); updateThemeStyles();
+
+        const togglePage = (tab, page) => {
+            const active = page.classList.contains('active');
+            [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
+            [kbPage, dictPage, adminPage].forEach(p => p.classList.remove('active'));
+            if (!active) { tab.classList.add('active'); page.classList.add('active'); }
+        };
+
+        catTab.onclick = () => togglePage(catTab, kbPage);
+        dictTab.onclick = () => { togglePage(dictTab, dictPage); loadDictionary(); };
+        adminTab.onclick = () => togglePage(adminTab, adminPage);
+
+        document.body.onclick = (e) => {
+            if (e.target.closest('.panel-close')) { [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active')); [kbPage, dictPage, adminPage].forEach(p => p.classList.remove('active')); }
+            if (e.target.id === 'toggle-space-hyphen') { Config.setEnabled(!Config.getEnabled()); updateKb(); }
+            if (e.target.id === 'toggle-chat-hyphen') { Config.setChatEnabled(!Config.getChatEnabled()); updateKb(); }
+            if (e.target.id === 'add-note') { const inp = document.getElementById('note-input'), n = Config.getNotes(); if (inp.value) { n.unshift({ content: inp.value }); Config.setNotes(n); inp.value = ''; updateDict(); } }
+            if (e.target.classList.contains('del-note')) { const n = Config.getNotes(); n.splice(e.target.dataset.idx, 1); Config.setNotes(n); updateDict(); }
+        };
+
+        document.body.oninput = (e) => {
+            if (e.target.id === 'theme-picker') { Config.setThemeColor(e.target.value); updateThemeStyles(); }
+            if (e.target.id === 'pos-select') { Config.setPanelPosition(e.target.value); updateThemeStyles(); }
+            if (e.target.id === 'dict-input') {
+                const syl = e.target.value.toLowerCase(), res = document.getElementById('dict-results');
+                if (syl.length < 2) { res.innerHTML = ''; return; }
+                const words = dictionary.filter(w => w.toLowerCase().includes(syl)).slice(0, 20);
+                res.innerHTML = words.map(w => `<span class="clickable-word" onclick="navigator.clipboard.writeText('${w}')">${w}</span>`).join('');
             }
-
-            if (document.getElementById('cat-btn')) return;
-
-            const createTab = (id, icon) => {
-                const t = document.createElement('div');
-                t.className = 'custom-tab';
-                t.id = id;
-                t.innerHTML = `<span>${icon}</span>`;
-                return t;
-            };
-
-            const catTab = createTab('cat-btn', '🚀');
-            const dictTab = createTab('dict-btn', '📖');
-            const adminTab = createTab('admin-btn', '⚙️');
-
-            [catTab, dictTab, adminTab].forEach(t => {
-                customRow.appendChild(t);
-            });
-
-            const clock = document.createElement('div');
-            clock.id = 'custom-clock';
-            clock.className = 'custom-clock';
-            clock.style.display = 'flex';
-            clock.style.alignItems = 'center';
-            clock.style.gap = '8px';
-            customRow.appendChild(clock);
-
-            const updateClock = () => {
-                const now = new Date();
-                const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                const clockEnabled = getClockEnabled();
-                
-                clock.innerHTML = clockEnabled ? `<span>${timeStr}</span>` : '';
-                clock.style.display = clockEnabled ? 'flex' : 'none';
-
-                document.querySelectorAll('.panel-clock').forEach(el => {
-                    el.innerText = timeStr;
-                });
-            };
-            setInterval(updateClock, 1000);
-            updateClock();
-
-            const kbPage = document.createElement('div');
-            kbPage.className = 'custom-kb-page';
-            const dictPage = document.createElement('div');
-            dictPage.className = 'custom-dict-page';
-            const adminPage = document.createElement('div');
-            adminPage.className = 'custom-admin-page';
-
-            const allCustomPages = [kbPage, dictPage, adminPage];
-
-            const getPanelNav = (activeTabId, title) => {
-                const t = translations[getLanguage()] || translations['English'];
-                const clockEnabled = getClockEnabled();
-                const now = new Date();
-                const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                
-                return `
-                <div class="panel-nav">
-                    <div class="panel-title">
-                        <span style="background: linear-gradient(to right, var(--pt-theme-color), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(var(--pt-theme-color-rgb), 0.3));">${title}</span>
-                        <div class="custom-tab-group">
-                            <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn">🚀</div>
-                            <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn">📖</div>
-                            <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn">⚙️</div>
-                        </div>
-                    </div>
-                    ${clockEnabled ? `<div class="custom-clock panel-clock">${timeStr}</div>` : ''}
-                    <div class="custom-close-x panel-close">✕</div>
-                </div>
-                `;
-            };
-
-            const updateKbContent = () => {
-                const isEnabled = getEnabled();
-                const isChatEnabled = getChatEnabled();
-                const t = translations[getLanguage()] || translations['English'];
-                catTab.title = t.kbHeader;
-
-                kbPage.innerHTML = `
-                ${getPanelNav('cat-btn', t.kbHeader)}
-                <div class="custom-page-content">
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">⌨️</div>
-                            <span>${t.kbHeader}</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <div class="settings-row" id="toggle-space-hyphen">
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700; font-size: 16px;">${t.toggleLabel}</span>
-                                    <span style="color: var(--pt-text-muted); font-size: 13px; line-height: 1.4;">${isEnabled ? t.onDesc : t.offDesc}</span>
-                                </div>
-                                <div class="toggle-switch ${isEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
-                            </div>
-
-                            <div class="settings-row" id="toggle-chat-hyphen">
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700; font-size: 16px;">${t.chatToggleLabel}</span>
-                                    <span style="color: var(--pt-text-muted); font-size: 13px; line-height: 1.4;">${isChatEnabled ? t.chatDesc : t.chatOffDesc}</span>
-                                </div>
-                                <div class="toggle-switch ${isChatEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
-                            </div>
-
-                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; opacity: 0.9; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                                <div style="width: 32px; height: 32px; border-radius: 10px; border: 2px solid var(--pt-theme-color); overflow: hidden; background: rgba(var(--pt-theme-color-rgb), 0.1); box-shadow: var(--pt-glow-effect); display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--pt-theme-color); font-size: 14px;">
-                                    <img src="https://media.discordapp.net/attachments/1362588131966062736/1484245858982564163/download.jfif?ex=69bd872c&is=69bc35ac&hm=c8fb790d9047f95f9158952dec974f5ad608d504c98c959901e41b6421c14923&=&format=webp&width=32&height=32" style="width: 100%; height: 100%; object-fit: cover;" id="kb-idea-author-img" onerror="this.style.display='none'; this.parentElement.innerText='M'">
-                                </div>
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <span style="font-size: 10px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; letter-spacing: 1px;">${t.ideaBy}</span>
-                                    <span style="font-size: 13px; font-weight: 800; color: #fff; text-shadow: 0 0 10px rgba(var(--pt-theme-color-rgb), 0.5);">meow meow</span>
-                                    <a href="https://discord.com/channels/@me/1446308212709265582" target="_blank" style="display: flex; align-items: center; gap: 4px; color: #5865F2; text-decoration: none; font-size: 10px; font-weight: 700; margin-top: 2px; opacity: 0.8; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.078 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-                                        <span>eliplay24</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="feature-card" style="background: rgba(var(--pt-theme-color-rgb), 0.05); border-color: rgba(var(--pt-theme-color-rgb), 0.2);">
-                        <div class="feature-header" style="color: var(--pt-theme-color);">
-                            <div class="feature-icon" style="background: rgba(var(--pt-theme-color-rgb), 0.15); box-shadow: var(--pt-glow-effect);">💡</div>
-                            <span>Tip</span>
-                        </div>
-                        <div style="color: var(--pt-text-color); opacity: 0.8; font-size: 14px; line-height: 1.7; margin-bottom: 12px;">
-                            ${t.closeInfo}
-                        </div>
-                        <a href="https://discord.com/channels/@me/1147633255345037352" target="_blank" style="display: flex; align-items: center; gap: 8px; background: #5865F2; color: white; padding: 8px 16px; border-radius: 10px; text-decoration: none; font-weight: 800; font-size: 12px; transition: 0.3s; width: fit-content; box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(88, 101, 242, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(88, 101, 242, 0.3)'">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.078 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-                            <span>rooticles.</span>
-                        </a>
-                    </div>
-                </div>
-            `;
-            };
-
-            const updateDictContent = () => {
-                const dictLang = getDictLanguage();
-                const searchMode = getSearchMode();
-                const wordType = getWordType();
-                const history = getSearchHistory();
-                const t = translations[getLanguage()] || translations['English'];
-                dictTab.title = t.dictHeader;
-
-                const notes = getNotes();
-
-                let options = '';
-                for (const l in dictionaryUrls) {
-                    options += `<option value="${l}" ${dictLang === l ? 'selected' : ''}>${t[l.toLowerCase()] || l}</option>`;
-                }
-
-                const historyHtml = history.length > 0 ? `
-                <div style="margin-top: 15px; padding: 20px; background: rgba(255, 255, 255, 0.02); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(4px);">
-                    <div style="font-size: 12px; font-weight: 800; color: var(--pt-text-muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1.5px; display: flex; justify-content: space-between; align-items: center;">
-                        <span>📜 Recent</span>
-                        <span id="clear-history" style="cursor: pointer; color: #ff4444; font-size: 10px; background: rgba(255, 68, 68, 0.1); padding: 5px 10px; border-radius: 8px; transition: 0.3s; font-weight: 700; border: 1px solid rgba(255,68,68,0.2);">CLEAR</span>
-                    </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        ${history.map(h => `<span class="history-chip" style="padding: 6px 12px; background: rgba(var(--pt-theme-color-rgb), 0.08); border-radius: 10px; font-size: 12px; cursor: pointer; border: 1px solid rgba(var(--pt-theme-color-rgb), 0.15); font-weight: 700; transition: 0.3s; color: var(--pt-text-color);">${h}</span>`).join('')}
-                    </div>
-                </div>
-            ` : '';
-
-                const notesHtml = notes.length > 0 ? notes.map((note, index) => `
-                    <div class="note-item">
-                        <div style="flex: 1;">
-                            <div class="note-content" style="font-size: 14px; line-height: 1.5; color: var(--pt-text-color); font-weight: 500;">${note.content}</div>
-                            <div class="note-timestamp" style="font-size: 11px; opacity: 0.5; margin-top: 8px; font-weight: 600;">${new Date(note.timestamp).toLocaleString()}</div>
-                        </div>
-                        <button class="note-delete" data-index="${index}">✕</button>
-                    </div>
-                `).join('') : `<div style="text-align: center; color: var(--pt-text-muted); padding: 30px; font-size: 14px; font-weight: 600;">${t.noNotes}</div>`;
-
-                const minLen = getMinWordLength();
-                const maxLen = getMaxWordLength();
-
-                dictPage.innerHTML = `
-                ${getPanelNav('dict-btn', t.dictHeader)}
-                <div class="custom-page-content">
-                    ${historyHtml}
-
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">🔍</div>
-                            <span>${t.dictHeader}</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 16px;">
-                            <div style="position: relative;">
-                                <input type="text" class="modern-input" id="dict-msg-input" placeholder="${t.msgPlaceholder}" style="padding-right: 60px; font-weight: 700; font-size: 18px;">
-                                <div style="position: absolute; right: 24px; top: 50%; transform: translateY(-50%); font-size: 20px; opacity: 0.6;">⚡</div>
-                            </div>
-
-                            <div style="display: flex; gap: 12px;">
-                                <select class="modern-input" id="dict-search-mode" style="flex: 1; padding: 14px 20px; font-weight: 700; appearance: none; cursor: pointer;">
-                                    <option value="Contains" ${searchMode === 'Contains' ? 'selected' : ''}>Contains</option>
-                                    <option value="StartsWith" ${searchMode === 'StartsWith' ? 'selected' : ''}>Starts With</option>
-                                    <option value="EndsWith" ${searchMode === 'EndsWith' ? 'selected' : ''}>Ends With</option>
-                                    <option value="SyllableChain" ${searchMode === 'SyllableChain' ? 'selected' : ''}>Syllable Chain</option>
-                                </select>
-                                <select class="modern-input" id="dict-word-type" style="flex: 1; padding: 14px 20px; font-weight: 700; appearance: none; cursor: pointer;">
-                                    <option value="All" ${wordType === 'All' ? 'selected' : ''}>All Words</option>
-                                    <option value="Hyphen" ${wordType === 'Hyphen' ? 'selected' : ''}>Hyphen Only</option>
-                                    <option value="Long" ${wordType === 'Long' ? 'selected' : ''}>Long Words</option>
-                                    <option value="Casual" ${wordType === 'Casual' ? 'selected' : ''}>Casual</option>
-                                    <option value="Shorts" ${wordType === 'Shorts' ? 'selected' : ''}>Shorts</option>
-                                    <option value="Phobia" ${wordType === 'Phobia' ? 'selected' : ''}>Phobia</option>
-                                    <option value="Apostrophes" ${wordType === 'Apostrophes' ? 'selected' : ''}>Apostrophes</option>
-                                </select>
-                            </div>
-
-                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
-                                    <span>Word Length</span>
-                                    <span style="color: var(--pt-theme-color);"><span id="val-dict-min-len">${minLen}</span> - <span id="val-dict-max-len">${maxLen}</span> chars</span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 16px;">
-                                    <input type="range" id="dict-min-len" min="2" max="30" value="${minLen}" style="flex: 1; accent-color: var(--pt-theme-color); cursor: pointer;">
-                                    <input type="range" id="dict-max-len" min="2" max="30" value="${maxLen}" style="flex: 1; accent-color: var(--pt-theme-color); cursor: pointer;">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="feature-card" id="dict-results-container" style="background: rgba(0,0,0,0.3); border-color: var(--pt-glass-border); padding: 28px;">
-                        <div class="custom-dict-result-header" id="dict-result-header" style="font-size: 16px; font-weight: 800; color: var(--pt-theme-color); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;"></div>
-                        <div class="custom-dict-result-list" id="dict-result-list" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">🌍</div>
-                            <span>${t.dictSelectLabel}</span>
-                        </div>
-                        <select class="modern-input" id="dict-lang-select" style="font-weight: 700; appearance: none; cursor: pointer;">
-                            ${options}
-                            <option value="Custom" ${dictLang === 'Custom' ? 'selected' : ''}>${t.dictCustomUpload}</option>
-                        </select>
-                    </div>
-
-                    <div id="custom-dict-upload-area" style="display: ${dictLang === 'Custom' ? 'block' : 'none'}; margin-bottom: 24px; padding: 28px; background: rgba(var(--pt-theme-color-rgb), 0.08); border-radius: 24px; border: 2px dashed rgba(var(--pt-theme-color-rgb), 0.3); backdrop-filter: blur(10px);">
-                        <div style="font-size: 15px; color: var(--pt-text-color); font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
-                            <span>📁</span> ${t.dictUploadDesc}
-                        </div>
-                        <input type="file" id="dict-file-upload" class="modern-input" accept=".txt" style="margin-bottom: 16px; border-style: solid;">
-                        <textarea id="dict-manual-input" class="modern-input" style="min-height: 150px; font-size: 14px; margin-bottom: 16px; font-family: var(--pt-font-mono); line-height: 1.6;" placeholder="${t.dictPlaceholder}">${(getCustomDictionary() || []).join('\n')}</textarea>
-                        <button class="modern-button" id="dict-file-confirm" style="width: 100%;">
-                            <span>💾</span> ${t.dictUploadBtn}
-                        </button>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">📌</div>
-                            <span>${t.notesHeader}</span>
-                        </div>
-                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                            <input type="text" id="new-note-input" class="modern-input" placeholder="${t.notePlaceholder}" style="flex: 1;">
-                            <button class="modern-button" id="add-note-btn" style="min-width: 60px; padding: 0;">+</button>
-                        </div>
-                        <div id="notes-list" style="display: flex; flex-direction: column;">
-                            ${notesHtml}
-                        </div>
-                    </div>
-
-                    <div class="feature-card" style="background: rgba(var(--pt-theme-color-rgb), 0.05); border-color: rgba(var(--pt-theme-color-rgb), 0.2);">
-                        <div class="feature-header" style="color: var(--pt-theme-color);">
-                            <div class="feature-icon" style="background: rgba(var(--pt-theme-color-rgb), 0.15); box-shadow: var(--pt-glow-effect);">💡</div>
-                            <span>Pro-Tip</span>
-                        </div>
-                        <div style="color: var(--pt-text-color); opacity: 0.8; font-size: 14px; line-height: 1.7;">
-                            Click on any word to copy it instantly. Use the filters to find the best words for your round!
-                        </div>
-                    </div>
-                </div>
-            `;
-            };
-
-            const updateAdminContent = () => {
-                const t = translations[getLanguage()] || translations['English'];
-                const themeColor = getThemeColor();
-                const borderRadius = getBorderRadius();
-                const clockEnabled = getClockEnabled();
-                const panelPosition = getPanelPosition();
-                adminTab.title = t.adminHeader;
-
-                adminPage.innerHTML = `
-                ${getPanelNav('admin-btn', t.adminHeader)}
-                <div class="custom-page-content">
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">🎨</div>
-                            <span>${t.adminVisualHeader}</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 20px;">
-                            <div style="display: flex; gap: 15px;">
-                                <div style="flex: 1; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 20px; border: 1px solid var(--pt-glass-border); display: flex; flex-direction: column; align-items: center; gap: 12px; transition: 0.3s;" class="color-picker-container">
-                                    <span style="font-size: 11px; font-weight: 800; color: var(--pt-text-muted); letter-spacing: 2px; text-transform: uppercase;">ACCENT COLOR</span>
-                                    <input type="color" class="custom-theme-picker" id="admin-theme-picker" value="${themeColor}" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,0.1); cursor: pointer;">
-                                </div>
-                            </div>
-
-                            <div class="settings-row" id="toggle-panel-pos" style="padding: 16px 20px;">
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700; font-size: 15px;">Panel Side</span>
-                                    <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Currently on the ${panelPosition.toUpperCase()} side</span>
-                                </div>
-                                <div style="display: flex; background: rgba(0,0,0,0.3); border-radius: 14px; padding: 5px; border: 1px solid var(--pt-glass-border);">
-                                    <div id="pos-left-btn" style="padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.3s; ${panelPosition === 'left' ? 'background: var(--pt-theme-color); color: white; box-shadow: 0 4px 12px rgba(var(--pt-theme-color-rgb), 0.3);' : 'color: var(--pt-text-muted);'}">LEFT</div>
-                                    <div id="pos-right-btn" style="padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.3s; ${panelPosition === 'right' ? 'background: var(--pt-theme-color); color: white; box-shadow: 0 4px 12px rgba(var(--pt-theme-color-rgb), 0.3);' : 'color: var(--pt-text-muted);'}">RIGHT</div>
-                                </div>
-                            </div>
-
-                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
-                                    <span>${t.adminRadiusLabel}</span>
-                                    <span style="color: var(--pt-theme-color);"><span id="val-admin-border-radius">${borderRadius}</span>px</span>
-                                </div>
-                                <input type="range" id="admin-border-radius" min="0" max="40" step="1" value="${borderRadius}" style="width: 100%; accent-color: var(--pt-theme-color); cursor: pointer;">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">️</div>
-                            <span>System & Interface</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <div class="settings-row" id="toggle-clock">
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700; font-size: 15px;">System Clock</span>
-                                    <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Displays the current time in the navigation bar.</span>
-                                </div>
-                                <div class="toggle-switch ${clockEnabled ? 'on' : ''}"><div class="toggle-knob"></div></div>
-                            </div>
-
-                            <div class="settings-row" style="cursor: default;">
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700; font-size: 15px;">Fast-Access Key</span>
-                                    <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Key to quickly open/close the panel.</span>
-                                </div>
-                                <input type="text" id="admin-toggle-key" class="modern-input" value="${getToggleKey()}" style="width: 80px; text-align: center; font-weight: 900; padding: 10px; border-radius: 12px; background: rgba(var(--pt-theme-color-rgb), 0.1); color: var(--pt-theme-color); border-color: rgba(var(--pt-theme-color-rgb), 0.2);">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; align-items: center; padding: 40px 20px; gap: 15px;">
-                        <div style="font-size: 11px; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; color: var(--pt-theme-color); opacity: 0.8; text-shadow: 0 0 15px rgba(var(--pt-theme-color-rgb), 0.4);">
-                            JKLM POWER TOOLS
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="padding: 5px 12px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 10px; font-weight: 800; color: var(--pt-text-muted); border: 1px solid var(--pt-glass-border);">VERSION ${SCRIPT_VERSION}</span>
-                            <span style="padding: 5px 12px; background: rgba(var(--pt-theme-color-rgb), 0.1); border-radius: 8px; font-size: 10px; font-weight: 800; color: var(--pt-theme-color); border: 1px solid rgba(var(--pt-theme-color-rgb), 0.2);">ROOT EDITION</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            };
-
-            updateKbContent();
-            updateDictContent();
-            updateAdminContent();
-
-            const updateSidebarWidths = (width) => {
-                allCustomPages.forEach(p => p.style.width = `${width}px`);
-            };
-            updateSidebarWidths(getSidebarWidth());
-
-            allCustomPages.forEach(p => document.body.appendChild(p));
-
-            window.closeCustomTabs = () => {
-                [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
-                allCustomPages.forEach(p => p.classList.remove('active'));
-                if (customRow) customRow.style.display = 'flex';
-                const home = nav.querySelector('[data-tab="home"]') || nav.querySelector('.tab') || nav.querySelector('.custom-tab');
-                if (home && ![catTab, dictTab, adminTab].includes(home)) home.click();
-            };
-
-            const toggleTab = (tab, page) => {
-                const isActive = tab.classList.contains('active');
-                if (isActive) {
-                    window.closeCustomTabs();
-                    return;
-                }
-                // Ensure width is at least 650px if it was the old default
-                let currentWidth = getSidebarWidth();
-                if (currentWidth < 650) {
-                    currentWidth = 650;
-                    setSidebarWidth(650);
-                    updateSidebarWidths(650);
-                }
-
-                document.querySelectorAll('.page, .tab, .custom-tab').forEach(el => el.classList.remove('active'));
-                allCustomPages.forEach(p => {
-                    p.classList.remove('active');
-                    p.classList.remove('selective-hidden');
-                });
-                tab.classList.add('active');
-                page.classList.add('active');
-                if (customRow) customRow.style.display = 'none';
-                if (page === dictPage) {
-                    updateDictContent();
-                    loadDictionary();
-                }
-            };
-
-            catTab.addEventListener('click', (e) => { e.preventDefault(); toggleTab(catTab, kbPage); });
-            dictTab.addEventListener('click', (e) => { e.preventDefault(); toggleTab(dictTab, dictPage); });
-            adminTab.addEventListener('click', (e) => {
-                e.preventDefault();
-                updateAdminContent();
-                toggleTab(adminTab, adminPage);
-            });
-
-            nav.addEventListener('click', (e) => {
-                const clicked = e.target.closest('.tab') || e.target.closest('.custom-tab');
-                if (clicked && ![catTab, dictTab, adminTab].includes(clicked)) {
-                    allCustomPages.forEach(p => p.classList.remove('active'));
-                    [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
-                }
-            });
-
-            allCustomPages.forEach(p => {
-                p.addEventListener('click', (e) => {
-                    const closeBtn = e.target.closest('.panel-close');
-                    if (closeBtn) {
-                        window.closeCustomTabs();
-                        return;
-                    }
-
-                    const tabBtn = e.target.closest('.panel-nav .custom-tab');
-                    if (tabBtn) {
-                        const targetId = tabBtn.getAttribute('data-target');
-                        if (targetId === 'cat-btn') toggleTab(catTab, kbPage);
-                        if (targetId === 'dict-btn') toggleTab(dictTab, dictPage);
-                        if (targetId === 'admin-btn') {
-                            updateAdminContent();
-                            toggleTab(adminTab, adminPage);
-                        }
-                    }
-                });
-            });
-
-            kbPage.addEventListener('click', (e) => {
-                const row = e.target.closest('.settings-row');
-                if (!row) return;
-
-                if (row.id === 'toggle-space-hyphen') setEnabled(!getEnabled());
-                if (row.id === 'toggle-chat-hyphen') setChatEnabled(!getChatEnabled());
-                updateKbContent();
-            });
-
-            const updateSuggestions = () => {
-                const input = document.getElementById('dict-msg-input');
-                const resultsContainer = document.getElementById('dict-results-container');
-                const resultHeader = document.getElementById('dict-result-header');
-                const resultList = document.getElementById('dict-result-list');
-                if (!input) return;
-
-                const syllable = input.value.trim().toLowerCase();
-                const searchMode = getSearchMode();
-                const wordType = getWordType();
-                const t = translations[getLanguage()] || translations['English'];
-
-                if (!syllable && wordType === 'All') {
-                    resultsContainer.classList.remove('active');
-                    return;
-                }
-
-                if (syllable && syllable.length >= 2) {
-                    let history = getSearchHistory();
-                    if (!history.includes(syllable.toUpperCase())) {
-                        history.unshift(syllable.toUpperCase());
-                        history = history.slice(0, 10);
-                        setSearchHistory(history);
-                        // Don't call updateDictContent here to avoid re-rendering while typing
-                    }
-                }
-
-                const ensureDictionary = async () => {
-                    await loadDictionary();
-                };
-
-                ensureDictionary().then(() => {
-                    let words = [...dictionary];
-                    
-                    const minLen = getMinWordLength();
-                    const maxLen = getMaxWordLength();
-
-                    // Apply word length filter first
-                    words = words.filter(w => w.length >= minLen && w.length <= maxLen);
-
-                    if (syllable) {
-                        if (searchMode === 'StartsWith') {
-                            words = words.filter(w => w.toLowerCase().startsWith(syllable));
-                        } else if (searchMode === 'EndsWith') {
-                            words = words.filter(w => w.toLowerCase().endsWith(syllable));
-                        } else if (searchMode === 'SyllableChain') {
-                            // Example: If last word was "APPLE", syllable is "E" or "LE"
-                            words = words.filter(w => w.toLowerCase().startsWith(syllable));
-                        } else {
-                            words = words.filter(w => w.toLowerCase().includes(syllable));
-                        }
-                    }
-
-                    if (wordType === 'Hyphen') {
-                        words = words.filter(w => w.includes('-'));
-                    } else if (wordType === 'Long') {
-                        words = words.filter(w => w.includes('-'));
-                    } else if (wordType === 'Long') {
-                        words = words.filter(w => w.length >= 20);
-                    } else if (wordType === 'Shorts') {
-                        words = words.filter(w => w.length >= 2 && w.length <= 4);
-                    } else if (wordType === 'Phobia') {
-                        words = words.filter(w => { const low = w.toLowerCase(); return low.includes('phobia') || low.includes('phobias') || low.includes('phobic'); });
-                    } else if (wordType === 'Apostrophes') {
-                        words = words.filter(w => w.includes("'"));
-                    } else if (wordType === 'Casual') {
-                        const rareChars = ['x', 'q', 'z', 'j'];
-                        words = words.filter(w => {
-                            const low = w.toLowerCase();
-                            return w.length >= 4 && w.length <= 8 && !rareChars.some(c => low.includes(c));
-                        });
-                    }
-
-                    if (words.length > 0) {
-                        resultsContainer.classList.add('active');
-                        const sorted = [...words].sort((a, b) => b.length - a.length).slice(0, 20);
-                        let header = t.dictResultPrefix.replace('{count}', words.length);
-                        resultHeader.innerText = header;
-                        resultList.innerHTML = sorted.map(w => {
-                            return `<span class="clickable-word" title="Click to copy" data-word="${w.toUpperCase()}">${w.toUpperCase()}</span>`;
-                        }).join(' – ');
-                    } else {
-                        resultHeader.innerText = t.dictNoResults;
-                        resultList.innerHTML = '';
-                    }
-                });
-            };
-
-            dictPage.addEventListener('click', (e) => {
-                if (e.target.id === 'add-note-btn') {
-                    const input = document.getElementById('new-note-input');
-                    const content = input.value.trim();
-                    if (content) {
-                        const notes = getNotes();
-                        notes.unshift({ content: content, timestamp: Date.now() });
-                        setNotes(notes);
-                        input.value = '';
-                        updateDictContent();
-                    }
-                }
-                if (e.target.classList.contains('note-delete')) {
-                    const index = parseInt(e.target.getAttribute('data-index'));
-                    const notes = getNotes();
-                    notes.splice(index, 1);
-                    setNotes(notes);
-                    updateDictContent();
-                }
-
-                if (e.target.id === 'dict-file-confirm') {
-                    const fileEl = document.getElementById('dict-file-upload');
-                    const manualInput = document.getElementById('dict-manual-input');
-                    const file = fileEl.files[0];
-                    const processWords = (text) => {
-                        const words = text.split('\n').map(w => w.trim()).filter(w => w.length > 0);
-                        setCustomDictionary(words);
-                        dictionary = words;
-                        dictionaryLoaded = true;
-                        currentDictLang = 'Custom';
-                        alert(`Saved ${words.length} words!`);
-                        updateSuggestions();
-                        if (manualInput) manualInput.value = words.join('\n');
-                    };
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (event) => processWords(event.target.result);
-                        reader.readAsText(file);
-                    } else if (manualInput && manualInput.value.trim()) {
-                        processWords(manualInput.value);
-                    }
-                }
-                if (e.target.id === 'clear-history') {
-                    setSearchHistory([]);
-                    updateDictContent();
-                }
-                if (e.target.classList.contains('history-chip')) {
-                    const input = document.getElementById('dict-msg-input');
-                    if (input) {
-                        input.value = e.target.innerText;
-                        updateSuggestions();
-                    }
-                }
-                if (e.target.id === 'dict-msg-send') {
-                    updateSuggestions();
-                }
-
-                const filterItem = e.target.closest('.custom-filter-item');
-                if (filterItem) {
-                    const filterKey = filterItem.getAttribute('data-filter');
-                    let currentFilters = getActiveFilters();
-                    if (currentFilters.includes(filterKey)) {
-                        currentFilters = currentFilters.filter(f => f !== filterKey);
-                    } else {
-                        currentFilters.push(filterKey);
-                    }
-                    setActiveFilters(currentFilters);
-                    updateDictContent();
-                    updateSuggestions();
-                }
-
-                if (e.target.classList.contains('clickable-word')) {
-                    const word = e.target.innerText;
-                    
-                    navigator.clipboard.writeText(word).then(() => {
-                        const originalColor = e.target.style.color;
-                        e.target.style.color = 'var(--pt-theme-color)';
-                        setTimeout(() => e.target.style.color = originalColor, 500);
-                    });
-                }
-            });
-            dictPage.addEventListener('change', (e) => {
-                if (e.target.id === 'dict-lang-select') {
-                    const val = e.target.value;
-                    setDictLanguage(val);
-                    const uploadArea = document.getElementById('custom-dict-upload-area');
-                    if (uploadArea) uploadArea.style.display = (val === 'Custom' ? 'block' : 'none');
-                    dictionaryLoaded = false;
-                    loadDictionary(true).then(() => {
-                        updateDictContent();
-                        updateSuggestions();
-                    });
-                } else if (e.target.id === 'dict-search-mode') {
-                    setSearchMode(e.target.value);
-                    updateSuggestions();
-                } else if (e.target.id === 'dict-word-type') {
-                    setWordType(e.target.value);
-                    updateSuggestions();
-                }
-            });
-            const debouncedUpdateSuggestions = debounce(() => {
-                updateSuggestions();
-            }, 150);
-
-            dictPage.addEventListener('input', (e) => {
-                if (e.target.id === 'dict-msg-input') {
-                    debouncedUpdateSuggestions();
-                }
-                if (e.target.id === 'dict-min-len') {
-                    const val = parseInt(e.target.value);
-                    setMinWordLength(val);
-                    const span = document.getElementById('val-dict-min-len');
-                    if (span) span.innerText = val;
-                    debouncedUpdateSuggestions();
-                }
-                if (e.target.id === 'dict-max-len') {
-                    const val = parseInt(e.target.value);
-                    setMaxWordLength(val);
-                    const span = document.getElementById('val-dict-max-len');
-                    if (span) span.innerText = val;
-                    debouncedUpdateSuggestions();
-                }
-            });
-            dictPage.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && e.target.id === 'dict-msg-input') {
-                    e.preventDefault();
-                    updateSuggestions();
-                }
-            });
-
-            adminPage.addEventListener('click', (e) => {
-                if (e.target.id === 'pos-left-btn') {
-                    setPanelPosition('left');
-                    updateThemeStyles();
-                    updateAdminContent();
-                }
-                if (e.target.id === 'pos-right-btn') {
-                    setPanelPosition('right');
-                    updateThemeStyles();
-                    updateAdminContent();
-                }
-
-                const row = e.target.closest('.settings-row');
-                if (row) {
-                    if (row.id === 'toggle-clock') {
-                        setClockEnabled(!getClockEnabled());
-                        updateThemeStyles();
-                    }
-                    updateAdminContent();
-                }
-            });
-
-            adminPage.addEventListener('change', (e) => {
-                if (e.target.id === 'admin-animation-type') {
-                    setAnimationType(e.target.value);
-                    updateThemeStyles();
-                }
-            });
-
-            adminPage.addEventListener('input', (e) => {
-                if (e.target.id === 'admin-theme-picker') {
-                    setThemeColor(e.target.value);
-                    updateThemeStyles();
-                }
-                if (e.target.id === 'admin-border-radius') {
-                    const val = parseInt(e.target.value, 10);
-                    setBorderRadius(val);
-                    const span = document.getElementById('val-admin-border-radius');
-                    if (span) span.innerText = val;
-                    updateThemeStyles();
-                }
-            });
-
-            adminPage.addEventListener('keydown', (e) => {
-                if (e.target.id === 'admin-toggle-key') {
-                    e.preventDefault();
-                    const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
-                    e.target.value = key;
-                    setToggleKey(key);
-                }
-            });
-
-            const gameObserver = new MutationObserver(() => {
-                initHomepageFilters(); // Try to inject filters on homepage
-                const sylEl = document.querySelector('.syllable');
-                if (sylEl) {
-                    const currentSyl = sylEl.innerText.trim().toLowerCase();
-                    if (currentSyl !== lastDetectedSyllable) {
-                        lastDetectedSyllable = currentSyl;
-                        const dictInput = document.getElementById('dict-msg-input');
-                        if (dictInput && document.getElementById('dict-btn').classList.contains('active')) {
-                            dictInput.value = currentSyl.toUpperCase();
-                            updateSuggestions();
-                        }
-                    }
-                }
-
-                updateThemeStyles();
-
-                const isSelfTurn = !!document.querySelector('.selfTurn');
-                window.lastTurnState = isSelfTurn;
-
-                const gameVisible = !!document.querySelector('.canvasArea') || !!document.querySelector('.syllable');
-                if (gameVisible && !isGameRunning) {
-                    isGameRunning = true;
-                } else if (!gameVisible && isGameRunning) {
-                    isGameRunning = false;
-                }
-            });
-            gameObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
-
-            GM_addValueChangeListener('spaceToHyphenEnabled', () => updateKbContent());
-            GM_addValueChangeListener('spaceToHyphenChatEnabled', () => updateKbContent());
-            GM_addValueChangeListener('dictLanguage', () => { dictionaryLoaded = false; loadDictionary(true).then(() => updateDictContent()); });
-            GM_addValueChangeListener('sidebarWidth', (n, o, nv) => updateSidebarWidths(nv));
-            GM_addValueChangeListener('themeColor', () => updateThemeStyles());
-
-            window.addEventListener('keydown', (e) => {
-                if (e.key === getToggleKey()) {
-                    const anyActive = allCustomPages.some(p => p.classList.contains('active'));
-                    if (anyActive) {
-                        window.closeCustomTabs();
-                    } else {
-                        toggleTab(adminTab, adminPage);
-                    }
-                }
-
-                if (e.key === 'Escape' && [catTab, dictTab, adminTab].some(t => t.classList.contains('active'))) {
-                    window.closeCustomTabs();
-                }
-            });
-        } catch (err) {
-            console.error('[JKLM Power Tools] Initialization error:', err);
-            isInitialized = false;
-        }
+        };
+
+        const observer = new MutationObserver(() => {
+            initHomepageFilters();
+            const syl = document.querySelector('.syllable')?.innerText.trim().toLowerCase();
+            if (syl && syl !== lastSyllable) {
+                lastSyllable = syl;
+                if (dictPage.classList.contains('active')) { document.getElementById('dict-input').value = syl; document.getElementById('dict-input').dispatchEvent(new Event('input')); }
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
     };
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'F1') {
-            e.preventDefault();
-            sendToChat('GG');
-            return;
+        if (e.key === Config.getToggleKey()) {
+            const p = document.querySelector('.custom-admin-page');
+            if (p) p.classList.contains('active') ? p.classList.remove('active') : p.classList.add('active');
         }
-
-        const enabled = getEnabled();
-        const chatEnabled = getChatEnabled();
-        if (!enabled && !chatEnabled) return;
-
-        if (e.code === 'Space' || e.key === ' ') {
-            const active = document.activeElement;
-            if (!active || !(active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
-            const isChatContext = active.closest('.chat') ||
-                active.placeholder?.toLowerCase().includes('chat') ||
-                active.classList.contains('chatInput') ||
-                active.id === 'dict-msg-input';
-            const isSelfTurn = !!document.querySelector('.selfTurn');
-
-            let shouldConvert = false;
-            if (isChatContext) {
-                if (chatEnabled) shouldConvert = true;
-            } else {
-                if (enabled && isSelfTurn) shouldConvert = true;
-            }
-            if (shouldConvert) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                try { if (!document.execCommand('insertText', false, '-')) throw new Error(); } catch (err) {
-                    const start = active.selectionStart, end = active.selectionEnd;
-                    active.value = active.value.substring(0, start) + '-' + active.value.substring(end);
-                    active.selectionStart = active.selectionEnd = start + 1;
-                    active.dispatchEvent(new Event('input', { bubbles: true }));
+        if (e.code === 'Space' && (Config.getEnabled() || Config.getChatEnabled())) {
+            const el = document.activeElement;
+            if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+                const isChat = el.closest('.chat') || el.id === 'dict-input';
+                if ((isChat && Config.getChatEnabled()) || (!isChat && Config.getEnabled() && document.querySelector('.selfTurn'))) {
+                    e.preventDefault(); document.execCommand('insertText', false, '-');
                 }
             }
         }
     }, true);
 
-            const checkInit = new MutationObserver(() => {
-                initHomepageFilters();
-                const nav = document.querySelector('.navigation, .tabs, .room .bottom, .room .navigation');
-                if (nav) init();
-            });
+    const checkInit = new MutationObserver(() => { if (document.querySelector('.navigation, .publicRooms')) init(); });
     checkInit.observe(document.documentElement, { childList: true, subtree: true });
-
-    // Initial check
-    init();
-    initHomepageFilters();
-    // Fallbacks
-    setTimeout(init, 1000);
-    setTimeout(initHomepageFilters, 1000);
-    setTimeout(init, 3000);
-    setTimeout(initHomepageFilters, 3000);
-    setTimeout(init, 6000);
-    setTimeout(initHomepageFilters, 6000);
+    init(); setTimeout(init, 1000); setTimeout(init, 3000);
 })();
