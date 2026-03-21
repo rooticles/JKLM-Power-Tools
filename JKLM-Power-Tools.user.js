@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      15.2
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.2)
+// @version      15.3
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v15.3)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '15.2';
+    const SCRIPT_VERSION = '15.3';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1314,12 +1314,12 @@
                                 </div>
                             </div>
 
-                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border); position: relative; z-index: 10;">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px; pointer-events: none;">
+                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border); position: relative;">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
                                     <span>Background Effect</span>
                                     <span style="color: var(--pt-theme-color);">SELECT</span>
                                 </div>
-                                <select class="modern-input" id="admin-animation-select" style="font-weight: 700; cursor: pointer; position: relative; z-index: 20; pointer-events: auto !important;">
+                                <select class="modern-input" id="admin-animation-select" style="font-weight: 700; cursor: pointer; position: relative;">
                                     <option value="slideIn" ${animationType === 'slideIn' ? 'selected' : ''}>Standard (Glass)</option>
                                     <option value="animated-mesh" ${animationType === 'animated-mesh' ? 'selected' : ''}>Mesh Gradient</option>
                                     <option value="animated-matrix" ${animationType === 'animated-matrix' ? 'selected' : ''}>Matrix Rain</option>
@@ -1420,28 +1420,23 @@
                 }
 
                 // Batch DOM updates for smoothness
-                requestAnimationFrame(() => {
-                    document.querySelectorAll('.page, .tab, .custom-tab').forEach(el => el.classList.remove('active'));
-                    allCustomPages.forEach(p => {
-                        p.classList.remove('active');
-                        p.classList.remove('selective-hidden');
-                    });
-                    tab.classList.add('active');
-                    page.classList.add('active');
-                    
-                    if (page === dictPage) {
-                        setTimeout(loadDictionary, 50); // Small delay to prioritize UI switch
-                    }
+                document.querySelectorAll('.page, .tab, .custom-tab').forEach(el => el.classList.remove('active'));
+                allCustomPages.forEach(p => {
+                    p.classList.remove('active');
+                    p.classList.remove('selective-hidden');
                 });
+                tab.classList.add('active');
+                page.classList.add('active');
+                
+                if (page === dictPage) {
+                    setTimeout(loadDictionary, 50);
+                }
             };
 
             // Enhanced Event Delegation for Tabs
             customRow.addEventListener('click', (e) => {
                 const tab = e.target.closest('.custom-tab');
                 if (!tab) return;
-                
-                e.preventDefault();
-                e.stopPropagation();
                 
                 const tabId = tab.id;
                 if (tabId === 'cat-btn') toggleTab(catTab, kbPage);
@@ -1450,7 +1445,7 @@
                     updateAdminContent();
                     toggleTab(adminTab, adminPage);
                 }
-            }, true); // Use capture phase to intercept before JKLM
+            }, false);
 
             nav.addEventListener('click', (e) => {
                 const clicked = e.target.closest('.tab') || e.target.closest('.custom-tab');
