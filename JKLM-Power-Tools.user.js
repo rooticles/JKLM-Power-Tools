@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      16.2
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v16.2)
+// @version      16.3
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v16.3)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -165,7 +165,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '16.2';
+    const SCRIPT_VERSION = '16.3';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1495,8 +1495,8 @@
                         'taimen', 'tang', 'tarpon', 'tarwhine', 'tenpounder', 'thornfish', 'threadfin', 'tope', 
                         'torpedo', 'trahira', 'treefish', 'tripletail', 'trumpeter', 'trunkfish', 'uaru', 
                         'vanjaram', 'vendace', 'vimba', 'walu', 'warmouth', 'whiff', 'wobbegong', 'wrasse', 
-                        'zander', 'zingel', 'humuhumunukunukuapua'
-                    ];
+                            'zander', 'zingel', 'humuhumunukunukuapua\'a'
+                        ];
 
                     let words = wordType === 'Fish' ? [...fishKeywords] : [...dictionary];
                     
