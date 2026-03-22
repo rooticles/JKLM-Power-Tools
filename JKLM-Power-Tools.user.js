@@ -3,10 +3,10 @@
 // ==UserScript==
 // @name         JKLM Root
 // @namespace    http://tampermonkey.net/
-// @version      18.5
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v18.5)
+// @version      18.6
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v18.6)
 // @author       Root
-// @icon         https://i.pinimg.com/736x/32/7e/db/327edb9a15b304efc264668ada03f725.jpg
+// @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @match        *://*.jklm.fun/*
@@ -192,7 +192,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '18.5';
+    const SCRIPT_VERSION = '18.6';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -228,6 +228,13 @@
     const setBorderRadius = (val) => GM_setValue('borderRadius', val);
     const getClockEnabled = () => GM_getValue('clockEnabled', true);
     const setClockEnabled = (val) => GM_setValue('clockEnabled', val);
+
+    const getChatMentionLog = () => GM_getValue('chatMentionLog', []);
+    const setChatMentionLog = (val) => GM_setValue('chatMentionLog', val);
+    const getChatBgColor = () => GM_getValue('chatBgColor', 'rgba(0, 0, 0, 0.4)');
+    const setChatBgColor = (val) => GM_setValue('chatBgColor', val);
+    const getChatTextColor = () => GM_getValue('chatTextColor', '#ffffff');
+    const setChatTextColor = (val) => GM_setValue('chatTextColor', val);
 
     const getSearchHistory = () => GM_getValue('searchHistory', []);
     const setSearchHistory = (val) => GM_setValue('searchHistory', val);
@@ -327,7 +334,14 @@
             passGenHeader: '🔐 Password Generator',
             passGenLength: 'Password Length:',
             passGenGenerate: 'Generate Password',
-            passGenCopy: 'Copy Password'
+            passGenCopy: 'Copy Password',
+            mentionLogHeader: '💬 Mention Log',
+            mentionLogEmpty: 'No mentions found yet.',
+            mentionLogClear: 'Clear Log',
+            customStylesHeader: '🖌️ Custom Styles',
+            chatBgLabel: 'Chat Background:',
+            chatTextLabel: 'Chat Text Color:',
+            stylesReset: 'Reset Styles'
         }
     };
 
@@ -383,6 +397,24 @@
             if (fish.endsWith('y') && low === fish.slice(0, -1) + 'ies') return true;
             return false;
         });
+    };
+
+    const updateChatStyles = () => {
+        const bgColor = getChatBgColor();
+        const textColor = getChatTextColor();
+        
+        let chatStyle = document.getElementById('pt-custom-chat-styles');
+        if (!chatStyle) {
+            chatStyle = document.createElement('style');
+            chatStyle.id = 'pt-custom-chat-styles';
+            document.head.appendChild(chatStyle);
+        }
+        
+        chatStyle.innerHTML = `
+            .chat .messages { background: ${bgColor} !important; }
+            .chat .messages .message .text { color: ${textColor} !important; }
+            .chat .messages .message .nickname { filter: brightness(1.2); }
+        `;
     };
 
     const downloadAllCategories = async () => {
@@ -1487,9 +1519,49 @@
                 const t = translations[getLanguage()] || translations['English'];
                 toolsTab.title = t.toolsHeader;
 
+                const mentions = getChatMentionLog();
+                const mentionsHtml = mentions.length > 0 ? mentions.map(m => `
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--pt-glass-border); border-radius: 12px; padding: 12px; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="font-weight: 800; color: var(--pt-theme-color); font-size: 13px;">${m.author}</span>
+                            <span style="font-size: 10px; opacity: 0.5;">${m.time}</span>
+                        </div>
+                        <div style="font-size: 13px; line-height: 1.4;">${m.text}</div>
+                    </div>
+                `).join('') : `<div style="text-align: center; color: var(--pt-text-muted); padding: 20px; font-size: 13px;">${t.mentionLogEmpty}</div>`;
+
                 toolsPage.innerHTML = `
                 ${getPanelNav('tools-btn', t.toolsHeader)}
                 <div class="custom-page-content">
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">🖌️</div>
+                            <span>${t.customStylesHeader}</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px;">
+                                <span style="font-size: 14px; font-weight: 600;">${t.chatBgLabel}</span>
+                                <input type="color" id="style-chat-bg" value="${getChatBgColor()}" style="width: 40px; height: 30px; border-radius: 6px; cursor: pointer; border: 1px solid var(--pt-glass-border);">
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px;">
+                                <span style="font-size: 14px; font-weight: 600;">${t.chatTextLabel}</span>
+                                <input type="color" id="style-chat-text" value="${getChatTextColor()}" style="width: 40px; height: 30px; border-radius: 6px; cursor: pointer; border: 1px solid var(--pt-glass-border);">
+                            </div>
+                            <button class="modern-button" id="style-reset-btn" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--pt-glass-border); padding: 8px;">${t.stylesReset}</button>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">💬</div>
+                            <span>${t.mentionLogHeader}</span>
+                        </div>
+                        <div id="mention-log-container" style="max-height: 300px; overflow-y: auto; padding-right: 5px;">
+                            ${mentionsHtml}
+                        </div>
+                        ${mentions.length > 0 ? `<button class="modern-button" id="mention-log-clear" style="width: 100%; margin-top: 15px; background: rgba(255,68,68,0.1); color: #ff4444; border: 1px solid rgba(255,68,68,0.2);">${t.mentionLogClear}</button>` : ''}
+                    </div>
+
                     <div class="feature-card">
                         <div class="feature-header">
                             <div class="feature-icon">🔐</div>
@@ -1867,12 +1939,30 @@
                         });
                     }
                 }
+                if (e.target.id === 'mention-log-clear') {
+                    setChatMentionLog([]);
+                    updateToolsContent();
+                }
+                if (e.target.id === 'style-reset-btn') {
+                    setChatBgColor('rgba(0, 0, 0, 0.4)');
+                    setChatTextColor('#ffffff');
+                    updateChatStyles();
+                    updateToolsContent();
+                }
             });
 
             toolsPage.addEventListener('input', (e) => {
                 if (e.target.id === 'pass-len-slider') {
                     const span = document.getElementById('val-pass-len');
                     if (span) span.innerText = e.target.value;
+                }
+                if (e.target.id === 'style-chat-bg') {
+                    setChatBgColor(e.target.value);
+                    updateChatStyles();
+                }
+                if (e.target.id === 'style-chat-text') {
+                    setChatTextColor(e.target.value);
+                    updateChatStyles();
                 }
             });
 
@@ -2002,6 +2092,47 @@
                 }
             });
             gameObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+            const chatObserver = new MutationObserver((mutations) => {
+                const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+                const selfNickname = win.room?.selfNickname || '';
+                if (!selfNickname) return;
+
+                for (const mutation of mutations) {
+                    for (const node of mutation.addedNodes) {
+                        if (node.nodeType === 1 && node.classList.contains('message')) {
+                            const text = node.querySelector('.text')?.innerText || '';
+                            const author = node.querySelector('.nickname')?.innerText || 'System';
+                            
+                            if (text.toLowerCase().includes(selfNickname.toLowerCase()) && author !== selfNickname) {
+                                let log = getChatMentionLog();
+                                log.unshift({
+                                    author,
+                                    text,
+                                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                });
+                                log = log.slice(0, 50); // Keep last 50
+                                setChatMentionLog(log);
+                                if (document.getElementById('tools-btn')?.classList.contains('active')) {
+                                    updateToolsContent();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const startChatObserver = () => {
+                const chatMessages = document.querySelector('.chat .messages');
+                if (chatMessages) {
+                    chatObserver.observe(chatMessages, { childList: true });
+                } else {
+                    setTimeout(startChatObserver, 1000);
+                }
+            };
+            startChatObserver();
+
+            updateChatStyles();
 
             GM_addValueChangeListener('spaceToHyphenEnabled', () => updateKbContent());
             GM_addValueChangeListener('spaceToHyphenChatEnabled', () => updateKbContent());
