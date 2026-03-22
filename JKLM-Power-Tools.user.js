@@ -246,7 +246,21 @@
 
     const isBombParty = () => {
         const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
-        return win.room?.gameId === 'bombparty' || window.location.href.includes('bombparty');
+        // JKLM URLs usually don't contain 'bombparty'.
+        // We check for the gameId in the room object.
+        if (win.room?.gameId === 'bombparty') return true;
+        if (win.room?.gameId === 'popsauce') return false;
+        
+        // Fallback for when the room object isn't fully loaded:
+        // We look for BombParty-specific elements.
+        const isPopSauce = !!document.querySelector('.question') || !!document.querySelector('.choices') || !!document.querySelector('.popsauce');
+        const isBombPartyEl = !!document.querySelector('.syllable') || !!document.querySelector('.canvasArea') || !!document.querySelector('.bombparty');
+        
+        if (isBombPartyEl) return true;
+        if (isPopSauce) return false;
+
+        // Default: Show it until we're sure it's NOT BombParty (to avoid hiding it on load)
+        return true;
     };
 
     const getTabHotkeys = () => GM_getValue('tabHotkeys', false);
