@@ -2,8 +2,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      17.6
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v17.6)
+// @version      17.8
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v17.8)
 // @author       Root
 // @icon         https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTJbeFZgV0zcGPsl6DlZo3cGrxKIEsWPIcJw&s
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -174,7 +174,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '17.6';
+    const SCRIPT_VERSION = '17.8';
 
     const FISH_KEYWORDS = [
         'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
