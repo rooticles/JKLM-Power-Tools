@@ -6,7 +6,7 @@
 // @version      19.2
 // @description  Advanced JKLM Power Tools - Ultimate Edition (v19.2)
 // @author       Root
-// @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
+// @icon         https://i.ytimg.com/vi/czR6DrMptJE/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBm-s4RSY9BGKY3Km3KS0ASs_RaiQ
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @match        *://*.jklm.fun/*
@@ -26,7 +26,7 @@
     const patchGlobalBugs = () => {
         try {
             const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
-            
+
             // --- Global Error Suppressor (Unbreakable Mode) ---
             const ignoreError = (msg) => {
                 const ignoredErrors = [
@@ -98,7 +98,7 @@
 
             // --- Ultra Stability Patch (v5 - Ultimate Edition) ---
             // This is the absolute final fix for "Cannot read properties of undefined (reading 'addEventListener')"
-            
+
             const createRecursiveProxy = (name = 'root') => {
                 const noop = () => {};
                 const handler = {
@@ -106,14 +106,14 @@
                         if (prop === 'then') return undefined;
                         if (prop === 'toJSON') return () => ({});
                         if (typeof prop === 'symbol') return undefined;
-                        
+
                         const methods = [
-                            'addEventListener', 'removeEventListener', 'on', 'off', 'emit', 
-                            'dispatchEvent', 'setMilestone', 'trigger', 'dispatch', 'join', 
+                            'addEventListener', 'removeEventListener', 'on', 'off', 'emit',
+                            'dispatchEvent', 'setMilestone', 'trigger', 'dispatch', 'join',
                             'leave', 'send', 'connect', 'disconnect'
                         ];
                         if (methods.includes(prop)) return noop;
-                        
+
                         return createRecursiveProxy(`${name}.${prop.toString()}`);
                     },
                     apply: (target, thisArg, args) => {
@@ -128,9 +128,9 @@
                 let _globalMilestones = win.milestones || createRecursiveProxy('milestones');
                 Object.defineProperty(win.Object.prototype, 'milestones', {
                     get: function() { return _globalMilestones; },
-                    set: function(val) { 
+                    set: function(val) {
                         if (this === win) _globalMilestones = val;
-                        else this._milestones = val; 
+                        else this._milestones = val;
                     },
                     configurable: true
                 });
@@ -140,12 +140,12 @@
                 let _val = win[name] || createRecursiveProxy(name);
                 Object.defineProperty(win, name, {
                     get: () => _val,
-                    set: (val) => { 
+                    set: (val) => {
                         if (val && typeof val === 'object') {
                             ['addEventListener', 'removeEventListener', 'on', 'off', 'emit', 'setMilestone'].forEach(m => {
                                 if (typeof val[m] === 'undefined') val[m] = () => {};
                             });
-                            _val = val; 
+                            _val = val;
                         }
                     },
                     configurable: true
@@ -165,7 +165,7 @@
                                 Proto[m] = function() { return this; };
                             }
                         });
-                        
+
                         // Specifically patch setMilestone to be resilient
                         const originalSetMilestone = Proto.setMilestone;
                         Proto.setMilestone = function(...args) {
@@ -180,7 +180,7 @@
                     }
                 });
             };
-            
+
             patchPrototypes();
             setTimeout(patchPrototypes, 500);
             setTimeout(patchPrototypes, 2000);
@@ -250,12 +250,12 @@
         // We check for the gameId in the room object.
         if (win.room?.gameId === 'bombparty') return true;
         if (win.room?.gameId === 'popsauce') return false;
-        
+
         // Fallback for when the room object isn't fully loaded:
         // We look for BombParty-specific elements.
         const isPopSauce = !!document.querySelector('.question') || !!document.querySelector('.choices') || !!document.querySelector('.popsauce');
         const isBombPartyEl = !!document.querySelector('.syllable') || !!document.querySelector('.canvasArea') || !!document.querySelector('.bombparty');
-        
+
         if (isBombPartyEl) return true;
         if (isPopSauce) return false;
 
@@ -345,38 +345,38 @@
     let currentDictLang = '';
 
     const FISH_KEYWORDS = [
-        'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
-        'pike', 'perch', 'snapper', 'grouper', 'marlin', 'swordfish', 'stingray', 'ray', 
-        'flounder', 'halibut', 'sole', 'mullet', 'sardine', 'anchovy', 'herring', 'barracuda', 
-        'piranha', 'tilapia', 'catfish', 'guppy', 'goldfish', 'clownfish', 'angelfish', 
-        'betta', 'tetra', 'molly', 'platy', 'danio', 'loach', 'discus', 'gourami', 'oscar', 
+        'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp',
+        'pike', 'perch', 'snapper', 'grouper', 'marlin', 'swordfish', 'stingray', 'ray',
+        'flounder', 'halibut', 'sole', 'mullet', 'sardine', 'anchovy', 'herring', 'barracuda',
+        'piranha', 'tilapia', 'catfish', 'guppy', 'goldfish', 'clownfish', 'angelfish',
+        'betta', 'tetra', 'molly', 'platy', 'danio', 'loach', 'discus', 'gourami', 'oscar',
         'cichlid', 'sturgeon', 'gar', 'bowfin', 'lungfish', 'lamprey', 'hagfish', 'coelacanth',
-        'mahimahi', 'wahoo', 'walleye', 'muskellunge', 'bluegill', 'crappie', 'sunfish', 'shad', 
-        'minnow', 'dace', 'roach', 'tench', 'bream', 'chub', 'barbel', 'grayling', 'char', 
-        'whitefish', 'smelt', 'capelin', 'hake', 'pollock', 'haddock', 'whiting', 'ling', 
-        'burbot', 'angler', 'monkfish', 'batfish', 'frogfish', 'needlefish', 'flyingfish', 
-        'seahorse', 'pipefish', 'stickleback', 'sculpin', 'lionfish', 'rockfish', 'tilefish', 
-        'remora', 'jack', 'pompano', 'dorado', 'porgy', 'drum', 'croaker', 'surmullet', 
-        'goatfish', 'archerfish', 'leaffish', 'snakehead', 'turbot', 'plaice', 'dab', 'puffer', 
-        'boxfish', 'triggerfish', 'filefish', 'albacore', 'alewife', 'alfonsino', 'amberjack', 
-        'anemonefish', 'arapaima', 'arowana', 'ayu', 'bangus', 'barracudina', 'barramundi', 
-        'bichir', 'bitterling', 'bleak', 'blenny', 'blobfish', 'blowfish', 'boga', 'bonefish', 
-        'bonito', 'bonytail', 'brill', 'brotula', 'candiru', 'catalufa', 'catla', 'cisco', 
-        'cobia', 'coley', 'cornetfish', 'cusk', 'damselfish', 'dartfish', 'dealfish', 'dhufish', 
-        'dory', 'dottyback', 'dragonet', 'driftfish', 'escolar', 'eulachon', 'fangtooth', 
-        'fierasfer', 'flier', 'garibaldi', 'goldeye', 'grunion', 'grunt', 'grunter', 'gudgeon', 
-        'halosaur', 'hamlet', 'hoki', 'huchen', 'hussar', 'icefish', 'ide', 'ilish', 'inanga', 
-        'inconnu', 'kahawai', 'kaluga', 'kokanee', 'kokopu', 'ladyfish', 'lenok', 'limia', 
-        'louvar', 'luderick', 'lumpsucker', 'mahseer', 'medaka', 'menhaden', 'mojarra', 'mola', 
-        'monchong', 'mooneye', 'moonfish', 'mora', 'morwong', 'mrigal', 'mummichog', 'nase', 
-        'notothen', 'oarfish', 'oldwife', 'opah', 'opaleye', 'orfe', 'panga', 'parore', 
-        'peamouth', 'pearleye', 'pleco', 'poacher', 'pomfret', 'powen', 'quillback', 'quillfish', 
-        'rasbora', 'rohu', 'ronquil', 'roosterfish', 'ruffe', 'sabertooth', 'sablefish', 'scat', 
-        'scup', 'shiner', 'sillago', 'skate', 'skilfish', 'sleeper', 'slickhead', 'slimehead', 
-        'snook', 'sprat', 'squeaker', 'stargazer', 'steelhead', 'stonecat', 'sucker', 'tailor', 
-        'taimen', 'tang', 'tarpon', 'tarwhine', 'tenpounder', 'thornfish', 'threadfin', 'tope', 
-        'torpedo', 'trahira', 'treefish', 'tripletail', 'trumpeter', 'trunkfish', 'uaru', 
-        'vanjaram', 'vendace', 'vimba', 'walu', 'warmouth', 'whiff', 'wobbegong', 'wrasse', 
+        'mahimahi', 'wahoo', 'walleye', 'muskellunge', 'bluegill', 'crappie', 'sunfish', 'shad',
+        'minnow', 'dace', 'roach', 'tench', 'bream', 'chub', 'barbel', 'grayling', 'char',
+        'whitefish', 'smelt', 'capelin', 'hake', 'pollock', 'haddock', 'whiting', 'ling',
+        'burbot', 'angler', 'monkfish', 'batfish', 'frogfish', 'needlefish', 'flyingfish',
+        'seahorse', 'pipefish', 'stickleback', 'sculpin', 'lionfish', 'rockfish', 'tilefish',
+        'remora', 'jack', 'pompano', 'dorado', 'porgy', 'drum', 'croaker', 'surmullet',
+        'goatfish', 'archerfish', 'leaffish', 'snakehead', 'turbot', 'plaice', 'dab', 'puffer',
+        'boxfish', 'triggerfish', 'filefish', 'albacore', 'alewife', 'alfonsino', 'amberjack',
+        'anemonefish', 'arapaima', 'arowana', 'ayu', 'bangus', 'barracudina', 'barramundi',
+        'bichir', 'bitterling', 'bleak', 'blenny', 'blobfish', 'blowfish', 'boga', 'bonefish',
+        'bonito', 'bonytail', 'brill', 'brotula', 'candiru', 'catalufa', 'catla', 'cisco',
+        'cobia', 'coley', 'cornetfish', 'cusk', 'damselfish', 'dartfish', 'dealfish', 'dhufish',
+        'dory', 'dottyback', 'dragonet', 'driftfish', 'escolar', 'eulachon', 'fangtooth',
+        'fierasfer', 'flier', 'garibaldi', 'goldeye', 'grunion', 'grunt', 'grunter', 'gudgeon',
+        'halosaur', 'hamlet', 'hoki', 'huchen', 'hussar', 'icefish', 'ide', 'ilish', 'inanga',
+        'inconnu', 'kahawai', 'kaluga', 'kokanee', 'kokopu', 'ladyfish', 'lenok', 'limia',
+        'louvar', 'luderick', 'lumpsucker', 'mahseer', 'medaka', 'menhaden', 'mojarra', 'mola',
+        'monchong', 'mooneye', 'moonfish', 'mora', 'morwong', 'mrigal', 'mummichog', 'nase',
+        'notothen', 'oarfish', 'oldwife', 'opah', 'opaleye', 'orfe', 'panga', 'parore',
+        'peamouth', 'pearleye', 'pleco', 'poacher', 'pomfret', 'powen', 'quillback', 'quillfish',
+        'rasbora', 'rohu', 'ronquil', 'roosterfish', 'ruffe', 'sabertooth', 'sablefish', 'scat',
+        'scup', 'shiner', 'sillago', 'skate', 'skilfish', 'sleeper', 'slickhead', 'slimehead',
+        'snook', 'sprat', 'squeaker', 'stargazer', 'steelhead', 'stonecat', 'sucker', 'tailor',
+        'taimen', 'tang', 'tarpon', 'tarwhine', 'tenpounder', 'thornfish', 'threadfin', 'tope',
+        'torpedo', 'trahira', 'treefish', 'tripletail', 'trumpeter', 'trunkfish', 'uaru',
+        'vanjaram', 'vendace', 'vimba', 'walu', 'warmouth', 'whiff', 'wobbegong', 'wrasse',
         'zander', 'zingel', 'humuhumunukunukuapua\'a'
     ];
 
@@ -545,9 +545,9 @@
         /* Glassmorphism Scrollbar (Panel only) */
         .custom-kb-page::-webkit-scrollbar, .custom-dict-page::-webkit-scrollbar, .custom-system-page::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-kb-page::-webkit-scrollbar-track, .custom-dict-page::-webkit-scrollbar-track, .custom-system-page::-webkit-scrollbar-track { background: transparent; }
-        .custom-kb-page::-webkit-scrollbar-thumb, .custom-dict-page::-webkit-scrollbar-thumb, .custom-system-page::-webkit-scrollbar-thumb { 
-            background: rgba(255, 255, 255, 0.1); 
-            border-radius: 10px; 
+        .custom-kb-page::-webkit-scrollbar-thumb, .custom-dict-page::-webkit-scrollbar-thumb, .custom-system-page::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
             border: 2px solid transparent;
             background-clip: content-box;
         }
@@ -983,9 +983,9 @@
             animation: tooltipFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes tooltipFade { 
-            from { opacity: 0; transform: translateY(15px) scale(0.95); } 
-            to { opacity: 1; transform: translateY(0) scale(1); } 
+        @keyframes tooltipFade {
+            from { opacity: 0; transform: translateY(15px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .note-delete {
@@ -1051,7 +1051,7 @@
         document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-tools-page, .custom-system-page').forEach(p => {
             p.classList.remove('pos-left', 'pos-right');
             p.classList.add(`pos-${panelPosition}`);
-            
+
             p.style.animation = `slideInPanel${panelPosition.charAt(0).toUpperCase() + panelPosition.slice(1)} 0.6s cubic-bezier(0.16, 1, 0.3, 1)`;
             p.style.background = isOpacityReduced ? 'rgba(26, 26, 46, 0.2)' : 'rgba(26, 26, 46, 0.95)';
             p.style.backdropFilter = isOpacityReduced ? 'blur(2px)' : 'blur(16px)';
@@ -1115,7 +1115,7 @@
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 const clockEnabled = getClockEnabled();
-                
+
                 if (clockEnabled) {
                     if (clock.innerText !== timeStr) {
                         clock.innerText = timeStr;
@@ -1146,7 +1146,7 @@
                 const clockEnabled = getClockEnabled();
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                
+
                 return `
                 <div class="panel-nav">
                     <div class="panel-title">
@@ -1503,7 +1503,7 @@
                 });
                 tab.classList.add('active');
                 page.classList.add('active');
-                
+
                 if (page === dictPage) {
                     setTimeout(loadDictionary, 50);
                 }
@@ -1513,7 +1513,7 @@
             customRow.addEventListener('click', (e) => {
                 const tab = e.target.closest('.custom-tab');
                 if (!tab) return;
-                
+
                 const tabId = tab.id;
                 if (tabId === 'cat-btn') toggleTab(catTab, kbPage);
                 else if (tabId === 'dict-btn') toggleTab(dictTab, dictPage);
@@ -1604,7 +1604,7 @@
                     } else {
                         words = [...dictionary];
                     }
-                    
+
                     const minLen = getMinWordLength();
                     const maxLen = getMaxWordLength();
 
@@ -1737,7 +1737,7 @@
 
                 if (e.target.classList.contains('clickable-word')) {
                     const word = e.target.innerText;
-                    
+
                     navigator.clipboard.writeText(word).then(() => {
                         const originalColor = e.target.style.color;
                         e.target.style.color = 'var(--pt-theme-color)';
