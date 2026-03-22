@@ -3,8 +3,8 @@
 // ==UserScript==
 // @name         JKLM Root
 // @namespace    http://tampermonkey.net/
-// @version      18.8
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v18.8)
+// @version      18.9
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v18.9)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -192,7 +192,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '18.8';
+    const SCRIPT_VERSION = '18.9';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -243,6 +243,11 @@
     const setMinWordLength = (val) => GM_setValue('minWordLength', val);
     const getMaxWordLength = () => GM_getValue('maxWordLength', 30);
     const setMaxWordLength = (val) => GM_setValue('maxWordLength', val);
+
+    const isBombParty = () => {
+        const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+        return win.room?.gameId === 'bombparty' || window.location.href.includes('bombparty');
+    };
 
     const getTabHotkeys = () => GM_getValue('tabHotkeys', false);
     const setTabHotkeys = (val) => GM_setValue('tabHotkeys', val);
@@ -1061,6 +1066,8 @@
                 nav.after(customRow);
             }
 
+            customRow.style.display = isBombParty() ? 'flex' : 'none';
+
             if (document.getElementById('cat-btn')) return;
 
             const createTab = (id, icon) => {
@@ -1869,6 +1876,16 @@
                 } else if (!gameVisible && isGameRunning) {
                     isGameRunning = false;
                 }
+
+                // Conditional visibility for PopSauce vs BombParty
+                const customRow = document.getElementById('custom-nav-row');
+                if (customRow) {
+                    const shouldShow = isBombParty();
+                    if (customRow.style.display !== (shouldShow ? 'flex' : 'none')) {
+                        customRow.style.display = shouldShow ? 'flex' : 'none';
+                        if (!shouldShow) window.closeCustomTabs?.();
+                    }
+                }
             });
             gameObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
 
@@ -1879,6 +1896,8 @@
             GM_addValueChangeListener('themeColor', () => updateThemeStyles());
 
             window.addEventListener('keydown', (e) => {
+                if (!isBombParty()) return;
+
                 if (e.key === getToggleKey()) {
                     const anyActive = allCustomPages.some(p => p.classList.contains('active'));
                     if (anyActive) {
