@@ -3,8 +3,8 @@
 // ==UserScript==
 // @name         JKLM Root
 // @namespace    http://tampermonkey.net/
-// @version      19.2
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v19.2)
+// @version      19.3
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v19.3)
 // @author       Root
 // @icon         https://i.ytimg.com/vi/czR6DrMptJE/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBm-s4RSY9BGKY3Km3KS0ASs_RaiQ
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -95,6 +95,35 @@
                 });
             };
             resumeAudio();
+
+            // --- Anti-Message-Delete Patch ---
+            // Prevents JKLM from deleting messages when a user is banned or leaves
+            const patchChatCleanup = () => {
+                const targets = [win.room, win.chat];
+                targets.forEach(target => {
+                    if (target && typeof target === 'object') {
+                        const methods = ['removeMessagesByPeerId', 'removeMessagesByUser', 'clearChat'];
+                        methods.forEach(method => {
+                            if (typeof target[method] === 'function' && !target[method].isPatched) {
+                                const original = target[method];
+                                target[method] = function(...args) {
+                                    console.log(`[JKLM Power Tools] Blocked message deletion via ${method}`, args);
+                                    return; // Do nothing, keep the messages
+                                };
+                                target[method].isPatched = true;
+                            }
+                        });
+                    }
+                });
+            };
+
+            // Periodically check for room/chat objects as they load asynchronously
+            const cleanupInterval = setInterval(patchChatCleanup, 1000);
+            setTimeout(() => clearInterval(cleanupInterval), 60000); // Check for 1 minute
+
+            // Add a mutation observer to catch dynamically added room/chat logic
+            const roomObserver = new MutationObserver(() => patchChatCleanup());
+            roomObserver.observe(document.documentElement, { childList: true, subtree: true });
 
             // --- Ultra Stability Patch (v5 - Ultimate Edition) ---
             // This is the absolute final fix for "Cannot read properties of undefined (reading 'addEventListener')"
@@ -192,7 +221,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '19.2';
+    const SCRIPT_VERSION = '19.3';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
