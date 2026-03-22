@@ -3,8 +3,8 @@
 // ==UserScript==
 // @name         JKLM Root
 // @namespace    http://tampermonkey.net/
-// @version      18.7
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v18.7)
+// @version      18.8
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v18.8)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -192,7 +192,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '18.7';
+    const SCRIPT_VERSION = '18.8';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -228,13 +228,6 @@
     const setBorderRadius = (val) => GM_setValue('borderRadius', val);
     const getClockEnabled = () => GM_getValue('clockEnabled', true);
     const setClockEnabled = (val) => GM_setValue('clockEnabled', val);
-
-    const getChatMentionLog = () => GM_getValue('chatMentionLog', []);
-    const setChatMentionLog = (val) => GM_setValue('chatMentionLog', val);
-    const getChatBgColor = () => GM_getValue('chatBgColor', 'rgba(0, 0, 0, 0.4)');
-    const setChatBgColor = (val) => GM_setValue('chatBgColor', val);
-    const getChatTextColor = () => GM_getValue('chatTextColor', '#ffffff');
-    const setChatTextColor = (val) => GM_setValue('chatTextColor', val);
 
     const getSearchHistory = () => GM_getValue('searchHistory', []);
     const setSearchHistory = (val) => GM_setValue('searchHistory', val);
@@ -322,20 +315,7 @@
             tabHotkeysLabel: 'Panel Tab Hotkeys (F1-F3)',
             tabHotkeysDesc: 'Quickly switch panels using F1, F2, and F3.',
             opacityKeyLabel: 'Panel Opacity Toggle (Key)',
-            ideaBy: 'Idea by',
-            // Tools Tab
-            toolsHeader: '🛠️ Utility Tools',
-            passGenHeader: '🔐 Password Generator',
-            passGenLength: 'Password Length:',
-            passGenGenerate: 'Generate Password',
-            passGenCopy: 'Copy Password',
-            mentionLogHeader: '💬 Mention Log',
-            mentionLogEmpty: 'No mentions found yet.',
-            mentionLogClear: 'Clear Log',
-            customStylesHeader: '🖌️ Custom Styles',
-            chatBgLabel: 'Chat Background:',
-            chatTextLabel: 'Chat Text Color:',
-            stylesReset: 'Reset Styles'
+            ideaBy: 'Idea by'
         }
     };
 
@@ -391,24 +371,6 @@
             if (fish.endsWith('y') && low === fish.slice(0, -1) + 'ies') return true;
             return false;
         });
-    };
-
-    const updateChatStyles = () => {
-        const bgColor = getChatBgColor();
-        const textColor = getChatTextColor();
-        
-        let chatStyle = document.getElementById('pt-custom-chat-styles');
-        if (!chatStyle) {
-            chatStyle = document.createElement('style');
-            chatStyle.id = 'pt-custom-chat-styles';
-            document.head.appendChild(chatStyle);
-        }
-        
-        chatStyle.innerHTML = `
-            .chat .messages { background: ${bgColor} !important; }
-            .chat .messages .message .text { color: ${textColor} !important; }
-            .chat .messages .message .nickname { filter: brightness(1.2); }
-        `;
     };
 
     const downloadAllCategories = async () => {
@@ -560,15 +522,15 @@
         }
 
         /* Glassmorphism Scrollbar (Panel only) */
-        .custom-kb-page::-webkit-scrollbar, .custom-dict-page::-webkit-scrollbar, .custom-tools-page::-webkit-scrollbar, .custom-system-page::-webkit-scrollbar { width: 8px; height: 8px; }
-        .custom-kb-page::-webkit-scrollbar-track, .custom-dict-page::-webkit-scrollbar-track, .custom-tools-page::-webkit-scrollbar-track, .custom-system-page::-webkit-scrollbar-track { background: transparent; }
-        .custom-kb-page::-webkit-scrollbar-thumb, .custom-dict-page::-webkit-scrollbar-thumb, .custom-tools-page::-webkit-scrollbar-thumb, .custom-system-page::-webkit-scrollbar-thumb { 
+        .custom-kb-page::-webkit-scrollbar, .custom-dict-page::-webkit-scrollbar, .custom-system-page::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-kb-page::-webkit-scrollbar-track, .custom-dict-page::-webkit-scrollbar-track, .custom-system-page::-webkit-scrollbar-track { background: transparent; }
+        .custom-kb-page::-webkit-scrollbar-thumb, .custom-dict-page::-webkit-scrollbar-thumb, .custom-system-page::-webkit-scrollbar-thumb { 
             background: rgba(255, 255, 255, 0.1); 
             border-radius: 10px; 
             border: 2px solid transparent;
             background-clip: content-box;
         }
-        .custom-kb-page::-webkit-scrollbar-thumb:hover, .custom-dict-page::-webkit-scrollbar-thumb:hover, .custom-tools-page::-webkit-scrollbar-thumb:hover, .custom-system-page::-webkit-scrollbar-thumb:hover { background: rgba(var(--pt-theme-color-rgb), 0.5); }
+        .custom-kb-page::-webkit-scrollbar-thumb:hover, .custom-dict-page::-webkit-scrollbar-thumb:hover, .custom-system-page::-webkit-scrollbar-thumb:hover { background: rgba(var(--pt-theme-color-rgb), 0.5); }
 
         .custom-nav-row {
             display: flex;
@@ -661,7 +623,7 @@
             transform: scale(1.1);
         }
 
-        .custom-kb-page, .custom-dict-page, .custom-tools-page, .custom-system-page {
+        .custom-kb-page, .custom-dict-page, .custom-system-page {
             display: none;
             padding: 20px;
             color: var(--pt-text-color);
@@ -688,7 +650,7 @@
             pointer-events: auto !important; /* Interaktion sicherstellen */
         }
 
-        .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-tools-page.pos-left, .custom-system-page.pos-left {
+        .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-system-page.pos-left {
             left: 0;
             border-right: 1px solid var(--pt-glass-border);
             border-left: none;
@@ -696,7 +658,7 @@
             border-bottom-left-radius: 0;
         }
 
-        .custom-kb-page.pos-right, .custom-dict-page.pos-right, .custom-tools-page.pos-right, .custom-system-page.pos-right {
+        .custom-kb-page.pos-right, .custom-dict-page.pos-right, .custom-system-page.pos-right {
             right: 0;
             border-left: 1px solid var(--pt-glass-border);
             border-right: none;
@@ -704,7 +666,7 @@
             border-bottom-right-radius: 0;
         }
 
-        .custom-kb-page.active, .custom-dict-page.active, .custom-tools-page.active, .custom-system-page.active {
+        .custom-kb-page.active, .custom-dict-page.active, .custom-system-page.active {
             display: block;
             animation: fadeInGlass 0.2s ease-out;
         }
@@ -1080,15 +1042,6 @@
     let isGameRunning = false;
 
     let isInitialized = false;
-    // --- Tools Logic ---
-    const generatePassword = (length = 16) => {
-        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
-        let retVal = "";
-        for (let i = 0, n = charset.length; i < length; ++i) {
-            retVal += charset.charAt(Math.floor(Math.random() * n));
-        }
-        return retVal;
-    };
 
     const init = () => {
         if (isInitialized) return;
@@ -1121,10 +1074,9 @@
 
             const catTab = createTab('cat-btn', '🚀');
             const dictTab = createTab('dict-btn', '📖');
-            const toolsTab = createTab('tools-btn', '🛠️');
             const systemTab = createTab('system-btn', '⚙️');
 
-            [catTab, dictTab, toolsTab, systemTab].forEach(t => {
+            [catTab, dictTab, systemTab].forEach(t => {
                 customRow.appendChild(t);
             });
 
@@ -1161,12 +1113,10 @@
             kbPage.className = 'custom-kb-page';
             const dictPage = document.createElement('div');
             dictPage.className = 'custom-dict-page';
-            const toolsPage = document.createElement('div');
-            toolsPage.className = 'custom-tools-page';
             const systemPage = document.createElement('div');
             systemPage.className = 'custom-system-page';
 
-            const allCustomPages = [kbPage, dictPage, toolsPage, systemPage];
+            const allCustomPages = [kbPage, dictPage, systemPage];
 
             const getPanelNav = (activeTabId, title) => {
                 const t = translations[getLanguage()] || translations['English'];
@@ -1181,7 +1131,6 @@
                         <div class="custom-tab-group">
                             <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">🚀</span></div>
                             <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">📖</span></div>
-                            <div class="custom-tab ${activeTabId === 'tools-btn' ? 'active' : ''}" data-target="tools-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">🛠️</span></div>
                             <div class="custom-tab ${activeTabId === 'system-btn' ? 'active' : ''}" data-target="system-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">⚙️</span></div>
                          </div>
                      </div>
@@ -1490,84 +1439,8 @@
             `;
             };
 
-            const updateToolsContent = () => {
-                const t = translations[getLanguage()] || translations['English'];
-                toolsTab.title = t.toolsHeader;
-
-                const mentions = getChatMentionLog();
-                const mentionsHtml = mentions.length > 0 ? mentions.map(m => `
-                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--pt-glass-border); border-radius: 12px; padding: 12px; margin-bottom: 8px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                            <span style="font-weight: 800; color: var(--pt-theme-color); font-size: 13px;">${m.author}</span>
-                            <span style="font-size: 10px; opacity: 0.5;">${m.time}</span>
-                        </div>
-                        <div style="font-size: 13px; line-height: 1.4;">${m.text}</div>
-                    </div>
-                `).join('') : `<div style="text-align: center; color: var(--pt-text-muted); padding: 20px; font-size: 13px;">${t.mentionLogEmpty}</div>`;
-
-                toolsPage.innerHTML = `
-                ${getPanelNav('tools-btn', t.toolsHeader)}
-                <div class="custom-page-content">
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">🖌️</div>
-                            <span>${t.customStylesHeader}</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px;">
-                                <span style="font-size: 14px; font-weight: 600;">${t.chatBgLabel}</span>
-                                <input type="color" id="style-chat-bg" value="${getChatBgColor()}" style="width: 40px; height: 30px; border-radius: 6px; cursor: pointer; border: 1px solid var(--pt-glass-border);">
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px;">
-                                <span style="font-size: 14px; font-weight: 600;">${t.chatTextLabel}</span>
-                                <input type="color" id="style-chat-text" value="${getChatTextColor()}" style="width: 40px; height: 30px; border-radius: 6px; cursor: pointer; border: 1px solid var(--pt-glass-border);">
-                            </div>
-                            <button class="modern-button" id="style-reset-btn" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--pt-glass-border); padding: 8px;">${t.stylesReset}</button>
-                        </div>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">💬</div>
-                            <span>${t.mentionLogHeader}</span>
-                        </div>
-                        <div id="mention-log-container" style="max-height: 300px; overflow-y: auto; padding-right: 5px;">
-                            ${mentionsHtml}
-                        </div>
-                        ${mentions.length > 0 ? `<button class="modern-button" id="mention-log-clear" style="width: 100%; margin-top: 15px; background: rgba(255,68,68,0.1); color: #ff4444; border: 1px solid rgba(255,68,68,0.2);">${t.mentionLogClear}</button>` : ''}
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">🔐</div>
-                            <span>${t.passGenHeader}</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 16px;">
-                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
-                                    <span>${t.passGenLength}</span>
-                                    <span style="color: var(--pt-theme-color);"><span id="val-pass-len">16</span> chars</span>
-                                </div>
-                                <input type="range" id="pass-len-slider" min="8" max="64" value="16" style="width: 100%; accent-color: var(--pt-theme-color); cursor: pointer;">
-                            </div>
-                            
-                            <div style="position: relative;">
-                                <input type="text" id="pass-gen-output" class="modern-input" readonly placeholder="Click Generate..." style="padding-right: 50px; font-family: var(--pt-font-mono); font-size: 14px;">
-                                <div id="copy-pass-btn" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.6; transition: 0.3s;" title="${t.passGenCopy}">📋</div>
-                            </div>
-
-                            <button class="modern-button" id="generate-pass-btn" style="width: 100%;">
-                                <span>⚡</span> ${t.passGenGenerate}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                `;
-            };
-
             updateKbContent();
             updateDictContent();
-            updateToolsContent();
             updateSystemContent();
 
             const updateSidebarWidths = (width) => {
@@ -1578,10 +1451,10 @@
             allCustomPages.forEach(p => document.body.appendChild(p));
 
             window.closeCustomTabs = () => {
-                [catTab, dictTab, toolsTab, systemTab].forEach(t => t.classList.remove('active'));
+                [catTab, dictTab, systemTab].forEach(t => t.classList.remove('active'));
                 allCustomPages.forEach(p => p.classList.remove('active'));
                 const home = nav.querySelector('[data-tab="home"]') || nav.querySelector('.tab') || nav.querySelector('.custom-tab');
-                if (home && ![catTab, dictTab, toolsTab, systemTab].includes(home)) home.click();
+                if (home && ![catTab, dictTab, systemTab].includes(home)) home.click();
             };
 
             const toggleTab = (tab, page) => {
@@ -1620,7 +1493,6 @@
                 const tabId = tab.id;
                 if (tabId === 'cat-btn') toggleTab(catTab, kbPage);
                 else if (tabId === 'dict-btn') toggleTab(dictTab, dictPage);
-                else if (tabId === 'tools-btn') toggleTab(toolsTab, toolsPage);
                 else if (tabId === 'system-btn') {
                     updateSystemContent();
                     toggleTab(systemTab, systemPage);
@@ -1629,9 +1501,9 @@
 
             nav.addEventListener('click', (e) => {
                 const clicked = e.target.closest('.tab') || e.target.closest('.custom-tab');
-                if (clicked && ![catTab, dictTab, toolsTab, systemTab].includes(clicked)) {
+                if (clicked && ![catTab, dictTab, systemTab].includes(clicked)) {
                     allCustomPages.forEach(p => p.classList.remove('active'));
-                    [catTab, dictTab, toolsTab, systemTab].forEach(t => t.classList.remove('active'));
+                    [catTab, dictTab, systemTab].forEach(t => t.classList.remove('active'));
                 }
             });
 
@@ -1650,7 +1522,6 @@
                         const targetId = tabBtn.getAttribute('data-target');
                         if (targetId === 'cat-btn') toggleTab(catTab, kbPage);
                         if (targetId === 'dict-btn') toggleTab(dictTab, dictPage);
-                        if (targetId === 'tools-btn') toggleTab(toolsTab, toolsPage);
                         if (targetId === 'system-btn') {
                             updateSystemContent();
                             toggleTab(systemTab, systemPage);
@@ -1892,55 +1763,6 @@
                 }
             });
 
-            toolsPage.addEventListener('click', (e) => {
-                if (e.target.id === 'generate-pass-btn') {
-                    const slider = document.getElementById('pass-len-slider');
-                    const output = document.getElementById('pass-gen-output');
-                    if (slider && output) {
-                        output.value = generatePassword(parseInt(slider.value));
-                    }
-                }
-                if (e.target.id === 'copy-pass-btn') {
-                    const output = document.getElementById('pass-gen-output');
-                    if (output && output.value) {
-                        navigator.clipboard.writeText(output.value).then(() => {
-                            const originalOpacity = e.target.style.opacity;
-                            e.target.style.opacity = '1';
-                            e.target.innerText = '✅';
-                            setTimeout(() => {
-                                e.target.style.opacity = originalOpacity;
-                                e.target.innerText = '📋';
-                            }, 1000);
-                        });
-                    }
-                }
-                if (e.target.id === 'mention-log-clear') {
-                    setChatMentionLog([]);
-                    updateToolsContent();
-                }
-                if (e.target.id === 'style-reset-btn') {
-                    setChatBgColor('rgba(0, 0, 0, 0.4)');
-                    setChatTextColor('#ffffff');
-                    updateChatStyles();
-                    updateToolsContent();
-                }
-            });
-
-            toolsPage.addEventListener('input', (e) => {
-                if (e.target.id === 'pass-len-slider') {
-                    const span = document.getElementById('val-pass-len');
-                    if (span) span.innerText = e.target.value;
-                }
-                if (e.target.id === 'style-chat-bg') {
-                    setChatBgColor(e.target.value);
-                    updateChatStyles();
-                }
-                if (e.target.id === 'style-chat-text') {
-                    setChatTextColor(e.target.value);
-                    updateChatStyles();
-                }
-            });
-
             systemPage.addEventListener('click', (e) => {
                 if (e.target.id === 'pos-left-btn') {
                     setPanelPosition('left');
@@ -2050,47 +1872,6 @@
             });
             gameObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
 
-            const chatObserver = new MutationObserver((mutations) => {
-                const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
-                const selfNickname = win.room?.selfNickname || '';
-                if (!selfNickname) return;
-
-                for (const mutation of mutations) {
-                    for (const node of mutation.addedNodes) {
-                        if (node.nodeType === 1 && node.classList.contains('message')) {
-                            const text = node.querySelector('.text')?.innerText || '';
-                            const author = node.querySelector('.nickname')?.innerText || 'System';
-                            
-                            if (text.toLowerCase().includes(selfNickname.toLowerCase()) && author !== selfNickname) {
-                                let log = getChatMentionLog();
-                                log.unshift({
-                                    author,
-                                    text,
-                                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                                });
-                                log = log.slice(0, 50); // Keep last 50
-                                setChatMentionLog(log);
-                                if (document.getElementById('tools-btn')?.classList.contains('active')) {
-                                    updateToolsContent();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            const startChatObserver = () => {
-                const chatMessages = document.querySelector('.chat .messages');
-                if (chatMessages) {
-                    chatObserver.observe(chatMessages, { childList: true });
-                } else {
-                    setTimeout(startChatObserver, 1000);
-                }
-            };
-            startChatObserver();
-
-            updateChatStyles();
-
             GM_addValueChangeListener('spaceToHyphenEnabled', () => updateKbContent());
             GM_addValueChangeListener('spaceToHyphenChatEnabled', () => updateKbContent());
             GM_addValueChangeListener('dictLanguage', () => { dictionaryLoaded = false; loadDictionary(true).then(() => updateDictContent()); });
@@ -2115,11 +1896,10 @@
                 if (getTabHotkeys()) {
                     if (e.key === 'F1') { e.preventDefault(); toggleTab(catTab, kbPage); }
                     if (e.key === 'F2') { e.preventDefault(); toggleTab(dictTab, dictPage); }
-                    if (e.key === 'F3') { e.preventDefault(); toggleTab(toolsTab, toolsPage); }
-                    if (e.key === 'F4') { e.preventDefault(); toggleTab(systemTab, systemPage); }
+                    if (e.key === 'F3') { e.preventDefault(); toggleTab(systemTab, systemPage); }
                 }
 
-                if (e.key === 'Escape' && [catTab, dictTab, toolsTab, systemTab].some(t => t.classList.contains('active'))) {
+                if (e.key === 'Escape' && [catTab, dictTab, systemTab].some(t => t.classList.contains('active'))) {
                     window.closeCustomTabs();
                 }
             });
