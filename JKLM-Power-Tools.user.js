@@ -1,9 +1,10 @@
 
+
 // ==UserScript==
 // @name         JKLM Root
 // @namespace    http://tampermonkey.net/
-// @version      18.3
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v16.6)
+// @version      18.4
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v18.4)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -191,7 +192,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '16.6';
+    const SCRIPT_VERSION = '18.4';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -320,7 +321,18 @@
             tabHotkeysLabel: 'Panel Tab Hotkeys (F1-F3)',
             tabHotkeysDesc: 'Quickly switch panels using F1, F2, and F3.',
             opacityKeyLabel: 'Panel Opacity Toggle (Key)',
-            ideaBy: 'Idea by'
+            ideaBy: 'Idea by',
+            // Tools Tab
+            toolsHeader: '🛠️ Utility Tools',
+            passGenHeader: '🔐 Password Generator',
+            passGenLength: 'Password Length:',
+            passGenGenerate: 'Generate Password',
+            passGenCopy: 'Copy Password',
+            weatherHeader: '🌦️ Weather Widget',
+            weatherLoading: 'Loading weather data...',
+            weatherError: 'Could not load weather.',
+            weatherTemp: 'Temperature:',
+            weatherCondition: 'Condition:'
         }
     };
 
@@ -527,15 +539,15 @@
         }
 
         /* Glassmorphism Scrollbar (Panel only) */
-        .custom-kb-page::-webkit-scrollbar, .custom-dict-page::-webkit-scrollbar, .custom-admin-page::-webkit-scrollbar { width: 8px; height: 8px; }
-        .custom-kb-page::-webkit-scrollbar-track, .custom-dict-page::-webkit-scrollbar-track, .custom-admin-page::-webkit-scrollbar-track { background: transparent; }
-        .custom-kb-page::-webkit-scrollbar-thumb, .custom-dict-page::-webkit-scrollbar-thumb, .custom-admin-page::-webkit-scrollbar-thumb { 
+        .custom-kb-page::-webkit-scrollbar, .custom-dict-page::-webkit-scrollbar, .custom-tools-page::-webkit-scrollbar, .custom-admin-page::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-kb-page::-webkit-scrollbar-track, .custom-dict-page::-webkit-scrollbar-track, .custom-tools-page::-webkit-scrollbar-track, .custom-admin-page::-webkit-scrollbar-track { background: transparent; }
+        .custom-kb-page::-webkit-scrollbar-thumb, .custom-dict-page::-webkit-scrollbar-thumb, .custom-tools-page::-webkit-scrollbar-thumb, .custom-admin-page::-webkit-scrollbar-thumb { 
             background: rgba(255, 255, 255, 0.1); 
             border-radius: 10px; 
             border: 2px solid transparent;
             background-clip: content-box;
         }
-        .custom-kb-page::-webkit-scrollbar-thumb:hover, .custom-dict-page::-webkit-scrollbar-thumb:hover, .custom-admin-page::-webkit-scrollbar-thumb:hover { background: rgba(var(--pt-theme-color-rgb), 0.5); }
+        .custom-kb-page::-webkit-scrollbar-thumb:hover, .custom-dict-page::-webkit-scrollbar-thumb:hover, .custom-tools-page::-webkit-scrollbar-thumb:hover, .custom-admin-page::-webkit-scrollbar-thumb:hover { background: rgba(var(--pt-theme-color-rgb), 0.5); }
 
         .custom-nav-row {
             display: flex;
@@ -628,7 +640,7 @@
             transform: scale(1.1);
         }
 
-        .custom-kb-page, .custom-dict-page, .custom-admin-page {
+        .custom-kb-page, .custom-dict-page, .custom-tools-page, .custom-admin-page {
             display: none;
             padding: 20px;
             color: var(--pt-text-color);
@@ -655,7 +667,7 @@
             pointer-events: auto !important; /* Interaktion sicherstellen */
         }
 
-        .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left {
+        .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-tools-page.pos-left, .custom-admin-page.pos-left {
             left: 0;
             border-right: 1px solid var(--pt-glass-border);
             border-left: none;
@@ -663,7 +675,7 @@
             border-bottom-left-radius: 0;
         }
 
-        .custom-kb-page.pos-right, .custom-dict-page.pos-right, .custom-admin-page.pos-right {
+        .custom-kb-page.pos-right, .custom-dict-page.pos-right, .custom-tools-page.pos-right, .custom-admin-page.pos-right {
             right: 0;
             border-left: 1px solid var(--pt-glass-border);
             border-right: none;
@@ -671,7 +683,7 @@
             border-bottom-right-radius: 0;
         }
 
-        .custom-kb-page.active, .custom-dict-page.active, .custom-admin-page.active {
+        .custom-kb-page.active, .custom-dict-page.active, .custom-tools-page.active, .custom-admin-page.active {
             display: block;
             animation: fadeInGlass 0.2s ease-out;
         }
@@ -1047,6 +1059,65 @@
     let isGameRunning = false;
 
     let isInitialized = false;
+    // --- Tools Logic ---
+    const generatePassword = (length = 16) => {
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
+        let retVal = "";
+        for (let i = 0, n = charset.length; i < length; ++i) {
+            retVal += charset.charAt(Math.floor(Math.random() * n));
+        }
+        return retVal;
+    };
+
+    const fetchWeather = async () => {
+        return new Promise((resolve, reject) => {
+            // Step 1: Get location via IP
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: "https://ipapi.co/json/",
+                onload: (response) => {
+                    try {
+                        const locationData = JSON.parse(response.responseText);
+                        const { latitude, longitude, city } = locationData;
+                        
+                        // Step 2: Get weather via Open-Meteo
+                        GM_xmlhttpRequest({
+                            method: "GET",
+                            url: `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`,
+                            onload: (weatherResponse) => {
+                                try {
+                                    const weatherData = JSON.parse(weatherResponse.responseText);
+                                    resolve({
+                                        city,
+                                        temp: weatherData.current_weather.temperature,
+                                        windspeed: weatherData.current_weather.windspeed,
+                                        conditionCode: weatherData.current_weather.weathercode
+                                    });
+                                } catch (e) { reject(e); }
+                            },
+                            onerror: (err) => reject(err)
+                        });
+                    } catch (e) { reject(e); }
+                },
+                onerror: (err) => reject(err)
+            });
+        });
+    };
+
+    const getWeatherIcon = (code) => {
+        // WMO Weather interpretation codes (WW)
+        if (code === 0) return '☀️'; // Clear sky
+        if (code <= 3) return '🌤️'; // Mainly clear, partly cloudy, and overcast
+        if (code <= 48) return '🌫️'; // Fog and depositing rime fog
+        if (code <= 55) return '🌦️'; // Drizzle: Light, moderate, and dense intensity
+        if (code <= 65) return '🌧️'; // Rain: Light, moderate and heavy intensity
+        if (code <= 77) return '❄️'; // Snow fall: Light, moderate, and heavy intensity
+        if (code <= 82) return '🌧️'; // Rain showers: Slight, moderate, and violent
+        if (code <= 86) return '❄️'; // Snow showers slight and heavy
+        if (code <= 99) return '⛈️'; // Thunderstorm: Slight or moderate
+        return '❓';
+    };
+
     const init = () => {
         if (isInitialized) return;
         try {
@@ -1078,9 +1149,10 @@
 
             const catTab = createTab('cat-btn', '🚀');
             const dictTab = createTab('dict-btn', '📖');
+            const toolsTab = createTab('tools-btn', '🛠️');
             const adminTab = createTab('admin-btn', '⚙️');
 
-            [catTab, dictTab, adminTab].forEach(t => {
+            [catTab, dictTab, toolsTab, adminTab].forEach(t => {
                 customRow.appendChild(t);
             });
 
@@ -1117,10 +1189,12 @@
             kbPage.className = 'custom-kb-page';
             const dictPage = document.createElement('div');
             dictPage.className = 'custom-dict-page';
+            const toolsPage = document.createElement('div');
+            toolsPage.className = 'custom-tools-page';
             const adminPage = document.createElement('div');
             adminPage.className = 'custom-admin-page';
 
-            const allCustomPages = [kbPage, dictPage, adminPage];
+            const allCustomPages = [kbPage, dictPage, toolsPage, adminPage];
 
             const getPanelNav = (activeTabId, title) => {
                 const t = translations[getLanguage()] || translations['English'];
@@ -1135,6 +1209,7 @@
                         <div class="custom-tab-group">
                             <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">🚀</span></div>
                             <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">📖</span></div>
+                            <div class="custom-tab ${activeTabId === 'tools-btn' ? 'active' : ''}" data-target="tools-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">🛠️</span></div>
                             <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">⚙️</span></div>
                          </div>
                      </div>
@@ -1462,8 +1537,79 @@
             `;
             };
 
+            const updateToolsContent = () => {
+                const t = translations[getLanguage()] || translations['English'];
+                toolsTab.title = t.toolsHeader;
+
+                toolsPage.innerHTML = `
+                ${getPanelNav('tools-btn', t.toolsHeader)}
+                <div class="custom-page-content">
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">🔐</div>
+                            <span>${t.passGenHeader}</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
+                                    <span>${t.passGenLength}</span>
+                                    <span style="color: var(--pt-theme-color);"><span id="val-pass-len">16</span> chars</span>
+                                </div>
+                                <input type="range" id="pass-len-slider" min="8" max="64" value="16" style="width: 100%; accent-color: var(--pt-theme-color); cursor: pointer;">
+                            </div>
+                            
+                            <div style="position: relative;">
+                                <input type="text" id="pass-gen-output" class="modern-input" readonly placeholder="Click Generate..." style="padding-right: 50px; font-family: var(--pt-font-mono); font-size: 14px;">
+                                <div id="copy-pass-btn" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.6; transition: 0.3s;" title="${t.passGenCopy}">📋</div>
+                            </div>
+
+                            <button class="modern-button" id="generate-pass-btn" style="width: 100%;">
+                                <span>⚡</span> ${t.passGenGenerate}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="feature-card" id="weather-container">
+                        <div class="feature-header">
+                            <div class="feature-icon">🌦️</div>
+                            <span>${t.weatherHeader}</span>
+                        </div>
+                        <div id="weather-content" style="display: flex; flex-direction: column; gap: 12px; align-items: center; padding: 10px;">
+                            <div style="font-size: 14px; color: var(--pt-text-muted); font-weight: 600;">${t.weatherLoading}</div>
+                        </div>
+                        <button class="modern-button" id="refresh-weather-btn" style="width: 100%; margin-top: 15px; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--pt-glass-border);">
+                            <span>🔄</span> Refresh
+                        </button>
+                    </div>
+                </div>
+                `;
+                
+                // Trigger initial weather load
+                refreshWeather();
+            };
+
+            const refreshWeather = () => {
+                const content = document.getElementById('weather-content');
+                const t = translations[getLanguage()] || translations['English'];
+                if (!content) return;
+
+                content.innerHTML = `<div style="font-size: 14px; color: var(--pt-text-muted); font-weight: 600;">${t.weatherLoading}</div>`;
+                
+                fetchWeather().then(data => {
+                    content.innerHTML = `
+                        <div style="font-size: 48px; margin-bottom: 5px;">${getWeatherIcon(data.conditionCode)}</div>
+                        <div style="font-size: 24px; font-weight: 800; color: #fff;">${data.temp}°C</div>
+                        <div style="font-size: 16px; font-weight: 700; color: var(--pt-theme-color);">${data.city}</div>
+                        <div style="font-size: 13px; color: var(--pt-text-muted); font-weight: 600; margin-top: 5px;">Wind: ${data.windspeed} km/h</div>
+                    `;
+                }).catch(err => {
+                    content.innerHTML = `<div style="font-size: 14px; color: #ff4444; font-weight: 600;">${t.weatherError}</div>`;
+                });
+            };
+
             updateKbContent();
             updateDictContent();
+            updateToolsContent();
             updateAdminContent();
 
             const updateSidebarWidths = (width) => {
@@ -1474,10 +1620,10 @@
             allCustomPages.forEach(p => document.body.appendChild(p));
 
             window.closeCustomTabs = () => {
-                [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
+                [catTab, dictTab, toolsTab, adminTab].forEach(t => t.classList.remove('active'));
                 allCustomPages.forEach(p => p.classList.remove('active'));
                 const home = nav.querySelector('[data-tab="home"]') || nav.querySelector('.tab') || nav.querySelector('.custom-tab');
-                if (home && ![catTab, dictTab, adminTab].includes(home)) home.click();
+                if (home && ![catTab, dictTab, toolsTab, adminTab].includes(home)) home.click();
             };
 
             const toggleTab = (tab, page) => {
@@ -1516,6 +1662,7 @@
                 const tabId = tab.id;
                 if (tabId === 'cat-btn') toggleTab(catTab, kbPage);
                 else if (tabId === 'dict-btn') toggleTab(dictTab, dictPage);
+                else if (tabId === 'tools-btn') toggleTab(toolsTab, toolsPage);
                 else if (tabId === 'admin-btn') {
                     updateAdminContent();
                     toggleTab(adminTab, adminPage);
@@ -1524,9 +1671,9 @@
 
             nav.addEventListener('click', (e) => {
                 const clicked = e.target.closest('.tab') || e.target.closest('.custom-tab');
-                if (clicked && ![catTab, dictTab, adminTab].includes(clicked)) {
+                if (clicked && ![catTab, dictTab, toolsTab, adminTab].includes(clicked)) {
                     allCustomPages.forEach(p => p.classList.remove('active'));
-                    [catTab, dictTab, adminTab].forEach(t => t.classList.remove('active'));
+                    [catTab, dictTab, toolsTab, adminTab].forEach(t => t.classList.remove('active'));
                 }
             });
 
@@ -1545,6 +1692,7 @@
                         const targetId = tabBtn.getAttribute('data-target');
                         if (targetId === 'cat-btn') toggleTab(catTab, kbPage);
                         if (targetId === 'dict-btn') toggleTab(dictTab, dictPage);
+                        if (targetId === 'tools-btn') toggleTab(toolsTab, toolsPage);
                         if (targetId === 'admin-btn') {
                             updateAdminContent();
                             toggleTab(adminTab, adminPage);
@@ -1786,6 +1934,40 @@
                 }
             });
 
+            toolsPage.addEventListener('click', (e) => {
+                if (e.target.id === 'generate-pass-btn') {
+                    const slider = document.getElementById('pass-len-slider');
+                    const output = document.getElementById('pass-gen-output');
+                    if (slider && output) {
+                        output.value = generatePassword(parseInt(slider.value));
+                    }
+                }
+                if (e.target.id === 'copy-pass-btn') {
+                    const output = document.getElementById('pass-gen-output');
+                    if (output && output.value) {
+                        navigator.clipboard.writeText(output.value).then(() => {
+                            const originalOpacity = e.target.style.opacity;
+                            e.target.style.opacity = '1';
+                            e.target.innerText = '✅';
+                            setTimeout(() => {
+                                e.target.style.opacity = originalOpacity;
+                                e.target.innerText = '📋';
+                            }, 1000);
+                        });
+                    }
+                }
+                if (e.target.id === 'refresh-weather-btn') {
+                    refreshWeather();
+                }
+            });
+
+            toolsPage.addEventListener('input', (e) => {
+                if (e.target.id === 'pass-len-slider') {
+                    const span = document.getElementById('val-pass-len');
+                    if (span) span.innerText = e.target.value;
+                }
+            });
+
             adminPage.addEventListener('click', (e) => {
                 if (e.target.id === 'pos-left-btn') {
                     setPanelPosition('left');
@@ -1937,10 +2119,11 @@
                 if (getTabHotkeys()) {
                     if (e.key === 'F1') { e.preventDefault(); toggleTab(catTab, kbPage); }
                     if (e.key === 'F2') { e.preventDefault(); toggleTab(dictTab, dictPage); }
-                    if (e.key === 'F3') { e.preventDefault(); toggleTab(adminTab, adminPage); }
+                    if (e.key === 'F3') { e.preventDefault(); toggleTab(toolsTab, toolsPage); }
+                    if (e.key === 'F4') { e.preventDefault(); toggleTab(adminTab, adminPage); }
                 }
 
-                if (e.key === 'Escape' && [catTab, dictTab, adminTab].some(t => t.classList.contains('active'))) {
+                if (e.key === 'Escape' && [catTab, dictTab, toolsTab, adminTab].some(t => t.classList.contains('active'))) {
                     window.closeCustomTabs();
                 }
             });
