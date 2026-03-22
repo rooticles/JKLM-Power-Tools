@@ -2,8 +2,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      17.3
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v17.3)
+// @version      17.4
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v17.4)
 // @author       Root
 // @icon         https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTJbeFZgV0zcGPsl6DlZo3cGrxKIEsWPIcJw&s
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -174,7 +174,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '17.3';
+    const SCRIPT_VERSION = '17.4';
 
     const FISH_KEYWORDS = [
         'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
@@ -342,10 +342,6 @@
     const setToggleKey = (val) => GM_setValue('toggleKey', val);
     const getPanelPosition = () => GM_getValue('panelPosition', 'right');
     const setPanelPosition = (val) => GM_setValue('panelPosition', val);
-    const getMinWordLength = () => GM_getValue('minWordLength', 2);
-    const setMinWordLength = (val) => GM_setValue('minWordLength', val);
-    const getMaxWordLength = () => GM_getValue('maxWordLength', 30);
-    const setMaxWordLength = (val) => GM_setValue('maxWordLength', val);
 
     const getTabHotkeys = () => GM_getValue('tabHotkeys', false);
     const setTabHotkeys = (val) => GM_setValue('tabHotkeys', val);
@@ -784,12 +780,13 @@
 
         .modern-input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.6) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #000000 !important;
+            border: 2px solid rgba(255, 255, 255, 0.1);
             color: #ffffff !important;
-            padding: 14px 20px;
-            border-radius: var(--pt-border-radius);
-            font-size: 15px;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 800;
             font-family: var(--pt-font-main);
             transition: var(--pt-transition);
             outline: none;
@@ -799,22 +796,26 @@
 
         select.modern-input {
             cursor: pointer;
-            appearance: auto !important;
-            -webkit-appearance: auto !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 15px center !important;
+            background-size: 14px !important;
+            padding-right: 40px !important;
         }
 
         .modern-input option {
             background-color: #000000 !important;
             color: #ffffff !important;
             padding: 12px;
-            font-weight: 500;
+            font-weight: 700;
         }
 
         .modern-input:focus {
-            border-color: var(--pt-theme-color);
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 4px rgba(var(--pt-theme-color-rgb), 0.1), var(--pt-glow-effect);
-            transform: scale(1.02);
+            border-color: #007bff;
+            background: #000000;
+            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2);
         }
 
         .modern-button {
@@ -1255,8 +1256,8 @@
                     </div>
                 `).join('') : `<div style="text-align: center; color: var(--pt-text-muted); padding: 30px; font-size: 14px; font-weight: 600;">${t.noNotes}</div>`;
 
-                const minLen = getMinWordLength();
-                const maxLen = getMaxWordLength();
+                const minLen = 2;
+                const maxLen = 30;
 
                 dictPage.innerHTML = `
                 ${getPanelNav('dict-btn', t.dictHeader)}
@@ -1275,13 +1276,13 @@
                             </div>
 
                             <div style="display: flex; gap: 12px;">
-                                <select class="modern-input" id="dict-search-mode" style="flex: 1; padding: 14px 20px; font-weight: 700; appearance: none; cursor: pointer;">
+                                <select class="modern-input" id="dict-search-mode">
                                     <option value="Contains" ${searchMode === 'Contains' ? 'selected' : ''}>Contains</option>
                                     <option value="StartsWith" ${searchMode === 'StartsWith' ? 'selected' : ''}>Starts With</option>
                                     <option value="EndsWith" ${searchMode === 'EndsWith' ? 'selected' : ''}>Ends With</option>
                                     <option value="SyllableChain" ${searchMode === 'SyllableChain' ? 'selected' : ''}>Syllable Chain</option>
                                 </select>
-                                <select class="modern-input" id="dict-word-type" style="flex: 1; padding: 14px 20px; font-weight: 700; appearance: none; cursor: pointer;">
+                                <select class="modern-input" id="dict-word-type">
                                     <option value="All" ${wordType === 'All' ? 'selected' : ''}>All Words</option>
                                     <option value="Hyphen" ${wordType === 'Hyphen' ? 'selected' : ''}>Hyphen Only</option>
                                     <option value="Long" ${wordType === 'Long' ? 'selected' : ''}>Long Words</option>
@@ -1301,22 +1302,14 @@
                                     <option value="Spices" ${wordType === 'Spices' ? 'selected' : ''}>Spices</option>
                                 </select>
                             </div>
-
-                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
-                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
-                                    <span>Word Length</span>
-                                    <span style="color: var(--pt-theme-color);"><span id="val-dict-min-len">${minLen}</span> - <span id="val-dict-max-len">${maxLen}</span> chars</span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 16px;">
-                                    <input type="range" id="dict-min-len" min="2" max="30" value="${minLen}" style="flex: 1; accent-color: var(--pt-theme-color); cursor: pointer;">
-                                    <input type="range" id="dict-max-len" min="2" max="30" value="${maxLen}" style="flex: 1; accent-color: var(--pt-theme-color); cursor: pointer;">
-                                </div>
-                            </div>
                         </div>
                     </div>
 
                     <div class="feature-card" id="dict-results-container" style="background: rgba(0,0,0,0.3); border-color: var(--pt-glass-border); padding: 28px;">
-                        <div class="custom-dict-result-header" id="dict-result-header" style="font-size: 16px; font-weight: 800; color: var(--pt-theme-color); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;"></div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <div class="custom-dict-result-header" id="dict-result-header" style="font-size: 16px; font-weight: 800; color: var(--pt-theme-color); display: flex; align-items: center; gap: 12px;"></div>
+                            <div style="font-size: 12px; font-weight: 900; color: #00d2ff; letter-spacing: 1px; text-shadow: 0 0 10px rgba(0,210,255,0.3);">${minLen} - ${maxLen} CHARS</div>
+                        </div>
                         <div class="custom-dict-result-list" id="dict-result-list" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
                     </div>
 
@@ -1604,8 +1597,8 @@
                     else if (wordType === 'Spices') words = dictionary.filter(isWordSpice);
                     else words = [...dictionary];
                     
-                    const minLen = getMinWordLength();
-                    const maxLen = getMaxWordLength();
+                    const minLen = 2;
+                    const maxLen = 30;
 
                     words = words.filter(w => w.length >= minLen && w.length <= maxLen);
 
@@ -1767,20 +1760,6 @@
 
             dictPage.addEventListener('input', (e) => {
                 if (e.target.id === 'dict-msg-input') {
-                    debouncedUpdateSuggestions();
-                }
-                if (e.target.id === 'dict-min-len') {
-                    const val = parseInt(e.target.value);
-                    setMinWordLength(val);
-                    const span = document.getElementById('val-dict-min-len');
-                    if (span) span.innerText = val;
-                    debouncedUpdateSuggestions();
-                }
-                if (e.target.id === 'dict-max-len') {
-                    const val = parseInt(e.target.value);
-                    setMaxWordLength(val);
-                    const span = document.getElementById('val-dict-max-len');
-                    if (span) span.innerText = val;
                     debouncedUpdateSuggestions();
                 }
             });
