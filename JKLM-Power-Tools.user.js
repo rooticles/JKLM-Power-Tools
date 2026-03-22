@@ -3,8 +3,8 @@
 // ==UserScript==
 // @name         JKLM Root
 // @namespace    http://tampermonkey.net/
-// @version      19.1
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v19.1)
+// @version      19.2
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v19.2)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -192,7 +192,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '19.1';
+    const SCRIPT_VERSION = '19.2';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -1596,7 +1596,14 @@
                 };
 
                 ensureDictionary().then(() => {
-                    let words = wordType === 'Fish' ? dictionary.filter(isWordFish) : [...dictionary];
+                    let words = [];
+                    if (wordType === 'German') {
+                        words = [...GERMAN_WORD_LIST];
+                    } else if (wordType === 'Fish') {
+                        words = dictionary.filter(isWordFish);
+                    } else {
+                        words = [...dictionary];
+                    }
                     
                     const minLen = getMinWordLength();
                     const maxLen = getMaxWordLength();
@@ -1619,9 +1626,6 @@
 
                     if (wordType === 'Hyphen') {
                         words = words.filter(w => w.includes('-'));
-                    } else if (wordType === 'German') {
-                        // Use the strictly German list we embedded
-                        words = GERMAN_WORD_LIST;
                     } else if (wordType === 'Long') {
                         words = words.filter(w => w.length >= 20);
                     } else if (wordType === 'Shorts') {
