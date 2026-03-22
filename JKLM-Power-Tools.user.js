@@ -1,11 +1,10 @@
-
 // ==UserScript==
-// @name         JKLM Root
+// @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      18.3
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v17.4)
+// @version      16.6
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v16.6)
 // @author       Root
-// @icon         https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTJbeFZgV0zcGPsl6DlZo3cGrxKIEsWPIcJw&s
+// @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @match        *://*.jklm.fun/*
@@ -21,10 +20,12 @@
 (function () {
     'use strict';
 
+    // --- Global Patch for JKLM & Overlay Bugs ---
     const patchGlobalBugs = () => {
         try {
             const win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
             
+            // --- Global Error Suppressor (Unbreakable Mode) ---
             const ignoreError = (msg) => {
                 const ignoredErrors = [
                     'addEventListener', 'milestones', 'socket', 'undefined', 'null',
@@ -48,6 +49,8 @@
                 }
             }, true);
 
+            // --- Service Worker Suppression (Performance Patch) ---
+            // Prevents no-op fetch handlers from bringing overhead during navigation
             if (win.navigator.serviceWorker) {
                 win.navigator.serviceWorker.getRegistrations().then(registrations => {
                     for (let registration of registrations) {
@@ -55,19 +58,23 @@
                     }
                 });
                 win.navigator.serviceWorker.register = () => {
-                    return new Promise(() => {});
+                    return new Promise(() => {}); // Do nothing
                 };
             }
 
+            // Fix JKLM 'chatUnreadHighlightCount' ReferenceError
             if (typeof win.chatUnreadHighlightCount === 'undefined') {
                 win.chatUnreadHighlightCount = 0;
             }
 
+            // --- Audio Autoplay Resilience ---
+            // Fixes "AudioContext was not allowed to start" error
             const resumeAudio = () => {
                 const contexts = [win.AudioContext, win.webkitAudioContext];
                 contexts.forEach(Ctx => {
                     if (Ctx && Ctx.prototype) {
                         const originalResume = Ctx.prototype.resume;
+                        // We don't necessarily need to wrap it, but we can proactively try to resume
                     }
                 });
 
@@ -80,12 +87,16 @@
                     });
                 };
 
+                // Resume on first user interaction
                 ['click', 'keydown', 'touchstart', 'mousedown'].forEach(evt => {
                     win.addEventListener(evt, triggerResume, { once: true, capture: true });
                 });
             };
             resumeAudio();
 
+            // --- Ultra Stability Patch (v5 - Ultimate Edition) ---
+            // This is the absolute final fix for "Cannot read properties of undefined (reading 'addEventListener')"
+            
             const createRecursiveProxy = (name = 'root') => {
                 const noop = () => {};
                 const handler = {
@@ -110,6 +121,7 @@
                 return new Proxy(noop, handler);
             };
 
+            // The "Nuclear Option": Ensure 'milestones' property exists on EVERY object in the JS environment
             if (win.Object && typeof win.Object.prototype.milestones === 'undefined') {
                 let _globalMilestones = win.milestones || createRecursiveProxy('milestones');
                 Object.defineProperty(win.Object.prototype, 'milestones', {
@@ -138,8 +150,10 @@
                 });
             };
 
+            // Patch global objects
             ['milestones', 'game', 'socket', 'room', 'client', 'roomProxy'].forEach(safeProxy);
 
+            // Continously monitor for Socket/Emitter definitions to patch prototypes
             const patchPrototypes = () => {
                 ['Socket', 'Emitter', 'EventEmitter', 'Room', 'Client'].forEach(objName => {
                     const Proto = win[objName] && win[objName].prototype;
@@ -150,11 +164,13 @@
                             }
                         });
                         
+                        // Specifically patch setMilestone to be resilient
                         const originalSetMilestone = Proto.setMilestone;
                         Proto.setMilestone = function(...args) {
                             try {
                                 if (originalSetMilestone) return originalSetMilestone.apply(this, args);
                             } catch (e) {
+                                // Suppress error if setMilestone fails internally
                                 return this;
                             }
                             return this;
@@ -174,132 +190,9 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '17.4';
+    const SCRIPT_VERSION = '16.6';
 
-    const FISH_KEYWORDS = [
-        'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
-        'pike', 'perch', 'snapper', 'grouper', 'marlin', 'swordfish', 'stingray', 'ray', 
-        'flounder', 'halibut', 'sole', 'mullet', 'sardine', 'anchovy', 'herring', 'barracuda', 
-        'piranha', 'tilapia', 'catfish', 'guppy', 'goldfish', 'clownfish', 'angelfish', 
-        'betta', 'tetra', 'molly', 'platy', 'danio', 'loach', 'discus', 'gourami', 'oscar', 
-        'cichlid', 'sturgeon', 'gar', 'bowfin', 'lungfish', 'lamprey', 'hagfish', 'coelacanth',
-        'mahimahi', 'wahoo', 'walleye', 'muskellunge', 'bluegill', 'crappie', 'sunfish', 'shad', 
-        'minnow', 'dace', 'roach', 'tench', 'bream', 'chub', 'barbel', 'grayling', 'char', 
-        'whitefish', 'smelt', 'capelin', 'hake', 'pollock', 'haddock', 'whiting', 'ling', 
-        'burbot', 'angler', 'monkfish', 'batfish', 'frogfish', 'needlefish', 'flyingfish', 
-        'seahorse', 'pipefish', 'stickleback', 'sculpin', 'lionfish', 'rockfish', 'tilefish', 
-        'remora', 'jack', 'pompano', 'dorado', 'porgy', 'drum', 'croaker', 'surmullet', 
-        'goatfish', 'archerfish', 'leaffish', 'snakehead', 'turbot', 'plaice', 'dab', 'puffer', 
-        'boxfish', 'triggerfish', 'filefish', 'albacore', 'alewife', 'alfonsino', 'amberjack', 
-        'anemonefish', 'arapaima', 'arowana', 'ayu', 'bangus', 'barracudina', 'barramundi', 
-        'bichir', 'bitterling', 'bleak', 'blenny', 'blobfish', 'blowfish', 'boga', 'bonefish', 
-        'bonito', 'bonytail', 'brill', 'brotula', 'candiru', 'catalufa', 'catla', 'cisco', 
-        'cobia', 'coley', 'cornetfish', 'cusk', 'damselfish', 'dartfish', 'dealfish', 'dhufish', 
-        'dory', 'dottyback', 'dragonet', 'driftfish', 'escolar', 'eulachon', 'fangtooth', 
-        'fierasfer', 'flier', 'garibaldi', 'goldeye', 'grunion', 'grunt', 'grunter', 'gudgeon', 
-        'halosaur', 'hamlet', 'hoki', 'huchen', 'hussar', 'icefish', 'ide', 'ilish', 'inanga', 
-        'inconnu', 'kahawai', 'kaluga', 'kokanee', 'kokopu', 'ladyfish', 'lenok', 'limia', 
-        'louvar', 'luderick', 'lumpsucker', 'mahseer', 'medaka', 'menhaden', 'mojarra', 'mola', 
-        'monchong', 'mooneye', 'moonfish', 'mora', 'morwong', 'mrigal', 'mummichog', 'nase', 
-        'notothen', 'oarfish', 'oldwife', 'opah', 'opaleye', 'orfe', 'panga', 'parore', 
-        'peamouth', 'pearleye', 'pleco', 'poacher', 'pomfret', 'powen', 'quillback', 'quillfish', 
-        'rasbora', 'rohu', 'ronquil', 'roosterfish', 'ruffe', 'sabertooth', 'sablefish', 'scat', 
-        'scup', 'shiner', 'sillago', 'skate', 'skilfish', 'sleeper', 'slickhead', 'slimehead', 
-        'snook', 'sprat', 'squeaker', 'stargazer', 'steelhead', 'stonecat', 'sucker', 'tailor', 
-        'taimen', 'tang', 'tarpon', 'tarwhine', 'tenpounder', 'thornfish', 'threadfin', 'tope', 
-        'torpedo', 'trahira', 'treefish', 'tripletail', 'trumpeter', 'trunkfish', 'uaru', 
-        'vanjaram', 'vendace', 'vimba', 'walu', 'warmouth', 'whiff', 'wobbegong', 'wrasse', 
-        'zander', 'zingel', 'humuhumunukunukuapua\'a'
-    ];
-
-    const PLANT_KEYWORDS = [
-        'flower', 'plant', 'tree', 'orchid', 'dandelion', 'mahogany', 'rose', 'tulip', 'daisy', 'lily',
-        'sunflower', 'oak', 'pine', 'maple', 'birch', 'willow', 'cactus', 'fern', 'moss', 'grass',
-        'bamboo', 'palm', 'ivy', 'clover', 'lavender', 'mint', 'basil', 'thyme', 'sage', 'rosemary',
-        'cedar', 'sequoia', 'redwood', 'spruce', 'fir', 'larch', 'juniper', 'cypress', 'yew'
-    ];
-
-    const SPACE_KEYWORDS = [
-        'space', 'universe', 'supernova', 'galaxy', 'asteroid', 'jupiter', 'mars', 'venus', 'saturn',
-        'neptune', 'uranus', 'pluto', 'mercury', 'earth', 'moon', 'star', 'planet', 'comet', 'meteor',
-        'nebula', 'cosmos', 'orbit', 'gravity', 'rocket', 'shuttle', 'astronaut', 'telescope', 'void'
-    ];
-
-    const ELEMENT_KEYWORDS = [
-        'hydrogen', 'helium', 'lithium', 'beryllium', 'boron', 'carbon', 'nitrogen', 'oxygen', 'fluorine',
-        'neon', 'sodium', 'magnesium', 'aluminum', 'silicon', 'phosphorus', 'sulfur', 'chlorine', 'argon',
-        'potassium', 'calcium', 'scandium', 'titanium', 'vanadium', 'chromium', 'manganese', 'iron',
-        'cobalt', 'nickel', 'copper', 'zinc', 'gallium', 'germanium', 'arsenic', 'selenium', 'bromine',
-        'krypton', 'rubidium', 'strontium', 'yttrium', 'zirconium', 'niobium', 'molybdenum', 'technetium',
-        'ruthenium', 'rhodium', 'palladium', 'silver', 'cadmium', 'indium', 'tin', 'antimony', 'tellurium',
-        'iodine', 'xenon', 'cesium', 'barium', 'lanthanum', 'cerium', 'praseodymium', 'neodymium',
-        'promethium', 'samarium', 'europium', 'gadolinium', 'terbium', 'dysprosium', 'holmium', 'erbium',
-        'thulium', 'ytterbium', 'lutetium', 'hafnium', 'tantalum', 'tungsten', 'rhenium', 'osmium',
-        'iridium', 'platinum', 'gold', 'mercury', 'thallium', 'lead', 'bismuth', 'polonium', 'astatine',
-        'radon', 'francium', 'radium', 'actinium', 'thorium', 'protactinium', 'uranium', 'neptunium',
-        'plutonium', 'americium', 'curium', 'berkelium', 'californium', 'einsteinium', 'fermium',
-        'mendelevium', 'nobelium', 'lawrencium', 'rutherfordium', 'dubnium', 'seaborgium', 'bohrium',
-        'hassium', 'meitnerium', 'darmstadtium', 'roentgenium', 'copernicium', 'nihonium', 'flerovium',
-        'moscovium', 'livermorium', 'tennessine', 'oganesson'
-    ];
-
-    const GEM_KEYWORDS = [
-        'emerald', 'sapphire', 'quartz', 'diamond', 'ruby', 'pearl', 'opal', 'topaz', 'amethyst',
-        'garnet', 'aquamarine', 'peridot', 'citrine', 'turquoise', 'jade', 'amber', 'onyx', 'crystal',
-        'gem', 'jewel', 'mineral', 'stone'
-    ];
-
-    const MYTH_KEYWORDS = [
-        'centaur', 'aphrodite', 'valkyrie', 'zeus', 'hera', 'poseidon', 'demeter', 'athena', 'apollo',
-        'artemis', 'ares', 'hephaestus', 'hermes', 'dionysus', 'hades', 'odin', 'thor', 'loki', 'freya',
-        'dragon', 'phoenix', 'griffin', 'mermaid', 'unicorn', 'titan', 'god', 'goddess', 'hero', 'myth'
-    ];
-
-    const INSTRUMENT_KEYWORDS = [
-        'saxophone', 'harpsichord', 'synthesizer', 'piano', 'guitar', 'violin', 'cello', 'flute',
-        'clarinet', 'trumpet', 'trombone', 'tuba', 'drum', 'harp', 'banjo', 'mandolin', 'organ',
-        'keyboard', 'bass', 'cello', 'viola', 'oboe', 'bassoon', 'recorder', 'xylophone', 'marimba'
-    ];
-
-    const TECH_KEYWORDS = [
-        'javascript', 'algorithm', 'mainframe', 'code', 'program', 'software', 'hardware', 'server',
-        'database', 'network', 'internet', 'web', 'app', 'binary', 'logic', 'compiler', 'hacker',
-        'cyber', 'pixel', 'data', 'cloud', 'security', 'python', 'java', 'html', 'css', 'script'
-    ];
-
-    const FOOD_KEYWORDS = [
-        'pomegranate', 'zucchini', 'artichoke', 'apple', 'banana', 'orange', 'grape', 'strawberry',
-        'potato', 'tomato', 'carrot', 'onion', 'garlic', 'pepper', 'salt', 'spice', 'herb', 'fruit',
-        'vegetable', 'berry', 'cherry', 'lemon', 'lime', 'melon', 'mango', 'peach', 'pear', 'plum'
-    ];
-
-    const SPICE_KEYWORDS = [
-        'coriander', 'turmeric', 'rosemary', 'cinnamon', 'ginger', 'pepper', 'basil', 'thyme', 'sage',
-        'cumin', 'paprika', 'clove', 'nutmeg', 'oregano', 'parsley', 'dill', 'mint', 'chili', 'vanilla'
-    ];
-
-    const matchCategory = (w, keywords) => {
-        const low = w.toLowerCase();
-        return keywords.some(k => {
-            if (low === k) return true;
-            if (low === k + 's') return true;
-            if (low === k + 'es') return true;
-            if (k.endsWith('y') && low === k.slice(0, -1) + 'ies') return true;
-            return false;
-        });
-    };
-
-    const isWordFish = (w) => matchCategory(w, FISH_KEYWORDS);
-    const isWordPlant = (w) => matchCategory(w, PLANT_KEYWORDS);
-    const isWordSpace = (w) => matchCategory(w, SPACE_KEYWORDS);
-    const isWordElement = (w) => matchCategory(w, ELEMENT_KEYWORDS);
-    const isWordGem = (w) => matchCategory(w, GEM_KEYWORDS);
-    const isWordMyth = (w) => matchCategory(w, MYTH_KEYWORDS);
-    const isWordInstrument = (w) => matchCategory(w, INSTRUMENT_KEYWORDS);
-    const isWordTech = (w) => matchCategory(w, TECH_KEYWORDS);
-    const isWordFood = (w) => matchCategory(w, FOOD_KEYWORDS);
-    const isWordSpice = (w) => matchCategory(w, SPICE_KEYWORDS);
-
+    // --- Performance Helpers ---
     const debounce = (func, wait) => {
         let timeout;
         return (...args) => {
@@ -308,6 +201,7 @@
         };
     };
 
+    // --- Storage Helpers ---
     const getEnabled = () => GM_getValue('spaceToHyphenEnabled', false);
     const setEnabled = (val) => GM_setValue('spaceToHyphenEnabled', val);
     const getChatEnabled = () => GM_getValue('spaceToHyphenChatEnabled', false);
@@ -336,18 +230,24 @@
     const getSearchHistory = () => GM_getValue('searchHistory', []);
     const setSearchHistory = (val) => GM_setValue('searchHistory', val);
 
+    // --- New Features Storage ---
     const getNotes = () => GM_getValue('notes', []);
     const setNotes = (val) => GM_setValue('notes', val);
     const getToggleKey = () => GM_getValue('toggleKey', 'F2');
     const setToggleKey = (val) => GM_setValue('toggleKey', val);
     const getPanelPosition = () => GM_getValue('panelPosition', 'right');
     const setPanelPosition = (val) => GM_setValue('panelPosition', val);
+    const getMinWordLength = () => GM_getValue('minWordLength', 2);
+    const setMinWordLength = (val) => GM_setValue('minWordLength', val);
+    const getMaxWordLength = () => GM_getValue('maxWordLength', 30);
+    const setMaxWordLength = (val) => GM_setValue('maxWordLength', val);
 
     const getTabHotkeys = () => GM_getValue('tabHotkeys', false);
     const setTabHotkeys = (val) => GM_setValue('tabHotkeys', val);
     const getOpacityToggleKey = () => GM_getValue('opacityToggleKey', 'Control');
     const setOpacityToggleKey = (val) => GM_setValue('opacityToggleKey', val);
 
+    // --- Chat & Macro Helpers ---
     const sendToChat = (msg) => {
         const chatInput = document.querySelector('.chat input, .chat textarea, .chatInput');
         if (chatInput) {
@@ -360,6 +260,7 @@
         }
     };
 
+    // --- Translations ---
     const translations = {
         'English': {
             kbHeader: '🚀 Keyboard Settings',
@@ -422,11 +323,101 @@
         }
     };
 
+    // --- Dictionary Logic ---
     let dictionary = [];
     let lowercasedDictionary = [];
     let dictionaryLoaded = false;
     let currentDictLang = '';
 
+    const FISH_KEYWORDS = [
+        'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
+        'pike', 'perch', 'snapper', 'grouper', 'marlin', 'swordfish', 'stingray', 'ray', 
+        'flounder', 'halibut', 'sole', 'mullet', 'sardine', 'anchovy', 'herring', 'barracuda', 
+        'piranha', 'tilapia', 'catfish', 'guppy', 'goldfish', 'clownfish', 'angelfish', 
+        'betta', 'tetra', 'molly', 'platy', 'danio', 'loach', 'discus', 'gourami', 'oscar', 
+        'cichlid', 'sturgeon', 'gar', 'bowfin', 'lungfish', 'lamprey', 'hagfish', 'coelacanth',
+        'mahimahi', 'wahoo', 'walleye', 'muskellunge', 'bluegill', 'crappie', 'sunfish', 'shad', 
+        'minnow', 'dace', 'roach', 'tench', 'bream', 'chub', 'barbel', 'grayling', 'char', 
+        'whitefish', 'smelt', 'capelin', 'hake', 'pollock', 'haddock', 'whiting', 'ling', 
+        'burbot', 'angler', 'monkfish', 'batfish', 'frogfish', 'needlefish', 'flyingfish', 
+        'seahorse', 'pipefish', 'stickleback', 'sculpin', 'lionfish', 'rockfish', 'tilefish', 
+        'remora', 'jack', 'pompano', 'dorado', 'porgy', 'drum', 'croaker', 'surmullet', 
+        'goatfish', 'archerfish', 'leaffish', 'snakehead', 'turbot', 'plaice', 'dab', 'puffer', 
+        'boxfish', 'triggerfish', 'filefish', 'albacore', 'alewife', 'alfonsino', 'amberjack', 
+        'anemonefish', 'arapaima', 'arowana', 'ayu', 'bangus', 'barracudina', 'barramundi', 
+        'bichir', 'bitterling', 'bleak', 'blenny', 'blobfish', 'blowfish', 'boga', 'bonefish', 
+        'bonito', 'bonytail', 'brill', 'brotula', 'candiru', 'catalufa', 'catla', 'cisco', 
+        'cobia', 'coley', 'cornetfish', 'cusk', 'damselfish', 'dartfish', 'dealfish', 'dhufish', 
+        'dory', 'dottyback', 'dragonet', 'driftfish', 'escolar', 'eulachon', 'fangtooth', 
+        'fierasfer', 'flier', 'garibaldi', 'goldeye', 'grunion', 'grunt', 'grunter', 'gudgeon', 
+        'halosaur', 'hamlet', 'hoki', 'huchen', 'hussar', 'icefish', 'ide', 'ilish', 'inanga', 
+        'inconnu', 'kahawai', 'kaluga', 'kokanee', 'kokopu', 'ladyfish', 'lenok', 'limia', 
+        'louvar', 'luderick', 'lumpsucker', 'mahseer', 'medaka', 'menhaden', 'mojarra', 'mola', 
+        'monchong', 'mooneye', 'moonfish', 'mora', 'morwong', 'mrigal', 'mummichog', 'nase', 
+        'notothen', 'oarfish', 'oldwife', 'opah', 'opaleye', 'orfe', 'panga', 'parore', 
+        'peamouth', 'pearleye', 'pleco', 'poacher', 'pomfret', 'powen', 'quillback', 'quillfish', 
+        'rasbora', 'rohu', 'ronquil', 'roosterfish', 'ruffe', 'sabertooth', 'sablefish', 'scat', 
+        'scup', 'shiner', 'sillago', 'skate', 'skilfish', 'sleeper', 'slickhead', 'slimehead', 
+        'snook', 'sprat', 'squeaker', 'stargazer', 'steelhead', 'stonecat', 'sucker', 'tailor', 
+        'taimen', 'tang', 'tarpon', 'tarwhine', 'tenpounder', 'thornfish', 'threadfin', 'tope', 
+        'torpedo', 'trahira', 'treefish', 'tripletail', 'trumpeter', 'trunkfish', 'uaru', 
+        'vanjaram', 'vendace', 'vimba', 'walu', 'warmouth', 'whiff', 'wobbegong', 'wrasse', 
+        'zander', 'zingel', 'humuhumunukunukuapua\'a'
+    ];
+
+    const isWordFish = (w) => {
+        const low = w.toLowerCase();
+        return FISH_KEYWORDS.some(fish => {
+            if (low === fish) return true;
+            if (low === fish + 's') return true;
+            if (low === fish + 'es') return true;
+            // Handle fish ending in 'y' -> 'ies'
+            if (fish.endsWith('y') && low === fish.slice(0, -1) + 'ies') return true;
+            return false;
+        });
+    };
+
+    const downloadAllCategories = async () => {
+        await loadDictionary();
+        const fishList = dictionary.filter(isWordFish);
+        const categories = {
+            'All_Words': dictionary,
+            'Hyphenated': dictionary.filter(w => w.includes('-')),
+            'Long_Words': dictionary.filter(w => w.length >= 20),
+            'Short_Words': dictionary.filter(w => w.length >= 2 && w.length <= 4),
+            'Phobias': dictionary.filter(w => { const low = w.toLowerCase(); return low.includes('phobia') || low.includes('phobias') || low.includes('phobic'); }),
+            'Apostrophes': dictionary.filter(w => w.includes("'")),
+            'Casual': dictionary.filter(w => {
+                const rareChars = ['x', 'q', 'z', 'j'];
+                const low = w.toLowerCase();
+                return w.length >= 4 && w.length <= 8 && !rareChars.some(c => low.includes(c));
+            }),
+            'Fish_Species': fishList
+        };
+
+        let content = `JKLM POWER TOOLS - CATEGORY EXPORT (v${SCRIPT_VERSION})\n`;
+        content += `Generated: ${new Date().toLocaleString()}\n`;
+        content += `====================================================\n\n`;
+
+        for (const [name, list] of Object.entries(categories)) {
+            content += `[ CATEGORY: ${name} (${list.length} words) ]\n`;
+            content += `----------------------------------------------------\n`;
+            content += list.join('\n');
+            content += `\n\n`;
+        }
+
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `JKLM-Power-Tools-Categories.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    // --- Local Music Player ---
     const dictionaryUrls = {
         'English': 'https://raw.githubusercontent.com/tt-46ben/overlay-wordlist/121bf1a601ed822553c2e68c38a4cdcd7737d352/words.txt'
     };
@@ -483,6 +474,7 @@
         return array;
     };
 
+    // --- Base64 & Profile Picture Helpers ---
     function uint6ToB64(nUint6) {
         return nUint6 < 26 ? nUint6 + 65 : nUint6 < 52 ? nUint6 + 71 : nUint6 < 62 ? nUint6 - 4 : nUint6 === 62 ? 43 : nUint6 === 63 ? 47 : 65;
     }
@@ -508,6 +500,7 @@
         return (sB64Enc.substr(0, sB64Enc.length - 2 + nMod3) + (nMod3 === 2 ? "" : nMod3 === 1 ? "=" : "=="));
     }
 
+    // --- CSS Styles ---
     const style = document.createElement('style');
     style.innerHTML = `
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -532,7 +525,7 @@
             --pt-glow-effect: 0 0 20px rgba(var(--pt-theme-color-rgb), 0.4);
         }
 
-        /* Panel only */
+        /* Glassmorphism Scrollbar (Panel only) */
         .custom-kb-page::-webkit-scrollbar, .custom-dict-page::-webkit-scrollbar, .custom-admin-page::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-kb-page::-webkit-scrollbar-track, .custom-dict-page::-webkit-scrollbar-track, .custom-admin-page::-webkit-scrollbar-track { background: transparent; }
         .custom-kb-page::-webkit-scrollbar-thumb, .custom-dict-page::-webkit-scrollbar-thumb, .custom-admin-page::-webkit-scrollbar-thumb { 
@@ -552,16 +545,16 @@
             width: 100%;
             border-bottom: none;
             position: relative;
-            z-index: 19999;
+            z-index: 19999; /* Lower than pages to prevent overlap */
             gap: 15px;
             padding: 0 25px;
             box-sizing: border-box;
             margin-top: -5px;
-            pointer-events: none;
+            pointer-events: none; /* Klicks durchlassen außer auf Kinder */
         }
 
         .custom-nav-row > * {
-            pointer-events: auto !important;
+            pointer-events: auto !important; /* Kinder sind klickbar */
         }
 
         .panel-nav {
@@ -578,7 +571,7 @@
             background: rgba(27, 31, 59, 0.4);
             backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--pt-glass-border);
-            pointer-events: auto !important;
+            pointer-events: auto !important; /* Interaktion für Nav-Bereich */
         }
 
         .panel-title {
@@ -617,7 +610,7 @@
         }
 
         .custom-tab span {
-            pointer-events: none !important;
+            pointer-events: none !important; /* Emojis/Icons ignorieren Klicks */
         }
 
         .custom-tab:hover {
@@ -642,14 +635,14 @@
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
             height: 100vh;
-            overflow-y: auto !important;
+            overflow-y: auto !important; /* Sicherstellen, dass Scrolling immer möglich ist */
             overflow-x: hidden;
             box-sizing: border-box;
             width: 650px;
             box-shadow: var(--pt-panel-shadow);
             position: fixed;
             top: 0;
-            z-index: 20000 !important;
+            z-index: 20000 !important; /* Above nav row */
             font-family: var(--pt-font-main);
             transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s ease;
             border-radius: var(--pt-border-radius);
@@ -658,7 +651,7 @@
             backface-visibility: hidden;
             contain: content;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
-            pointer-events: auto !important;
+            pointer-events: auto !important; /* Interaktion sicherstellen */
         }
 
         .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-admin-page.pos-left {
@@ -718,8 +711,9 @@
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
         }
 
+        /* Frosted Glass Cards */
         .feature-card {
-            background: rgba(0, 0, 0, 0.45) !important;
+            background: rgba(0, 0, 0, 0.45) !important; /* Darker for high readability */
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: var(--pt-border-radius);
             padding: 24px;
@@ -727,14 +721,14 @@
             transition: var(--pt-transition);
             position: relative;
             overflow: hidden;
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px); /* Stronger blur for text isolation */
             transform: translate3d(0, 0, 0);
             will-change: transform, box-shadow;
-            pointer-events: auto !important;
+            pointer-events: auto !important; /* Interaktion erzwingen */
         }
 
         .feature-card * {
-            pointer-events: auto !important;
+            pointer-events: auto !important; /* Alle Elemente in der Card klickbar machen */
         }
 
         .feature-card:hover {
@@ -778,15 +772,15 @@
             box-shadow: inset 0 0 10px rgba(var(--pt-theme-color-rgb), 0.2);
         }
 
+        /* Glass Inputs */
         .modern-input {
             width: 100%;
-            background: #000000 !important;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: #ffffff !important;
-            padding: 12px 20px;
-            border-radius: 50px;
-            font-size: 14px;
-            font-weight: 800;
+            padding: 14px 20px;
+            border-radius: var(--pt-border-radius);
+            font-size: 15px;
             font-family: var(--pt-font-main);
             transition: var(--pt-transition);
             outline: none;
@@ -796,26 +790,22 @@
 
         select.modern-input {
             cursor: pointer;
-            appearance: none !important;
-            -webkit-appearance: none !important;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
-            background-repeat: no-repeat !important;
-            background-position: right 15px center !important;
-            background-size: 14px !important;
-            padding-right: 40px !important;
+            appearance: auto !important;
+            -webkit-appearance: auto !important;
         }
 
         .modern-input option {
-            background-color: #000000 !important;
-            color: #ffffff !important;
+            background-color: #000000 !important; /* Deep black for all browsers */
+            color: #ffffff !important; /* White text for contrast */
             padding: 12px;
-            font-weight: 700;
+            font-weight: 500;
         }
 
         .modern-input:focus {
-            border-color: #007bff;
-            background: #000000;
-            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2);
+            border-color: var(--pt-theme-color);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(var(--pt-theme-color-rgb), 0.1), var(--pt-glow-effect);
+            transform: scale(1.02);
         }
 
         .modern-button {
@@ -852,7 +842,7 @@
             cursor: pointer;
             transition: var(--pt-transition);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            user-select: none;
+            user-select: none; /* Verhindert Text-Markierung beim Klicken */
         }
 
         .settings-row:hover {
@@ -896,12 +886,12 @@
             display: inline-block;
             padding: 8px 16px;
             margin: 4px;
-            background: rgba(0, 0, 0, 0.6) !important;
+            background: rgba(0, 0, 0, 0.6) !important; /* Darker background */
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 10px;
             cursor: pointer;
             transition: var(--pt-transition);
-            font-weight: 700;
+            font-weight: 700; /* Bolder */
             font-size: 14px;
             color: #ffffff !important;
             backdrop-filter: blur(4px);
@@ -938,7 +928,7 @@
         }
 
         .note-item {
-            background: rgba(0, 0, 0, 0.5) !important;
+            background: rgba(0, 0, 0, 0.5) !important; /* Darker for readability */
             border: 1px solid var(--pt-glass-border);
             border-radius: 12px;
             padding: 24px;
@@ -1003,6 +993,7 @@
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
         }
 
+        /* Responsive Animations */
         @keyframes slideInPanelRight {
             from { transform: translate3d(100%, 0, 0); opacity: 0; }
             to { transform: translate3d(0, 0, 0); opacity: 1; }
@@ -1256,8 +1247,8 @@
                     </div>
                 `).join('') : `<div style="text-align: center; color: var(--pt-text-muted); padding: 30px; font-size: 14px; font-weight: 600;">${t.noNotes}</div>`;
 
-                const minLen = 2;
-                const maxLen = 30;
+                const minLen = getMinWordLength();
+                const maxLen = getMaxWordLength();
 
                 dictPage.innerHTML = `
                 ${getPanelNav('dict-btn', t.dictHeader)}
@@ -1276,13 +1267,13 @@
                             </div>
 
                             <div style="display: flex; gap: 12px;">
-                                <select class="modern-input" id="dict-search-mode">
+                                <select class="modern-input" id="dict-search-mode" style="flex: 1; padding: 14px 20px; font-weight: 700; appearance: none; cursor: pointer;">
                                     <option value="Contains" ${searchMode === 'Contains' ? 'selected' : ''}>Contains</option>
                                     <option value="StartsWith" ${searchMode === 'StartsWith' ? 'selected' : ''}>Starts With</option>
                                     <option value="EndsWith" ${searchMode === 'EndsWith' ? 'selected' : ''}>Ends With</option>
                                     <option value="SyllableChain" ${searchMode === 'SyllableChain' ? 'selected' : ''}>Syllable Chain</option>
                                 </select>
-                                <select class="modern-input" id="dict-word-type">
+                                <select class="modern-input" id="dict-word-type" style="flex: 1; padding: 14px 20px; font-weight: 700; appearance: none; cursor: pointer;">
                                     <option value="All" ${wordType === 'All' ? 'selected' : ''}>All Words</option>
                                     <option value="Hyphen" ${wordType === 'Hyphen' ? 'selected' : ''}>Hyphen Only</option>
                                     <option value="Long" ${wordType === 'Long' ? 'selected' : ''}>Long Words</option>
@@ -1291,25 +1282,24 @@
                                     <option value="Phobia" ${wordType === 'Phobia' ? 'selected' : ''}>Phobia</option>
                                     <option value="Apostrophes" ${wordType === 'Apostrophes' ? 'selected' : ''}>Apostrophes</option>
                                     <option value="Fish" ${wordType === 'Fish' ? 'selected' : ''}>Fish</option>
-                                    <option value="Plants" ${wordType === 'Plants' ? 'selected' : ''}>Plants</option>
-                                    <option value="Space" ${wordType === 'Space' ? 'selected' : ''}>Space</option>
-                                    <option value="Elements" ${wordType === 'Elements' ? 'selected' : ''}>Elements</option>
-                                    <option value="Gems" ${wordType === 'Gems' ? 'selected' : ''}>Gems</option>
-                                    <option value="Mythology" ${wordType === 'Mythology' ? 'selected' : ''}>Mythology</option>
-                                    <option value="Instruments" ${wordType === 'Instruments' ? 'selected' : ''}>Instruments</option>
-                                    <option value="IT" ${wordType === 'IT' ? 'selected' : ''}>IT</option>
-                                    <option value="Food" ${wordType === 'Food' ? 'selected' : ''}>Food</option>
-                                    <option value="Spices" ${wordType === 'Spices' ? 'selected' : ''}>Spices</option>
                                 </select>
+                            </div>
+
+                            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px solid var(--pt-glass-border);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--pt-text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;">
+                                    <span>Word Length</span>
+                                    <span style="color: var(--pt-theme-color);"><span id="val-dict-min-len">${minLen}</span> - <span id="val-dict-max-len">${maxLen}</span> chars</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 16px;">
+                                    <input type="range" id="dict-min-len" min="2" max="30" value="${minLen}" style="flex: 1; accent-color: var(--pt-theme-color); cursor: pointer;">
+                                    <input type="range" id="dict-max-len" min="2" max="30" value="${maxLen}" style="flex: 1; accent-color: var(--pt-theme-color); cursor: pointer;">
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="feature-card" id="dict-results-container" style="background: rgba(0,0,0,0.3); border-color: var(--pt-glass-border); padding: 28px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <div class="custom-dict-result-header" id="dict-result-header" style="font-size: 16px; font-weight: 800; color: var(--pt-theme-color); display: flex; align-items: center; gap: 12px;"></div>
-                            <div style="font-size: 12px; font-weight: 900; color: #00d2ff; letter-spacing: 1px; text-shadow: 0 0 10px rgba(0,210,255,0.3);">${minLen} - ${maxLen} CHARS</div>
-                        </div>
+                        <div class="custom-dict-result-header" id="dict-result-header" style="font-size: 16px; font-weight: 800; color: var(--pt-theme-color); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;"></div>
                         <div class="custom-dict-result-list" id="dict-result-list" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
                     </div>
 
@@ -1435,6 +1425,25 @@
                                     <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Hold/Toggle this key for transparency.</span>
                                 </div>
                                 <input type="text" id="admin-opacity-key" class="modern-input" value="${getOpacityToggleKey()}" style="width: 80px; text-align: center; font-weight: 900; padding: 10px; border-radius: 12px; background: rgba(var(--pt-theme-color-rgb), 0.1); color: var(--pt-theme-color); border-color: rgba(var(--pt-theme-color-rgb), 0.2);">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon">🔑</div>
+                            <span>Admin Access</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div class="settings-row" style="cursor: default; flex-direction: column; align-items: stretch; gap: 15px;">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-weight: 700; font-size: 15px;">Admin Password</span>
+                                    <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Enter the admin password to unlock secret features.</span>
+                                </div>
+                                <input type="password" id="admin-password-input" class="modern-input" placeholder="Enter Password..." style="width: 100%; font-weight: 700; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--pt-glass-border);">
+                                <button class="modern-button" id="admin-download-all" style="width: 100%; display: none; background: var(--pt-theme-color); color: white; box-shadow: var(--pt-glow-effect);">
+                                    <span>📥</span> Download All Category Lists
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1576,6 +1585,7 @@
                         history.unshift(syllable.toUpperCase());
                         history = history.slice(0, 10);
                         setSearchHistory(history);
+                        // Don't call updateDictContent here to avoid re-rendering while typing
                     }
                 }
 
@@ -1584,22 +1594,12 @@
                 };
 
                 ensureDictionary().then(() => {
-                    let words;
-                    if (wordType === 'Fish') words = dictionary.filter(isWordFish);
-                    else if (wordType === 'Plants') words = dictionary.filter(isWordPlant);
-                    else if (wordType === 'Space') words = dictionary.filter(isWordSpace);
-                    else if (wordType === 'Elements') words = dictionary.filter(isWordElement);
-                    else if (wordType === 'Gems') words = dictionary.filter(isWordGem);
-                    else if (wordType === 'Mythology') words = dictionary.filter(isWordMyth);
-                    else if (wordType === 'Instruments') words = dictionary.filter(isWordInstrument);
-                    else if (wordType === 'IT') words = dictionary.filter(isWordTech);
-                    else if (wordType === 'Food') words = dictionary.filter(isWordFood);
-                    else if (wordType === 'Spices') words = dictionary.filter(isWordSpice);
-                    else words = [...dictionary];
+                    let words = wordType === 'Fish' ? dictionary.filter(isWordFish) : [...dictionary];
                     
-                    const minLen = 2;
-                    const maxLen = 30;
+                    const minLen = getMinWordLength();
+                    const maxLen = getMaxWordLength();
 
+                    // Apply word length filter first
                     words = words.filter(w => w.length >= minLen && w.length <= maxLen);
 
                     if (syllable) {
@@ -1608,6 +1608,7 @@
                         } else if (searchMode === 'EndsWith') {
                             words = words.filter(w => w.toLowerCase().endsWith(syllable));
                         } else if (searchMode === 'SyllableChain') {
+                            // Example: If last word was "APPLE", syllable is "E" or "LE"
                             words = words.filter(w => w.toLowerCase().startsWith(syllable));
                         } else {
                             words = words.filter(w => w.toLowerCase().includes(syllable));
@@ -1762,6 +1763,20 @@
                 if (e.target.id === 'dict-msg-input') {
                     debouncedUpdateSuggestions();
                 }
+                if (e.target.id === 'dict-min-len') {
+                    const val = parseInt(e.target.value);
+                    setMinWordLength(val);
+                    const span = document.getElementById('val-dict-min-len');
+                    if (span) span.innerText = val;
+                    debouncedUpdateSuggestions();
+                }
+                if (e.target.id === 'dict-max-len') {
+                    const val = parseInt(e.target.value);
+                    setMaxWordLength(val);
+                    const span = document.getElementById('val-dict-max-len');
+                    if (span) span.innerText = val;
+                    debouncedUpdateSuggestions();
+                }
             });
             dictPage.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && e.target.id === 'dict-msg-input') {
@@ -1791,6 +1806,14 @@
                     updateAdminContent();
                     return;
                 }
+
+                if (e.target.id === 'admin-download-all') {
+                    const pass = document.getElementById('admin-password-input')?.value;
+                    if (pass === 'VnHj]/|MiPuI7oz4JVTGQiq~#Sf7gt9eJq1up0d;(>jkt/1MB') {
+                        downloadAllCategories();
+                    }
+                    return;
+                }
             });
 
             adminPage.addEventListener('change', (e) => {
@@ -1813,6 +1836,16 @@
                     if (span) span.innerText = val;
                     updateThemeStyles();
                 }
+                if (e.target.id === 'admin-password-input') {
+                    const downloadBtn = document.getElementById('admin-download-all');
+                    if (downloadBtn) {
+                        if (e.target.value === 'VnHj]/|MiPuI7oz4JVTGQiq~#Sf7gt9eJq1up0d;(>jkt/1MB') {
+                            downloadBtn.style.display = 'block';
+                        } else {
+                            downloadBtn.style.display = 'none';
+                        }
+                    }
+                }
             });
 
             adminPage.addEventListener('keydown', (e) => {
@@ -1834,6 +1867,7 @@
                 const sylEl = document.querySelector('.syllable');
                 const selfInput = document.querySelector('.selfTurn input, .selfTurn textarea');
 
+                // Word length counter logic
                 if (selfInput) {
                     let counter = document.getElementById('pt-word-counter');
                     if (!counter) {
@@ -1962,7 +1996,9 @@
             });
     checkInit.observe(document.documentElement, { childList: true, subtree: true });
 
+    // Initial check
     init();
+    // Fallbacks
     setTimeout(init, 1000);
     setTimeout(init, 3000);
     setTimeout(init, 6000);
