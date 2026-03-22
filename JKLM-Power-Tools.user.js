@@ -3,8 +3,8 @@
 // ==UserScript==
 // @name         JKLM Root
 // @namespace    http://tampermonkey.net/
-// @version      19.4
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v19.4)
+// @version      19.5
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v19.5)
 // @author       Root
 // @icon         https://i.ytimg.com/vi/czR6DrMptJE/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBm-s4RSY9BGKY3Km3KS0ASs_RaiQ
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -126,10 +126,10 @@
                             const textEl = target.classList?.contains('text') ? target : target.closest('.text');
                             const content = textEl.innerText;
                             if (content.includes('[deleted]') || content.includes('{deleted]')) {
-                                // Try to restore from data attribute if we saved it
+                                // Restore original text combined with deleted indicator
                                 const original = textEl.getAttribute('data-original-text');
-                                if (original && content !== original) {
-                                    textEl.innerText = original;
+                                if (original && !content.includes(original)) {
+                                    textEl.innerText = `{deleted] ${original}`;
                                 }
                             } else if (content && !textEl.hasAttribute('data-original-text')) {
                                 // Save original text when it first appears
@@ -147,6 +147,9 @@
                                     const content = textEl.innerText;
                                     if (content && !content.includes('[deleted]') && !content.includes('{deleted]')) {
                                         textEl.setAttribute('data-original-text', content);
+                                    } else if (content && (content.includes('[deleted]') || content.includes('{deleted]'))) {
+                                        // If it's already deleted but we have it in some history or something? 
+                                        // For now, we just ensure original text is saved for new non-deleted messages.
                                     }
                                 }
                             }
@@ -273,7 +276,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '19.4';
+    const SCRIPT_VERSION = '19.5';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
