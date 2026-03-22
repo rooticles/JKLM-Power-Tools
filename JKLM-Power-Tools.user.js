@@ -1,8 +1,8 @@
 
 // ==UserScript==
-// @name         JKLM-Power-Tools
+// @name         JKLM Root
 // @namespace    http://tampermonkey.net/
-// @version      17.4
+// @version      18.3
 // @description  Advanced JKLM Power Tools - Ultimate Edition (v17.4)
 // @author       Root
 // @icon         https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTJbeFZgV0zcGPsl6DlZo3cGrxKIEsWPIcJw&s
