@@ -3,10 +3,10 @@
 // ==UserScript==
 // @name         JKLM Root
 // @namespace    http://tampermonkey.net/
-// @version      18.6
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v18.6)
+// @version      18.7
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v18.7)
 // @author       Root
-// @icon         https://i.pinimg.com/736x/32/7e/db/327edb9a15b304efc264668ada03f725.jpg
+// @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @match        *://*.jklm.fun/*
@@ -192,7 +192,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '18.6';
+    const SCRIPT_VERSION = '18.7';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -291,7 +291,7 @@
             dictSelectLabel: 'Language Selection:',
             historyHeader: '📜 History',
             historyEmpty: 'No words searched in this round yet.',
-            adminHeader: '⚙️ Design & System',
+            systemHeader: '⚙️ Settings & Design',
             adminVisualHeader: '🎨 Visual Design',
             adminThemeLabel: 'Accent Color:',
             adminCppHeader: '🖼️ Custom Profile Picture',
@@ -301,12 +301,6 @@
             adminCppSuccess: 'Applied successfully.',
             adminSidebarWidthLabel: 'Panel Width (pixels):',
             adminMinLabel: 'Minimum: 180.',
-            adminLoginHeader: '🛡️ Admin Area',
-            adminUserPlaceholder: 'Username...',
-            adminPassPlaceholder: 'Password...',
-            adminLoginBtn: 'Login',
-            adminLogoutBtn: 'Logout',
-            adminLoginError: 'Invalid credentials!',
             adminGlassLabel: 'Transparency:',
             adminRadiusLabel: 'Corner Softness:',
             adminClockLabel: 'System Clock',
@@ -566,15 +560,15 @@
         }
 
         /* Glassmorphism Scrollbar (Panel only) */
-        .custom-kb-page::-webkit-scrollbar, .custom-dict-page::-webkit-scrollbar, .custom-tools-page::-webkit-scrollbar, .custom-admin-page::-webkit-scrollbar { width: 8px; height: 8px; }
-        .custom-kb-page::-webkit-scrollbar-track, .custom-dict-page::-webkit-scrollbar-track, .custom-tools-page::-webkit-scrollbar-track, .custom-admin-page::-webkit-scrollbar-track { background: transparent; }
-        .custom-kb-page::-webkit-scrollbar-thumb, .custom-dict-page::-webkit-scrollbar-thumb, .custom-tools-page::-webkit-scrollbar-thumb, .custom-admin-page::-webkit-scrollbar-thumb { 
+        .custom-kb-page::-webkit-scrollbar, .custom-dict-page::-webkit-scrollbar, .custom-tools-page::-webkit-scrollbar, .custom-system-page::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-kb-page::-webkit-scrollbar-track, .custom-dict-page::-webkit-scrollbar-track, .custom-tools-page::-webkit-scrollbar-track, .custom-system-page::-webkit-scrollbar-track { background: transparent; }
+        .custom-kb-page::-webkit-scrollbar-thumb, .custom-dict-page::-webkit-scrollbar-thumb, .custom-tools-page::-webkit-scrollbar-thumb, .custom-system-page::-webkit-scrollbar-thumb { 
             background: rgba(255, 255, 255, 0.1); 
             border-radius: 10px; 
             border: 2px solid transparent;
             background-clip: content-box;
         }
-        .custom-kb-page::-webkit-scrollbar-thumb:hover, .custom-dict-page::-webkit-scrollbar-thumb:hover, .custom-tools-page::-webkit-scrollbar-thumb:hover, .custom-admin-page::-webkit-scrollbar-thumb:hover { background: rgba(var(--pt-theme-color-rgb), 0.5); }
+        .custom-kb-page::-webkit-scrollbar-thumb:hover, .custom-dict-page::-webkit-scrollbar-thumb:hover, .custom-tools-page::-webkit-scrollbar-thumb:hover, .custom-system-page::-webkit-scrollbar-thumb:hover { background: rgba(var(--pt-theme-color-rgb), 0.5); }
 
         .custom-nav-row {
             display: flex;
@@ -667,7 +661,7 @@
             transform: scale(1.1);
         }
 
-        .custom-kb-page, .custom-dict-page, .custom-tools-page, .custom-admin-page {
+        .custom-kb-page, .custom-dict-page, .custom-tools-page, .custom-system-page {
             display: none;
             padding: 20px;
             color: var(--pt-text-color);
@@ -694,7 +688,7 @@
             pointer-events: auto !important; /* Interaktion sicherstellen */
         }
 
-        .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-tools-page.pos-left, .custom-admin-page.pos-left {
+        .custom-kb-page.pos-left, .custom-dict-page.pos-left, .custom-tools-page.pos-left, .custom-system-page.pos-left {
             left: 0;
             border-right: 1px solid var(--pt-glass-border);
             border-left: none;
@@ -702,7 +696,7 @@
             border-bottom-left-radius: 0;
         }
 
-        .custom-kb-page.pos-right, .custom-dict-page.pos-right, .custom-tools-page.pos-right, .custom-admin-page.pos-right {
+        .custom-kb-page.pos-right, .custom-dict-page.pos-right, .custom-tools-page.pos-right, .custom-system-page.pos-right {
             right: 0;
             border-left: 1px solid var(--pt-glass-border);
             border-right: none;
@@ -710,7 +704,7 @@
             border-bottom-right-radius: 0;
         }
 
-        .custom-kb-page.active, .custom-dict-page.active, .custom-tools-page.active, .custom-admin-page.active {
+        .custom-kb-page.active, .custom-dict-page.active, .custom-tools-page.active, .custom-system-page.active {
             display: block;
             animation: fadeInGlass 0.2s ease-out;
         }
@@ -1071,7 +1065,7 @@
         document.documentElement.style.setProperty('--pt-text-muted', textMuted);
         document.documentElement.style.setProperty('--pt-glass-border', glassBorder);
 
-        document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-admin-page').forEach(p => {
+        document.querySelectorAll('.custom-kb-page, .custom-dict-page, .custom-tools-page, .custom-system-page').forEach(p => {
             p.classList.remove('pos-left', 'pos-right');
             p.classList.add(`pos-${panelPosition}`);
             
@@ -1128,9 +1122,9 @@
             const catTab = createTab('cat-btn', '🚀');
             const dictTab = createTab('dict-btn', '📖');
             const toolsTab = createTab('tools-btn', '🛠️');
-            const adminTab = createTab('admin-btn', '⚙️');
+            const systemTab = createTab('system-btn', '⚙️');
 
-            [catTab, dictTab, toolsTab, adminTab].forEach(t => {
+            [catTab, dictTab, toolsTab, systemTab].forEach(t => {
                 customRow.appendChild(t);
             });
 
@@ -1169,10 +1163,10 @@
             dictPage.className = 'custom-dict-page';
             const toolsPage = document.createElement('div');
             toolsPage.className = 'custom-tools-page';
-            const adminPage = document.createElement('div');
-            adminPage.className = 'custom-admin-page';
+            const systemPage = document.createElement('div');
+            systemPage.className = 'custom-system-page';
 
-            const allCustomPages = [kbPage, dictPage, toolsPage, adminPage];
+            const allCustomPages = [kbPage, dictPage, toolsPage, systemPage];
 
             const getPanelNav = (activeTabId, title) => {
                 const t = translations[getLanguage()] || translations['English'];
@@ -1188,7 +1182,7 @@
                             <div class="custom-tab ${activeTabId === 'cat-btn' ? 'active' : ''}" data-target="cat-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">🚀</span></div>
                             <div class="custom-tab ${activeTabId === 'dict-btn' ? 'active' : ''}" data-target="dict-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">📖</span></div>
                             <div class="custom-tab ${activeTabId === 'tools-btn' ? 'active' : ''}" data-target="tools-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">🛠️</span></div>
-                            <div class="custom-tab ${activeTabId === 'admin-btn' ? 'active' : ''}" data-target="admin-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">⚙️</span></div>
+                            <div class="custom-tab ${activeTabId === 'system-btn' ? 'active' : ''}" data-target="system-btn"><span style="pointer-events: none; display: flex; align-items: center; justify-content: center;">⚙️</span></div>
                          </div>
                      </div>
                     ${clockEnabled ? `<div class="custom-clock panel-clock">${timeStr}</div>` : ''}
@@ -1406,16 +1400,16 @@
             `;
             };
 
-            const updateAdminContent = () => {
+            const updateSystemContent = () => {
                 const t = translations[getLanguage()] || translations['English'];
                 const themeColor = getThemeColor();
                 const borderRadius = getBorderRadius();
                 const clockEnabled = getClockEnabled();
                 const panelPosition = getPanelPosition();
-                adminTab.title = t.adminHeader;
+                systemTab.title = t.systemHeader;
 
-                adminPage.innerHTML = `
-                ${getPanelNav('admin-btn', t.adminHeader)}
+                systemPage.innerHTML = `
+                ${getPanelNav('system-btn', t.systemHeader)}
                 <div class="custom-page-content">
                     <div class="feature-card">
                         <div class="feature-header">
@@ -1479,25 +1473,6 @@
                                     <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Hold/Toggle this key for transparency.</span>
                                 </div>
                                 <input type="text" id="admin-opacity-key" class="modern-input" value="${getOpacityToggleKey()}" style="width: 80px; text-align: center; font-weight: 900; padding: 10px; border-radius: 12px; background: rgba(var(--pt-theme-color-rgb), 0.1); color: var(--pt-theme-color); border-color: rgba(var(--pt-theme-color-rgb), 0.2);">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-header">
-                            <div class="feature-icon">🔑</div>
-                            <span>Admin Access</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <div class="settings-row" style="cursor: default; flex-direction: column; align-items: stretch; gap: 15px;">
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-weight: 700; font-size: 15px;">Admin Password</span>
-                                    <span style="color: var(--pt-text-muted); font-size: 12px; font-weight: 600;">Enter the admin password to unlock secret features.</span>
-                                </div>
-                                <input type="password" id="admin-password-input" class="modern-input" placeholder="Enter Password..." style="width: 100%; font-weight: 700; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--pt-glass-border);">
-                                <button class="modern-button" id="admin-download-all" style="width: 100%; display: none; background: var(--pt-theme-color); color: white; box-shadow: var(--pt-glow-effect);">
-                                    <span>📥</span> Download All Category Lists
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -1593,7 +1568,7 @@
             updateKbContent();
             updateDictContent();
             updateToolsContent();
-            updateAdminContent();
+            updateSystemContent();
 
             const updateSidebarWidths = (width) => {
                 allCustomPages.forEach(p => p.style.width = `${width}px`);
@@ -1603,10 +1578,10 @@
             allCustomPages.forEach(p => document.body.appendChild(p));
 
             window.closeCustomTabs = () => {
-                [catTab, dictTab, toolsTab, adminTab].forEach(t => t.classList.remove('active'));
+                [catTab, dictTab, toolsTab, systemTab].forEach(t => t.classList.remove('active'));
                 allCustomPages.forEach(p => p.classList.remove('active'));
                 const home = nav.querySelector('[data-tab="home"]') || nav.querySelector('.tab') || nav.querySelector('.custom-tab');
-                if (home && ![catTab, dictTab, toolsTab, adminTab].includes(home)) home.click();
+                if (home && ![catTab, dictTab, toolsTab, systemTab].includes(home)) home.click();
             };
 
             const toggleTab = (tab, page) => {
@@ -1646,17 +1621,17 @@
                 if (tabId === 'cat-btn') toggleTab(catTab, kbPage);
                 else if (tabId === 'dict-btn') toggleTab(dictTab, dictPage);
                 else if (tabId === 'tools-btn') toggleTab(toolsTab, toolsPage);
-                else if (tabId === 'admin-btn') {
-                    updateAdminContent();
-                    toggleTab(adminTab, adminPage);
+                else if (tabId === 'system-btn') {
+                    updateSystemContent();
+                    toggleTab(systemTab, systemPage);
                 }
             }, false);
 
             nav.addEventListener('click', (e) => {
                 const clicked = e.target.closest('.tab') || e.target.closest('.custom-tab');
-                if (clicked && ![catTab, dictTab, toolsTab, adminTab].includes(clicked)) {
+                if (clicked && ![catTab, dictTab, toolsTab, systemTab].includes(clicked)) {
                     allCustomPages.forEach(p => p.classList.remove('active'));
-                    [catTab, dictTab, toolsTab, adminTab].forEach(t => t.classList.remove('active'));
+                    [catTab, dictTab, toolsTab, systemTab].forEach(t => t.classList.remove('active'));
                 }
             });
 
@@ -1676,9 +1651,9 @@
                         if (targetId === 'cat-btn') toggleTab(catTab, kbPage);
                         if (targetId === 'dict-btn') toggleTab(dictTab, dictPage);
                         if (targetId === 'tools-btn') toggleTab(toolsTab, toolsPage);
-                        if (targetId === 'admin-btn') {
-                            updateAdminContent();
-                            toggleTab(adminTab, adminPage);
+                        if (targetId === 'system-btn') {
+                            updateSystemContent();
+                            toggleTab(systemTab, systemPage);
                         }
                     }
                 });
@@ -1966,17 +1941,17 @@
                 }
             });
 
-            adminPage.addEventListener('click', (e) => {
+            systemPage.addEventListener('click', (e) => {
                 if (e.target.id === 'pos-left-btn') {
                     setPanelPosition('left');
                     updateThemeStyles();
-                    updateAdminContent();
+                    updateSystemContent();
                     return;
                 }
                 if (e.target.id === 'pos-right-btn') {
                     setPanelPosition('right');
                     updateThemeStyles();
-                    updateAdminContent();
+                    updateSystemContent();
                     return;
                 }
 
@@ -1984,20 +1959,12 @@
                 if (toggleClock) {
                     setClockEnabled(!getClockEnabled());
                     updateThemeStyles();
-                    updateAdminContent();
-                    return;
-                }
-
-                if (e.target.id === 'admin-download-all') {
-                    const pass = document.getElementById('admin-password-input')?.value;
-                    if (pass === 'VnHj]/|MiPuI7oz4JVTGQiq~#Sf7gt9eJq1up0d;(>jkt/1MB') {
-                        downloadAllCategories();
-                    }
+                    updateSystemContent();
                     return;
                 }
             });
 
-            adminPage.addEventListener('change', (e) => {
+            systemPage.addEventListener('change', (e) => {
                 const picker = e.target.closest('#admin-theme-picker');
                 if (picker) {
                     setThemeColor(picker.value);
@@ -2005,7 +1972,7 @@
                 }
             });
 
-            adminPage.addEventListener('input', (e) => {
+            systemPage.addEventListener('input', (e) => {
                 if (e.target.id === 'admin-theme-picker') {
                     setThemeColor(e.target.value);
                     updateThemeStyles();
@@ -2017,19 +1984,9 @@
                     if (span) span.innerText = val;
                     updateThemeStyles();
                 }
-                if (e.target.id === 'admin-password-input') {
-                    const downloadBtn = document.getElementById('admin-download-all');
-                    if (downloadBtn) {
-                        if (e.target.value === 'VnHj]/|MiPuI7oz4JVTGQiq~#Sf7gt9eJq1up0d;(>jkt/1MB') {
-                            downloadBtn.style.display = 'block';
-                        } else {
-                            downloadBtn.style.display = 'none';
-                        }
-                    }
-                }
             });
 
-            adminPage.addEventListener('keydown', (e) => {
+            systemPage.addEventListener('keydown', (e) => {
                 if (e.target.id === 'admin-toggle-key') {
                     e.preventDefault();
                     const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
@@ -2146,7 +2103,7 @@
                     if (anyActive) {
                         window.closeCustomTabs();
                     } else {
-                        toggleTab(adminTab, adminPage);
+                        toggleTab(systemTab, systemPage);
                     }
                 }
 
@@ -2159,10 +2116,10 @@
                     if (e.key === 'F1') { e.preventDefault(); toggleTab(catTab, kbPage); }
                     if (e.key === 'F2') { e.preventDefault(); toggleTab(dictTab, dictPage); }
                     if (e.key === 'F3') { e.preventDefault(); toggleTab(toolsTab, toolsPage); }
-                    if (e.key === 'F4') { e.preventDefault(); toggleTab(adminTab, adminPage); }
+                    if (e.key === 'F4') { e.preventDefault(); toggleTab(systemTab, systemPage); }
                 }
 
-                if (e.key === 'Escape' && [catTab, dictTab, toolsTab, adminTab].some(t => t.classList.contains('active'))) {
+                if (e.key === 'Escape' && [catTab, dictTab, toolsTab, systemTab].some(t => t.classList.contains('active'))) {
                     window.closeCustomTabs();
                 }
             });
