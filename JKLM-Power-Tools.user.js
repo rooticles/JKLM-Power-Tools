@@ -3,8 +3,8 @@
 // ==UserScript==
 // @name         JKLM Root
 // @namespace    http://tampermonkey.net/
-// @version      18.4
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v18.4)
+// @version      18.5
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v18.5)
 // @author       Root
 // @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -192,7 +192,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '18.4';
+    const SCRIPT_VERSION = '18.5';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
@@ -327,12 +327,7 @@
             passGenHeader: '🔐 Password Generator',
             passGenLength: 'Password Length:',
             passGenGenerate: 'Generate Password',
-            passGenCopy: 'Copy Password',
-            weatherHeader: '🌦️ Weather Widget',
-            weatherLoading: 'Loading weather data...',
-            weatherError: 'Could not load weather.',
-            weatherTemp: 'Temperature:',
-            weatherCondition: 'Condition:'
+            passGenCopy: 'Copy Password'
         }
     };
 
@@ -1069,55 +1064,6 @@
         return retVal;
     };
 
-    const fetchWeather = async () => {
-        return new Promise((resolve, reject) => {
-            // Step 1: Get location via IP
-            GM_xmlhttpRequest({
-                method: "GET",
-                url: "https://ipapi.co/json/",
-                onload: (response) => {
-                    try {
-                        const locationData = JSON.parse(response.responseText);
-                        const { latitude, longitude, city } = locationData;
-                        
-                        // Step 2: Get weather via Open-Meteo
-                        GM_xmlhttpRequest({
-                            method: "GET",
-                            url: `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`,
-                            onload: (weatherResponse) => {
-                                try {
-                                    const weatherData = JSON.parse(weatherResponse.responseText);
-                                    resolve({
-                                        city,
-                                        temp: weatherData.current_weather.temperature,
-                                        windspeed: weatherData.current_weather.windspeed,
-                                        conditionCode: weatherData.current_weather.weathercode
-                                    });
-                                } catch (e) { reject(e); }
-                            },
-                            onerror: (err) => reject(err)
-                        });
-                    } catch (e) { reject(e); }
-                },
-                onerror: (err) => reject(err)
-            });
-        });
-    };
-
-    const getWeatherIcon = (code) => {
-        // WMO Weather interpretation codes (WW)
-        if (code === 0) return '☀️'; // Clear sky
-        if (code <= 3) return '🌤️'; // Mainly clear, partly cloudy, and overcast
-        if (code <= 48) return '🌫️'; // Fog and depositing rime fog
-        if (code <= 55) return '🌦️'; // Drizzle: Light, moderate, and dense intensity
-        if (code <= 65) return '🌧️'; // Rain: Light, moderate and heavy intensity
-        if (code <= 77) return '❄️'; // Snow fall: Light, moderate, and heavy intensity
-        if (code <= 82) return '🌧️'; // Rain showers: Slight, moderate, and violent
-        if (code <= 86) return '❄️'; // Snow showers slight and heavy
-        if (code <= 99) return '⛈️'; // Thunderstorm: Slight or moderate
-        return '❓';
-    };
-
     const init = () => {
         if (isInitialized) return;
         try {
@@ -1568,43 +1514,8 @@
                             </button>
                         </div>
                     </div>
-
-                    <div class="feature-card" id="weather-container">
-                        <div class="feature-header">
-                            <div class="feature-icon">🌦️</div>
-                            <span>${t.weatherHeader}</span>
-                        </div>
-                        <div id="weather-content" style="display: flex; flex-direction: column; gap: 12px; align-items: center; padding: 10px;">
-                            <div style="font-size: 14px; color: var(--pt-text-muted); font-weight: 600;">${t.weatherLoading}</div>
-                        </div>
-                        <button class="modern-button" id="refresh-weather-btn" style="width: 100%; margin-top: 15px; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--pt-glass-border);">
-                            <span>🔄</span> Refresh
-                        </button>
-                    </div>
                 </div>
                 `;
-                
-                // Trigger initial weather load
-                refreshWeather();
-            };
-
-            const refreshWeather = () => {
-                const content = document.getElementById('weather-content');
-                const t = translations[getLanguage()] || translations['English'];
-                if (!content) return;
-
-                content.innerHTML = `<div style="font-size: 14px; color: var(--pt-text-muted); font-weight: 600;">${t.weatherLoading}</div>`;
-                
-                fetchWeather().then(data => {
-                    content.innerHTML = `
-                        <div style="font-size: 48px; margin-bottom: 5px;">${getWeatherIcon(data.conditionCode)}</div>
-                        <div style="font-size: 24px; font-weight: 800; color: #fff;">${data.temp}°C</div>
-                        <div style="font-size: 16px; font-weight: 700; color: var(--pt-theme-color);">${data.city}</div>
-                        <div style="font-size: 13px; color: var(--pt-text-muted); font-weight: 600; margin-top: 5px;">Wind: ${data.windspeed} km/h</div>
-                    `;
-                }).catch(err => {
-                    content.innerHTML = `<div style="font-size: 14px; color: #ff4444; font-weight: 600;">${t.weatherError}</div>`;
-                });
             };
 
             updateKbContent();
@@ -1955,9 +1866,6 @@
                             }, 1000);
                         });
                     }
-                }
-                if (e.target.id === 'refresh-weather-btn') {
-                    refreshWeather();
                 }
             });
 
