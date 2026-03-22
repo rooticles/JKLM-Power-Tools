@@ -3,8 +3,8 @@
 // ==UserScript==
 // @name         JKLM Root
 // @namespace    http://tampermonkey.net/
-// @version      19.5
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v19.5)
+// @version      19.6
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v19.6)
 // @author       Root
 // @icon         https://i.ytimg.com/vi/czR6DrMptJE/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBm-s4RSY9BGKY3Km3KS0ASs_RaiQ
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -96,19 +96,21 @@
             };
             resumeAudio();
 
-            // --- Anti-Message-Delete Patch ---
-            // Prevents JKLM from deleting messages when a user is banned or leaves
+            // --- Aggressive Anti-Message-Delete Patch ---
             const patchChatCleanup = () => {
-                const targets = [win.room, win.chat];
+                const targets = [win.room, win.chat, win.milestones];
                 targets.forEach(target => {
                     if (target && typeof target === 'object') {
-                        const methods = ['removeMessagesByPeerId', 'removeMessagesByUser', 'clearChat'];
+                        // Methods that JKLM typically uses to purge messages
+                        const methods = ['removeMessagesByPeerId', 'removeMessagesByUser', 'clearChat', 'deleteMessage', 'purgeMessages'];
                         methods.forEach(method => {
                             if (typeof target[method] === 'function' && !target[method].isPatched) {
                                 const original = target[method];
                                 target[method] = function(...args) {
                                     console.log(`[JKLM Power Tools] Blocked message deletion via ${method}`, args);
-                                    return; // Do nothing, keep the messages
+                                    // Special case: if it's a "user left" or "banned" event, we might want to let the event through but block the UI removal
+                                    // For now, we just block the whole method call if it's purely for UI removal.
+                                    return; 
                                 };
                                 target[method].isPatched = true;
                             }
@@ -117,60 +119,108 @@
                 });
             };
 
-            // Anti-Replacement: Monitor chat for "[deleted]" replacements
-            const messageProtectionObserver = new MutationObserver((mutations) => {
-                mutations.forEach(mutation => {
-                    if (mutation.type === 'characterData' || mutation.type === 'childList') {
-                        const target = mutation.target.nodeType === 3 ? mutation.target.parentElement : mutation.target;
-                        if (target && (target.classList?.contains('text') || target.closest('.text'))) {
-                            const textEl = target.classList?.contains('text') ? target : target.closest('.text');
-                            const content = textEl.innerText;
-                            if (content.includes('[deleted]') || content.includes('{deleted]')) {
-                                // Restore original text combined with deleted indicator
-                                const original = textEl.getAttribute('data-original-text');
-                                if (original && !content.includes(original)) {
-                                    textEl.innerText = `{deleted] ${original}`;
-                                }
-                            } else if (content && !textEl.hasAttribute('data-original-text')) {
-                                // Save original text when it first appears
-                                textEl.setAttribute('data-original-text', content);
-                            }
+            // Global DOM Interceptor: Prevents elements with class "message" from being removed
+            const patchDOMRemoval = () => {
+                if (Node.prototype.removeChild.isPatched) return;
+
+                const originalRemoveChild = Node.prototype.removeChild;
+                Node.prototype.removeChild = function(child) {
+                    if (child && child.classList && (child.classList.contains('message') || child.closest('.message'))) {
+                        // If it's a message, don't remove it from the chat
+                        if (this.classList && (this.classList.contains('messages') || this.closest('.messages'))) {
+                            console.log('[JKLM Power Tools] Blocked DOM removal of a chat message');
+                            return child;
                         }
                     }
-                    
-                    // Also handle newly added messages
-                    if (mutation.addedNodes) {
+                    return originalRemoveChild.apply(this, arguments);
+                };
+                Node.prototype.removeChild.isPatched = true;
+
+                const originalRemove = Element.prototype.remove;
+                Element.prototype.remove = function() {
+                    if (this.classList && (this.classList.contains('message') || this.closest('.message'))) {
+                        console.log('[JKLM Power Tools] Blocked direct removal of a chat message');
+                        return;
+                    }
+                    return originalRemove.apply(this, arguments);
+                };
+            };
+            patchDOMRemoval();
+
+            // Message Content Guard: Saves original text and prevents it from being overwritten by "{deleted]"
+            const messageProtectionObserver = new MutationObserver((mutations) => {
+                mutations.forEach(mutation => {
+                    // 1. Capture new messages and save their original content
+                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                         mutation.addedNodes.forEach(node => {
                             if (node.nodeType === 1) {
-                                const textEl = node.classList?.contains('text') ? node : node.querySelector?.('.text');
-                                if (textEl && !textEl.hasAttribute('data-original-text')) {
+                                const textElements = node.classList?.contains('text') ? [node] : node.querySelectorAll?.('.text') || [];
+                                textElements.forEach(textEl => {
                                     const content = textEl.innerText;
                                     if (content && !content.includes('[deleted]') && !content.includes('{deleted]')) {
-                                        textEl.setAttribute('data-original-text', content);
-                                    } else if (content && (content.includes('[deleted]') || content.includes('{deleted]'))) {
-                                        // If it's already deleted but we have it in some history or something? 
-                                        // For now, we just ensure original text is saved for new non-deleted messages.
+                                        if (!textEl.hasAttribute('data-original-text')) {
+                                            textEl.setAttribute('data-original-text', content);
+                                        }
                                     }
-                                }
+                                });
                             }
                         });
+                    }
+
+                    // 2. Watch for text changes (replacement with "{deleted]")
+                    if (mutation.type === 'characterData' || (mutation.type === 'childList' && mutation.target.classList?.contains('text'))) {
+                        const textEl = mutation.target.nodeType === 3 ? mutation.target.parentElement : mutation.target;
+                        if (textEl && (textEl.classList?.contains('text') || textEl.closest('.text'))) {
+                            const actualEl = textEl.classList?.contains('text') ? textEl : textEl.closest('.text');
+                            const currentText = actualEl.innerText;
+                            const originalText = actualEl.getAttribute('data-original-text');
+
+                            if (originalText && (currentText.includes('[deleted]') || currentText.includes('{deleted]'))) {
+                                if (currentText !== `{deleted] ${originalText}`) {
+                                    // Use a non-recursive update
+                                    actualEl.innerText = `{deleted] ${originalText}`;
+                                    // Add a visual indicator
+                                    actualEl.style.opacity = '0.7';
+                                    actualEl.style.fontStyle = 'italic';
+                                }
+                            }
+                        }
                     }
                 });
             });
 
             const startMessageProtection = () => {
-                const chatContainer = document.querySelector('.chat .messages');
+                const chatContainer = document.querySelector('.chat .messages') || document.querySelector('.messages');
                 if (chatContainer) {
                     messageProtectionObserver.observe(chatContainer, { 
                         childList: true, 
                         subtree: true, 
                         characterData: true 
                     });
+                    console.log('[JKLM Power Tools] Chat protection observer active.');
                 } else {
                     setTimeout(startMessageProtection, 1000);
                 }
             };
             startMessageProtection();
+
+            // Socket Interceptor: Try to catch the actual socket events
+            const patchSocket = () => {
+                if (!win.socket || win.socket.isEventPatched) return;
+                
+                const originalOn = win.socket.on || win.socket.addEventListener;
+                if (typeof originalOn === 'function') {
+                    win.socket.on = win.socket.addEventListener = function(event, callback) {
+                        if (event === 'removeMessagesByPeerId' || event === 'removeMessagesByUser') {
+                            console.log(`[JKLM Power Tools] Intercepted socket listener for: ${event}`);
+                            // We don't block the registration, but we'll monitor the callback if needed
+                        }
+                        return originalOn.apply(this, arguments);
+                    };
+                    win.socket.isEventPatched = true;
+                }
+            };
+            setInterval(patchSocket, 2000);
 
             // Periodically check for room/chat objects as they load asynchronously
             const cleanupInterval = setInterval(patchChatCleanup, 1000);
@@ -276,7 +326,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '19.5';
+    const SCRIPT_VERSION = '19.6';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
