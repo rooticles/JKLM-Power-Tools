@@ -2,8 +2,8 @@
 // ==UserScript==
 // @name         JKLM-Power-Tools
 // @namespace    http://tampermonkey.net/
-// @version      17.4
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v17.4)
+// @version      17.5
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v17.5)
 // @author       Root
 // @icon         https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTJbeFZgV0zcGPsl6DlZo3cGrxKIEsWPIcJw&s
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -174,7 +174,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '17.4';
+    const SCRIPT_VERSION = '17.5';
 
     const FISH_KEYWORDS = [
         'fish', 'shark', 'trout', 'salmon', 'bass', 'tuna', 'mackerel', 'cod', 'eel', 'carp', 
@@ -216,13 +216,29 @@
         'flower', 'plant', 'tree', 'orchid', 'dandelion', 'mahogany', 'rose', 'tulip', 'daisy', 'lily',
         'sunflower', 'oak', 'pine', 'maple', 'birch', 'willow', 'cactus', 'fern', 'moss', 'grass',
         'bamboo', 'palm', 'ivy', 'clover', 'lavender', 'mint', 'basil', 'thyme', 'sage', 'rosemary',
-        'cedar', 'sequoia', 'redwood', 'spruce', 'fir', 'larch', 'juniper', 'cypress', 'yew'
+        'cedar', 'sequoia', 'redwood', 'spruce', 'fir', 'larch', 'juniper', 'cypress', 'yew',
+        'algae', 'aloe', 'amaryllis', 'anemone', 'aster', 'azalea', 'begonia', 'bluebell', 'bougainvillea',
+        'bramble', 'buttercup', 'camellia', 'carnation', 'chrysanthemum', 'clematis', 'coleus', 'columbine',
+        'conifer', 'cornflower', 'crocus', 'cyclamen', 'daffodil', 'dahlia', 'delphinium', 'dogwood',
+        'edelweiss', 'elderberry', 'elm', 'eucalyptus', 'forget-me-not', 'foxglove', 'freesia', 'fuchsia',
+        'gardenia', 'geranium', 'gladiolus', 'goldenrod', 'hawthorn', 'heather', 'hibiscus', 'holly',
+        'honeysuckle', 'hyacinth', 'hydrangea', 'iris', 'jasmine', 'juniper', 'laurel', 'lilac',
+        'magnolia', 'marigold', 'mistletoe', 'myrtle', 'narcissus', 'nasturtium', 'oleander', 'pansy',
+        'peony', 'petunia', 'phlox', 'poppy', 'primrose', 'rhododendron', 'snapdragon', 'snowdrop',
+        'thistle', 'verbena', 'vetch', 'violet', 'wallflower', 'wisteria', 'zinnia'
     ];
 
     const SPACE_KEYWORDS = [
         'space', 'universe', 'supernova', 'galaxy', 'asteroid', 'jupiter', 'mars', 'venus', 'saturn',
         'neptune', 'uranus', 'pluto', 'mercury', 'earth', 'moon', 'star', 'planet', 'comet', 'meteor',
-        'nebula', 'cosmos', 'orbit', 'gravity', 'rocket', 'shuttle', 'astronaut', 'telescope', 'void'
+        'nebula', 'cosmos', 'orbit', 'gravity', 'rocket', 'shuttle', 'astronaut', 'telescope', 'void',
+        'andromeda', 'apogee', 'asteroid', 'astrology', 'astronomy', 'astrophysics', 'aurora', 'axis',
+        'binary', 'blackhole', 'celestial', 'cluster', 'constellation', 'cosmic', 'cosmonaut', 'crater',
+        'darkmatter', 'deepspace', 'eclipse', 'equinox', 'exoplanet', 'flare', 'interstellar', 'lightyear',
+        'lunar', 'magnitude', 'milkyway', 'nadir', 'nova', 'observatory', 'parallax', 'parsec',
+        'penumbra', 'perigee', 'photon', 'pulsar', 'quasar', 'radiation', 'redshift', 'satellite',
+        'singularity', 'solstice', 'spectroscopy', 'starlight', 'sunspot', 'telemetry', 'trajectory',
+        'ultraviolet', 'vacuum', 'wavelength', 'zenith', 'zodiac'
     ];
 
     const ELEMENT_KEYWORDS = [
@@ -240,42 +256,81 @@
         'plutonium', 'americium', 'curium', 'berkelium', 'californium', 'einsteinium', 'fermium',
         'mendelevium', 'nobelium', 'lawrencium', 'rutherfordium', 'dubnium', 'seaborgium', 'bohrium',
         'hassium', 'meitnerium', 'darmstadtium', 'roentgenium', 'copernicium', 'nihonium', 'flerovium',
-        'moscovium', 'livermorium', 'tennessine', 'oganesson'
+        'moscovium', 'livermorium', 'tennessine', 'oganesson', 'actinide', 'alkali', 'alkaline', 'alloy',
+        'amalgam', 'anion', 'atomic', 'cation', 'halide', 'halogen', 'isotope', 'lanthanide', 'metalloid',
+        'noble', 'nucleotide', 'nucleus', 'valence'
     ];
 
     const GEM_KEYWORDS = [
         'emerald', 'sapphire', 'quartz', 'diamond', 'ruby', 'pearl', 'opal', 'topaz', 'amethyst',
         'garnet', 'aquamarine', 'peridot', 'citrine', 'turquoise', 'jade', 'amber', 'onyx', 'crystal',
-        'gem', 'jewel', 'mineral', 'stone'
+        'gem', 'jewel', 'mineral', 'stone', 'agate', 'alexandrite', 'beryl', 'bloodstone', 'carnelian',
+        'chalcedony', 'chrysoberyl', 'chrysoprase', 'corundum', 'feldspar', 'fluorite', 'hematite',
+        'iolite', 'kunzite', 'kyanite', 'labradorite', 'lapis', 'lazuli', 'malachite', 'moonstone',
+        'morganite', 'nephrite', 'obsidian', 'olivine', 'pyrite', 'rhodochrosite', 'rhodonite',
+        'sphene', 'spinel', 'sunstone', 'tanzanite', 'tourmaline', 'zircon'
     ];
 
     const MYTH_KEYWORDS = [
         'centaur', 'aphrodite', 'valkyrie', 'zeus', 'hera', 'poseidon', 'demeter', 'athena', 'apollo',
         'artemis', 'ares', 'hephaestus', 'hermes', 'dionysus', 'hades', 'odin', 'thor', 'loki', 'freya',
-        'dragon', 'phoenix', 'griffin', 'mermaid', 'unicorn', 'titan', 'god', 'goddess', 'hero', 'myth'
+        'dragon', 'phoenix', 'griffin', 'mermaid', 'unicorn', 'titan', 'god', 'goddess', 'hero', 'myth',
+        'achilles', 'adonis', 'amazon', 'ambrosia', 'anubis', 'arachne', 'atlas', 'basilisk', 'cerberus',
+        'chimera', 'cyclops', 'dryad', 'echidna', 'elysium', 'faun', 'fenrir', 'gorgon', 'harpy',
+        'hecate', 'helena', 'hercules', 'hydra', 'icarus', 'juno', 'jupiter', 'kraken', 'labyrinth',
+        'leprechaun', 'leviathan', 'medusa', 'midas', 'minotaur', 'muses', 'narcissus', 'nectar',
+        'nemesis', 'neptune', 'nymph', 'olympus', 'oracle', 'orion', 'orpheus', 'osiris', 'pandora',
+        'pegasus', 'persephone', 'prometheus', 'satyr', 'scylla', 'siren', 'sphinx', 'tartarus',
+        'valhalla', 'vampire', 'werewolf', 'wyvern'
     ];
 
     const INSTRUMENT_KEYWORDS = [
         'saxophone', 'harpsichord', 'synthesizer', 'piano', 'guitar', 'violin', 'cello', 'flute',
         'clarinet', 'trumpet', 'trombone', 'tuba', 'drum', 'harp', 'banjo', 'mandolin', 'organ',
-        'keyboard', 'bass', 'cello', 'viola', 'oboe', 'bassoon', 'recorder', 'xylophone', 'marimba'
+        'keyboard', 'bass', 'cello', 'viola', 'oboe', 'bassoon', 'recorder', 'xylophone', 'marimba',
+        'accordion', 'bagpipe', 'balalaika', 'castanets', 'chimes', 'concertina', 'cornet', 'cymbal',
+        'didgeridoo', 'euphonium', 'fiddle', 'glockenspiel', 'gong', 'harmonica', 'kazoo', 'lute',
+        'lyre', 'metronome', 'mouthpiece', 'obbligato', 'ocarina', 'orchestra', 'panpipes', 'piccolo',
+        'psaltery', 'reverb', 'rhythm', 'shakuhachi', 'sitar', 'spinet', 'tambourine', 'theremin',
+        'triangle', 'ukulele', 'vibraphone', 'zither'
     ];
 
     const TECH_KEYWORDS = [
         'javascript', 'algorithm', 'mainframe', 'code', 'program', 'software', 'hardware', 'server',
         'database', 'network', 'internet', 'web', 'app', 'binary', 'logic', 'compiler', 'hacker',
-        'cyber', 'pixel', 'data', 'cloud', 'security', 'python', 'java', 'html', 'css', 'script'
+        'cyber', 'pixel', 'data', 'cloud', 'security', 'python', 'java', 'html', 'css', 'script',
+        'api', 'application', 'array', 'backend', 'bandwidth', 'bit', 'blockchain', 'boolean', 'browser',
+        'byte', 'cache', 'chip', 'client', 'cloud', 'cookie', 'cpu', 'cryptography', 'debug', 'desktop',
+        'developer', 'encryption', 'ethernet', 'firewall', 'firmware', 'frontend', 'gateway', 'gigabyte',
+        'graphics', 'hyperlink', 'interface', 'kernel', 'keyboard', 'laptop', 'linux', 'macintosh',
+        'malware', 'memory', 'microchip', 'modem', 'monitor', 'motherboard', 'mouse', 'offline',
+        'online', 'operating', 'packet', 'password', 'peripheral', 'phishing', 'plugin', 'processor',
+        'protocol', 'proxy', 'ram', 'router', 'scanner', 'server', 'smartphone', 'socket', 'spam',
+        'spyware', 'storage', 'terminal', 'upload', 'user', 'variable', 'virtual', 'virus', 'wifi',
+        'windows', 'workstation'
     ];
 
     const FOOD_KEYWORDS = [
         'pomegranate', 'zucchini', 'artichoke', 'apple', 'banana', 'orange', 'grape', 'strawberry',
         'potato', 'tomato', 'carrot', 'onion', 'garlic', 'pepper', 'salt', 'spice', 'herb', 'fruit',
-        'vegetable', 'berry', 'cherry', 'lemon', 'lime', 'melon', 'mango', 'peach', 'pear', 'plum'
+        'vegetable', 'berry', 'cherry', 'lemon', 'lime', 'melon', 'mango', 'peach', 'pear', 'plum',
+        'ketchup', 'kiwi', 'kiwifruit', 'apricot', 'avocado', 'blackberry', 'blueberry', 'broccoli',
+        'cabbage', 'cantaloupe', 'cauliflower', 'celery', 'coconut', 'corn', 'cucumber', 'date',
+        'eggplant', 'fig', 'grapefruit', 'guava', 'honeydew', 'kale', 'lettuce', 'mushroom',
+        'nectarine', 'olive', 'papaya', 'parsley', 'pea', 'pineapple', 'pumpkin', 'radish',
+        'raspberry', 'spinach', 'squash', 'tangerine', 'turnip', 'watermelon', 'almond', 'bacon',
+        'bagel', 'barley', 'beef', 'bread', 'butter', 'cake', 'candy', 'caramel', 'cheese',
+        'chicken', 'chocolate', 'cookie', 'cream', 'donut', 'egg', 'flour', 'honey', 'jam',
+        'jelly', 'juice', 'lamb', 'milk', 'muffin', 'noodle', 'nut', 'oat', 'oil', 'pancake',
+        'pasta', 'pastry', 'pie', 'pork', 'rice', 'salad', 'sandwich', 'sauce', 'sausage',
+        'soup', 'steak', 'sugar', 'syrup', 'tea', 'toast', 'tofu', 'turkey', 'yogurt'
     ];
 
     const SPICE_KEYWORDS = [
         'coriander', 'turmeric', 'rosemary', 'cinnamon', 'ginger', 'pepper', 'basil', 'thyme', 'sage',
-        'cumin', 'paprika', 'clove', 'nutmeg', 'oregano', 'parsley', 'dill', 'mint', 'chili', 'vanilla'
+        'cumin', 'paprika', 'clove', 'nutmeg', 'oregano', 'parsley', 'dill', 'mint', 'chili', 'vanilla',
+        'anise', 'cardamom', 'cayenne', 'celery', 'chive', 'cilantro', 'fennel', 'fenugreek',
+        'mace', 'marjoram', 'mustard', 'saffron', 'savory', 'tarragon'
     ];
 
     const matchCategory = (w, keywords) => {
