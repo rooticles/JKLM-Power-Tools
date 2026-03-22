@@ -3,8 +3,8 @@
 // ==UserScript==
 // @name         JKLM Root
 // @namespace    http://tampermonkey.net/
-// @version      19.3
-// @description  Advanced JKLM Power Tools - Ultimate Edition (v19.3)
+// @version      19.4
+// @description  Advanced JKLM Power Tools - Ultimate Edition (v19.4)
 // @author       Root
 // @icon         https://i.ytimg.com/vi/czR6DrMptJE/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBm-s4RSY9BGKY3Km3KS0ASs_RaiQ
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
@@ -117,6 +117,58 @@
                 });
             };
 
+            // Anti-Replacement: Monitor chat for "[deleted]" replacements
+            const messageProtectionObserver = new MutationObserver((mutations) => {
+                mutations.forEach(mutation => {
+                    if (mutation.type === 'characterData' || mutation.type === 'childList') {
+                        const target = mutation.target.nodeType === 3 ? mutation.target.parentElement : mutation.target;
+                        if (target && (target.classList?.contains('text') || target.closest('.text'))) {
+                            const textEl = target.classList?.contains('text') ? target : target.closest('.text');
+                            const content = textEl.innerText;
+                            if (content.includes('[deleted]') || content.includes('{deleted]')) {
+                                // Try to restore from data attribute if we saved it
+                                const original = textEl.getAttribute('data-original-text');
+                                if (original && content !== original) {
+                                    textEl.innerText = original;
+                                }
+                            } else if (content && !textEl.hasAttribute('data-original-text')) {
+                                // Save original text when it first appears
+                                textEl.setAttribute('data-original-text', content);
+                            }
+                        }
+                    }
+                    
+                    // Also handle newly added messages
+                    if (mutation.addedNodes) {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeType === 1) {
+                                const textEl = node.classList?.contains('text') ? node : node.querySelector?.('.text');
+                                if (textEl && !textEl.hasAttribute('data-original-text')) {
+                                    const content = textEl.innerText;
+                                    if (content && !content.includes('[deleted]') && !content.includes('{deleted]')) {
+                                        textEl.setAttribute('data-original-text', content);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+
+            const startMessageProtection = () => {
+                const chatContainer = document.querySelector('.chat .messages');
+                if (chatContainer) {
+                    messageProtectionObserver.observe(chatContainer, { 
+                        childList: true, 
+                        subtree: true, 
+                        characterData: true 
+                    });
+                } else {
+                    setTimeout(startMessageProtection, 1000);
+                }
+            };
+            startMessageProtection();
+
             // Periodically check for room/chat objects as they load asynchronously
             const cleanupInterval = setInterval(patchChatCleanup, 1000);
             setTimeout(() => clearInterval(cleanupInterval), 60000); // Check for 1 minute
@@ -221,7 +273,7 @@
     };
     patchGlobalBugs();
 
-    const SCRIPT_VERSION = '19.3';
+    const SCRIPT_VERSION = '19.4';
 
     // --- Performance Helpers ---
     const debounce = (func, wait) => {
