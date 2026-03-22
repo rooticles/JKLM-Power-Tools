@@ -6,7 +6,7 @@
 // @version      18.6
 // @description  Advanced JKLM Power Tools - Ultimate Edition (v18.6)
 // @author       Root
-// @icon         https://static.wikia.nocookie.net/studio-ghibli/images/7/73/Jiji.png/revision/latest?cb=20210221161230
+// @icon         https://i.pinimg.com/736x/32/7e/db/327edb9a15b304efc264668ada03f725.jpg
 // @updateURL    https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @downloadURL  https://raw.githubusercontent.com/rooticles/JKLM-Power-Tools/main/JKLM-Power-Tools.user.js
 // @match        *://*.jklm.fun/*
